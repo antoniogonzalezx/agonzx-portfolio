@@ -71,7 +71,7 @@ export const PROJECTS = [
   { emoji:'☕',name:'Cafecita',badge:'Coming soon',tags:['SwiftUI','iOS','App Store'],href:'https://cafecita.app' },
 ];
 
-export const ROTATING_WORDS = ['footballer','music lover','perfectionist','chill guy','curious'];
+export const ROTATING_WORDS = ['Failed footballer','Code maker','Music lover','Perfectionist','Curious','Creative','Original','(Over)thinker'];
 
 // Stack bento items — 12-column × 5-row explicit grid (square units via ResizeObserver)
 // type: 'wiki-img' = single-color logo, 'wiki-gray' = multi-color logo, 'lobehub' = Mono icon, 'text' = label only
