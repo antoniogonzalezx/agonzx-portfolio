@@ -20,8 +20,8 @@ export default function Icon() {
           style={{
             color: '#3DF2E0',
             fontSize: 15,
-            fontWeight: 900,
-            letterSpacing: '-1px',
+            fontWeight: 600,
+            letterSpacing: '-0.5px',
           }}
         >
           {'{x}'}
