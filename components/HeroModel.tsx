@@ -13,8 +13,8 @@ interface DragState {
 }
 
 interface BracesModelProps {
-  dragRef: React.RefObject<DragState>;
-  velocityRef: React.RefObject<{ x: number; y: number }>;
+  dragRef: React.MutableRefObject<DragState>;
+  velocityRef: React.MutableRefObject<{ x: number; y: number }>;
 }
 
 function BracesModel({ dragRef, velocityRef }: BracesModelProps) {
