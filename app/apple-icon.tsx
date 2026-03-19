@@ -1,13 +1,9 @@
 import { ImageResponse } from 'next/og';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
 
 export const size = { width: 180, height: 180 };
 export const contentType = 'image/png';
 
-export default async function AppleIcon() {
-  const font = await readFile(join(process.cwd(), 'public/fonts/MartianGrotesk-StdBl.woff2'));
-
+export default function AppleIcon() {
   return new ImageResponse(
     (
       <div
@@ -24,9 +20,8 @@ export default async function AppleIcon() {
         <span
           style={{
             color: '#3DF2E0',
-            fontSize: 88,
+            fontSize: 84,
             fontWeight: 900,
-            fontFamily: 'Martian Grotesk',
             letterSpacing: '-4px',
           }}
         >
@@ -34,9 +29,6 @@ export default async function AppleIcon() {
         </span>
       </div>
     ),
-    {
-      ...size,
-      fonts: [{ name: 'Martian Grotesk', data: font, weight: 900 }],
-    }
+    { ...size }
   );
 }
