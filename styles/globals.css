@@ -1,0 +1,148 @@
+@font-face { font-family: 'Nohemi'; src: url('/fonts/Nohemi-Regular.woff2') format('woff2'), url('/fonts/Nohemi-Regular.woff') format('woff'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Nohemi'; src: url('/fonts/Nohemi-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Nohemi'; src: url('/fonts/Nohemi-SemiBold.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Nohemi'; src: url('/fonts/Nohemi-Bold.woff2') format('woff2'), url('/fonts/Nohemi-Bold.woff') format('woff'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Nohemi'; src: url('/fonts/Nohemi-ExtraBold.woff2') format('woff2'), url('/fonts/Nohemi-ExtraBold.woff') format('woff'); font-weight: 800; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Nohemi'; src: url('/fonts/Nohemi-Black.woff2') format('woff2'), url('/fonts/Nohemi-Black.woff') format('woff'); font-weight: 900; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Safiro'; src: url('/fonts/safiro-medium.woff2') format('woff2'), url('/fonts/safiro-medium.woff') format('woff'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Martian Mono'; src: url('/fonts/MartianMono-Variable.woff2') format('woff2-variations'); font-weight: 100 800; font-style: normal; font-display: swap; }
+
+:root {
+  --bg:#0B0F14; --bg2:#0E1219; --card:#111820; --elev:#1A2230;
+  --accent:#3DF2E0; --accent-g:rgba(61,242,224,0.2); --accent-s:rgba(61,242,224,0.06);
+  --white:#E8ECF0; --t2:#8A95A8; --t3:#4A556A;
+  --brd:rgba(255,255,255,0.06); --ease:cubic-bezier(0.16,1,0.3,1);
+  --font-mono: 'Martian Mono', monospace;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--white);font-family:'Safiro',sans-serif;overflow-x:hidden}
+::selection{background:var(--accent);color:#000}
+a{color:inherit;text-decoration:none}
+::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:var(--bg)} ::-webkit-scrollbar-thumb{background:var(--t3);border-radius:2px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scrollPulse{0%{top:-100%}50%{top:0}100%{top:100%}}
+@keyframes swiftKw{0%{opacity:0;transform:translate(-50%,-50%) translateY(0)}12%{opacity:0.75}75%{opacity:0.5}100%{opacity:0;transform:translate(-50%,-50%) translateY(-18px)}}
+.sec-pad{padding:7rem 2.5rem}
+.snap-section{min-height:100vh;min-height:100dvh}
+@media(max-width:900px){.sec-pad{padding:5rem 1.5rem}}
+
+/* ── Mobile nav overlay ─────────────────────────────────────────────────── */
+.nav-links-desktop { display: flex; gap: 1.5rem; }
+.nav-menu-btn      { display: none; }
+.mobile-nav-overlay {
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(11,15,20,0.88);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.mobile-nav-overlay.open { opacity: 1; pointer-events: auto; }
+.mobile-nav-links { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; width: 100%; }
+.mobile-nav-link {
+  font-family: Nohemi, sans-serif; font-size: clamp(2rem,8vw,2.8rem); font-weight: 800;
+  text-transform: uppercase; letter-spacing: -0.02em;
+  color: var(--white); text-decoration: none;
+  display: flex; align-items: baseline; gap: 0.7rem;
+  width: 100%; max-width: 340px; padding: 0.5rem 1rem;
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.35s ease, transform 0.35s ease, color 0.2s;
+}
+.mobile-nav-overlay.open .mobile-nav-link { opacity: 1; transform: translateY(0); }
+.mobile-nav-link:active { color: var(--accent); }
+.mobile-nav-link .link-idx {
+  font-family: var(--font-mono); font-size: 0.6rem; color: var(--t3);
+  align-self: center; min-width: 1.4rem;
+}
+
+/* ── Nav responsive ─────────────────────────────────────────────────────── */
+@media(max-width:700px){
+  .nav-links-desktop { display: none !important; }
+  .nav-menu-btn      { display: flex !important; }
+  .parallax-dots     { display: none !important; }
+}
+
+/* ── About responsive ───────────────────────────────────────────────────── */
+/* Mobile sections hidden by default; desktop section always visible */
+.about-mobile-1, .about-mobile-2 { display: none; }
+@media(max-width:700px){
+  .about-desktop  { display: none !important; }
+  .about-mobile-1 { display: flex !important; }
+  .about-mobile-2 { display: flex !important; }
+}
+@media(max-width:900px){ .about-grid { grid-template-columns: 1fr !important; } }
+@media(max-width:700px){ .about-grid { gap: 2rem !important; } }
+
+/* ── Experience mobile ──────────────────────────────────────────────────── */
+@media(max-width:700px){
+  .exp-timeline-fixed  { display: none !important; }
+  .exp-bg-num          { display: none !important; }
+  .exp-content  {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-left: 1.4rem !important;
+    padding-right: 1.4rem !important;
+    max-width: calc(100vw - 2.8rem) !important;
+    width: calc(100vw - 2.8rem) !important;
+    box-sizing: border-box;
+  }
+}
+
+/* ── Projects: hide scrollbar on horizontal scroller ────────────────────── */
+.proj-horiz-scroller::-webkit-scrollbar { display: none; }
+
+/* ── Projects ScrollStack (mobile) overrides ─────────────────────────────── */
+.projects-stack .scroll-stack-inner { padding: 20vh 1.2rem 35rem; }
+.projects-stack .scroll-stack-card  {
+  height: 22rem; padding: 0;
+  border-radius: 30px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+  border: none;
+  max-width: 380px;
+  margin-left: auto !important; margin-right: auto !important;
+  overflow: hidden;
+}
+
+/* ── Stack section mobile ───────────────────────────────────────────────── */
+/* Bento grid stays visible on mobile — uses 4-col layout via ResizeObserver */
+@media(max-width:700px){
+  .stack-section { padding: 7rem 0.9rem 0.7rem !important; }
+  .parallax-dots { display: none; }
+}
+
+/* ── Projects ───────────────────────────────────────────────────────────── */
+.proj-card { border:1px solid transparent!important; background:rgba(255,255,255,0.02)!important; border-radius:16px!important; box-shadow:0 4px 20px rgba(0,0,0,0.25)!important; transition:all 0.4s cubic-bezier(0.16,1,0.3,1)!important }
+.proj-card:hover { border-color:var(--accent)!important; transform:translateY(-4px)!important; box-shadow:0 12px 40px rgba(0,0,0,0.35),0 0 20px rgba(61,242,224,0.06)!important; background:rgba(61,242,224,0.02)!important }
+
+
+/* ── Contact mobile ─────────────────────────────────────────────────────── */
+@media(max-width:700px){
+  .contact-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
+}
+
+/* ── Bento grid ─────────────────────────────────────────────────────────── */
+.icon-dark      { filter: brightness(0); opacity: 0.82; }
+.icon-dark-gray { filter: grayscale(1) brightness(0.18); opacity: 0.78; }
+.icon-lobe-dark { color: rgba(11,15,20,0.8); }
+.label-dark     { color: rgba(11,15,20,0.65) !important; }
+.icon-white     { filter: brightness(0) invert(1); opacity: 0.92; }
+.icon-gray      { filter: grayscale(1) brightness(2.0); opacity: 0.88; }
+.icon-lobe      { color: rgba(255,255,255,0.88); }
+.bento-label    { color: rgba(255,255,255,0.42); transition: color 0.25s ease; }
+.bento-hero .bento-label { color: rgba(255,255,255,0.9); }
+.bento-hero .icon-white  { filter: brightness(0) invert(1) drop-shadow(0 0 16px rgba(255,255,255,0.25)); opacity: 1; }
+.bento-hero .icon-gray   { filter: grayscale(1) brightness(2.2) drop-shadow(0 0 16px rgba(255,255,255,0.18)); opacity: 1; }
+.bento-cell:hover .icon-white     { filter: brightness(0) invert(1) drop-shadow(0 0 10px rgba(255,255,255,0.55)); opacity: 1; }
+.bento-cell:hover .icon-gray      { filter: grayscale(1) brightness(2.2) drop-shadow(0 0 10px rgba(255,255,255,0.32)); opacity: 1; }
+.bento-cell:hover .icon-dark      { filter: brightness(0) drop-shadow(0 0 8px rgba(11,15,20,0.4)); opacity: 1; }
+.bento-cell:hover .icon-dark-gray { filter: grayscale(1) brightness(0.12) drop-shadow(0 0 6px rgba(11,15,20,0.3)); opacity: 1; }
+.bento-cell:hover .icon-lobe      { filter: drop-shadow(0 0 10px rgba(255,255,255,0.45)); color: #fff; }
+.bento-cell:hover .icon-lobe-dark { filter: drop-shadow(0 0 8px rgba(11,15,20,0.35)); color: rgba(11,15,20,0.95); }
+.bento-cell:hover .bento-label    { color: rgba(255,255,255,0.9); }
+.bento-cell:hover .label-dark     { color: rgba(11,15,20,0.9) !important; }
+.bento-hero:hover .icon-white     { filter: brightness(0) invert(1) drop-shadow(0 0 26px rgba(255,255,255,0.7)); }
+.bento-hero:hover .icon-gray      { filter: grayscale(1) brightness(2.3) drop-shadow(0 0 26px rgba(255,255,255,0.48)); }
+/* Bento grid columns/rows are managed entirely by ResizeObserver in Stack.tsx */

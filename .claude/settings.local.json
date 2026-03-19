@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(for f:*)",
+      "Bash(do)",
+      "Bash(echo \"=== $f ===\")",
+      "Read(//Users/antoniogonzalez/Personal Projects/PORTFOLIO/agonzx-portfolio/public/logos/**)",
+      "Bash(__NEW_LINE_1ac3dc28853d198d__ done:*)",
+      "Bash(done)",
+      "Bash(node -e \"const { Codex } = require\\(''''@lobehub/icons''''\\); console.log\\(Object.keys\\(Codex\\)\\);\")",
+      "Bash(npx tsc:*)",
+      "Bash(node -e \":*)",
+      "Bash(cd:*)",
+      "WebFetch(domain:upload.wikimedia.org)",
+      "Bash(curl -s -A \"Mozilla/5.0\" \"https://upload.wikimedia.org/wikipedia/commons/e/e9/Notion-logo.svg\")",
+      "Bash(curl -s -A \"Mozilla/5.0\" \"https://upload.wikimedia.org/wikipedia/commons/6/67/App_Store_%28iOS%29.svg\")",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl:*)",
+      "Bash(npm install:*)",
+      "WebFetch(domain:app.spline.design)"
+    ]
+  }
+}
