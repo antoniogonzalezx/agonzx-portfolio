@@ -6,6 +6,7 @@
 @font-face { font-family: 'Nohemi'; src: url('/fonts/Nohemi-Black.woff2') format('woff2'), url('/fonts/Nohemi-Black.woff') format('woff'); font-weight: 900; font-style: normal; font-display: swap; }
 @font-face { font-family: 'Safiro'; src: url('/fonts/safiro-medium.woff2') format('woff2'), url('/fonts/safiro-medium.woff') format('woff'); font-weight: 500; font-style: normal; font-display: swap; }
 @font-face { font-family: 'Martian Mono'; src: url('/fonts/MartianMono-Variable.woff2') format('woff2-variations'); font-weight: 100 800; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Martian Grotesk'; src: url('/fonts/MartianGrotesk-StdBl.woff2') format('woff2'); font-weight: 900; font-style: normal; font-display: swap; }
 
 :root {
   --bg:#0B0F14; --bg2:#0E1219; --card:#111820; --elev:#1A2230;

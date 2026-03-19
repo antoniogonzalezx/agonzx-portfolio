@@ -5,9 +5,9 @@ import { ROTATING_WORDS } from './data';
 
 const LiquidEther  = dynamic(() => import('./reactbits/LiquidEther/LiquidEther'),  { ssr: false });
 const RotatingText = dynamic(() => import('./reactbits/RotatingText/RotatingText'), { ssr: false }) as any;
+const HeroModel    = dynamic(() => import('./HeroModel'), { ssr: false });
 
 const SWIFT_KEYWORDS: { text: string; color: string }[] = [
-  // Attributes — pink
   { text: '@State',        color: '#FC5FA3' },
   { text: '@Binding',      color: '#FC5FA3' },
   { text: '@Observable',   color: '#FC5FA3' },
@@ -15,10 +15,8 @@ const SWIFT_KEYWORDS: { text: string; color: string }[] = [
   { text: '@Environment',  color: '#FC5FA3' },
   { text: '@Published',    color: '#FC5FA3' },
   { text: '@ViewBuilder',  color: '#FC5FA3' },
-  // Macros — orange
   { text: '#Preview',      color: '#FFA14F' },
   { text: '#available',    color: '#FFA14F' },
-  // Keywords — pink
   { text: 'async',         color: '#FC5FA3' },
   { text: 'await',         color: '#FC5FA3' },
   { text: 'guard',         color: '#FC5FA3' },
@@ -37,7 +35,6 @@ const SWIFT_KEYWORDS: { text: string; color: string }[] = [
   { text: 'extension',     color: '#FC5FA3' },
   { text: 'override',      color: '#FC5FA3' },
   { text: 'static',        color: '#FC5FA3' },
-  // Types — cyan
   { text: 'Task',          color: '#5DD8FF' },
   { text: 'View',          color: '#5DD8FF' },
   { text: 'String',        color: '#5DD8FF' },
@@ -48,18 +45,11 @@ const SWIFT_KEYWORDS: { text: string; color: string }[] = [
   { text: 'Never',         color: '#5DD8FF' },
   { text: 'Self',          color: '#5DD8FF' },
   { text: 'URLSession',    color: '#5DD8FF' },
-  // Functions — teal
   { text: 'withAnimation', color: '#67B7A4' },
   { text: '.sink',         color: '#67B7A4' },
   { text: '.map',          color: '#67B7A4' },
   { text: '.filter',       color: '#67B7A4' },
   { text: '.store',        color: '#67B7A4' },
-  // Symbols / operators — dim white
-  { text: '->',            color: '#A3B1C2' },
-  { text: '{ }',           color: '#A3B1C2' },
-  { text: '[ ]',           color: '#A3B1C2' },
-  { text: '??',            color: '#A3B1C2' },
-  { text: '...',           color: '#A3B1C2' },
 ];
 
 function useSwiftCursorTrail(containerRef: React.RefObject<HTMLElement | null>) {
@@ -136,29 +126,58 @@ export default function Hero() {
       <div aria-hidden className="hero-grain" style={{ position:'absolute',inset:0,zIndex:2,pointerEvents:'none',opacity:0.09,mixBlendMode:'overlay',backgroundRepeat:'repeat',backgroundSize:'180px 180px',backgroundImage:'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'180\' height=\'180\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'180\' height=\'180\' filter=\'url(%23n)\'/%3E%3C/svg%3E")' }} />
 
       {/* Name + pill */}
-      <div style={{ position:'relative', zIndex:5, display:'flex', flexDirection:'column', alignItems:'center', width:'100%' }}>
-        <h1 style={{ animation:'fadeUp 1s 0.2s both var(--ease)', lineHeight:0.9 }}>
-          <span style={{ display:'block',fontFamily:'Nohemi,sans-serif',fontSize:'clamp(3.5rem,12vw,10.5rem)',fontWeight:900,textTransform:'uppercase',letterSpacing:'-0.03em',color:'#E8ECF0' }}>ANTONIO</span>
-          <span style={{ display:'block',fontFamily:'Nohemi,sans-serif',fontSize:'clamp(3.5rem,12vw,10.5rem)',fontWeight:900,textTransform:'uppercase',letterSpacing:'-0.03em',color:'#E8ECF0' }}>GONZÁLEZ</span>
+      <div style={{ position:'relative', zIndex:5, display:'flex', flexDirection:'column', alignItems:'center', width:'100%', paddingBottom:'clamp(4rem, 9vh, 6rem)' }}>
+
+        {/* 3D {x} model */}
+        <div style={{ animation:'fadeUp 1s 0.05s both var(--ease)', width:'100%', maxWidth:'clamp(220px,40vw,480px)' }}>
+          <HeroModel />
+        </div>
+
+        <h1 className="hero-name" style={{ animation:'fadeUp 1s 0.2s both var(--ease)', lineHeight:0.9 }}>
+          <span style={{ display:'block',fontFamily:'"Martian Grotesk",sans-serif',fontSize:'clamp(3.5rem,12vw,10.5rem)',fontWeight:900,textTransform:'uppercase',letterSpacing:'-0.03em',color:'#E8ECF0' }}>ANTONIO</span>
+          <span style={{ display:'block',fontFamily:'"Martian Grotesk",sans-serif',fontSize:'clamp(3.5rem,12vw,10.5rem)',fontWeight:900,textTransform:'uppercase',letterSpacing:'-0.03em',color:'#E8ECF0' }}>GONZALEZ</span>
         </h1>
 
         <div style={{ display:'flex',alignItems:'center',gap:'1rem',marginTop:'2rem',animation:'fadeUp 1s 0.4s both var(--ease)',background:'rgba(255,255,255,0.04)',backdropFilter:'blur(12px)',padding:'0.6rem 1.5rem',borderRadius:100,border:'1px solid rgba(255,255,255,0.08)' }}>
-          <span style={{ fontFamily:'Nohemi,sans-serif',fontSize:'0.85rem',fontWeight:600,letterSpacing:'0.1em',color:'var(--white)' }}>iOS ENGINEER</span>
+          <span style={{ fontFamily:'Safiro,sans-serif',fontSize:'0.9rem',fontWeight:700,letterSpacing:'0.02em',color:'var(--white)' }}>iOS Engineer</span>
           <span style={{ width:1,height:16,background:'rgba(255,255,255,0.15)' }} />
           <RotatingText texts={ROTATING_WORDS} mainClassName="rotating-hero" staggerFrom="last" staggerDuration={0.025} rotationInterval={3000} />
         </div>
       </div>
 
       {/* Scroll indicator */}
-      <div style={{ position:'absolute',bottom:'2.5rem',left:'50%',transform:'translateX(-50%)',zIndex:5,animation:'fadeUp 1s 0.7s both var(--ease)',display:'flex',flexDirection:'column',alignItems:'center',gap:'0.6rem' }}>
-        <div style={{ width:20,height:32,borderRadius:12,border:'1px solid rgba(255,255,255,0.15)',position:'relative',overflow:'hidden' }}>
-          <div style={{ position:'absolute',top:4,left:'50%',transform:'translateX(-50%)',width:3,height:8,borderRadius:2,background:'var(--accent)',animation:'scrollDot 2s ease-in-out infinite' }} />
+      <div style={{ position:'absolute',bottom:'2.5rem',left:0,right:0,margin:'0 auto',width:'fit-content',zIndex:10,animation:'fadeUp 1s 0.7s both var(--ease)',display:'flex',flexDirection:'column',alignItems:'center',gap:'0.5rem' }}>
+        <div className="scroll-mouse">
+          <div className="scroll-mouse-dot" />
         </div>
       </div>
 
       <style suppressHydrationWarning>{`
-        .rotating-hero{font-family:Nohemi,sans-serif;font-size:0.85rem;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em}
-        @keyframes scrollDot{0%,100%{transform:translateX(-50%) translateY(0);opacity:1}50%{transform:translateX(-50%) translateY(12px);opacity:0.3}}
+        .rotating-hero{font-family:Safiro,sans-serif;font-size:0.85rem;font-weight:400;color:var(--t2);text-transform:none;letter-spacing:0.01em}
+        .hero-name{margin-top:-5.5rem}
+        @media(max-width:700px){.hero-name{margin-top:-1rem}}
+        .scroll-mouse{
+          width:28px;height:46px;border-radius:14px;
+          border:2px solid var(--accent);
+          box-shadow:0 0 10px rgba(61,242,224,0.25), inset 0 0 8px rgba(61,242,224,0.06);
+          position:relative;overflow:hidden;
+          opacity:0.85;
+        }
+        .scroll-mouse:hover{opacity:1;box-shadow:0 0 16px rgba(61,242,224,0.45), inset 0 0 10px rgba(61,242,224,0.1);}
+        .scroll-mouse-dot{
+          position:absolute;top:7px;left:50%;
+          transform:translateX(-50%);
+          width:4px;height:8px;border-radius:2px;
+          background:var(--accent);
+          box-shadow:0 0 6px var(--accent);
+          animation:scrollDot 2s ease-in-out infinite;
+        }
+        @keyframes scrollDot{
+          0%{transform:translateX(-50%) translateY(0);opacity:1}
+          60%{transform:translateX(-50%) translateY(18px);opacity:0}
+          61%{transform:translateX(-50%) translateY(0);opacity:0}
+          100%{transform:translateX(-50%) translateY(0);opacity:1}
+        }
 
         .hero-blob { position:absolute; border-radius:50%; mix-blend-mode:screen; will-change:transform; }
         .hero-blob-1 {

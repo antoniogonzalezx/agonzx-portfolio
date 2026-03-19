@@ -1,6 +1,6 @@
-# [X] agonzx — Portfolio
+# {x} agonzx — Portfolio
 
-> Antonio González · iOS Engineer · Code Vibing
+> Antonio González · iOS Engineer
 
 ## Quick Start
 
@@ -22,9 +22,9 @@ Open [http://localhost:3000](http://localhost:3000)
 
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
-- **Fonts**: Nohemi (headings) + Safiro (body) + Martian Mono (code) — custom webfonts in `/public/fonts/`
+- **Fonts**: Martian Grotesk (hero name) + Nohemi (headings) + Safiro (body) + Martian Mono (code) — custom webfonts in `/public/fonts/`
 - **Components**: [ReactBits](https://reactbits.dev) — animated UI components
-- **3D**: Three.js + react-three-fiber + Rapier physics (for Lanyard card)
+- **3D**: Three.js + React Three Fiber — interactive `{x}` hero model + Rapier physics
 - **Animations**: Motion (scroll/reveal), Lenis (smooth scrolling)
 - **Deploy**: Vercel
 
@@ -213,8 +213,8 @@ The site uses a split mobile/desktop architecture:
 ## Notes
 
 - All content is in `components/data.ts` — edit there to update text, links, etc.
-- Font files are in `public/fonts/` — Nohemi for headings, Safiro for body, Martian Mono for code
+- Font files are in `public/fonts/` — Martian Grotesk for the hero name, Nohemi for headings, Safiro for body, Martian Mono for code
 - The fluid cursor is disabled on touch devices automatically
 - Glass effects use `backdrop-filter` which requires modern browsers
-- The Lanyard component needs Three.js — it's the heaviest dependency
+- The `{x}` 3D model in the hero uses `HeroModel.tsx` — click and drag to rotate, follows mouse across the page
 - All ReactBits components are bundled directly in `components/reactbits/`
