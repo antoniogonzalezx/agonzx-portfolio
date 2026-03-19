@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ScrollStack, { ScrollStackItem } from './reactbits/ScrollStack/ScrollStack';
 import HorizScrollStack, { HorizStackItem } from './HorizScrollStack';
 import { PROJECTS } from './data';
@@ -88,7 +88,7 @@ function CardContent({ p, i, compact }: { p: Project; i: number; compact?: boole
 
       <h2 style={{
         fontFamily: 'Nohemi,sans-serif',
-        fontSize: compact ? 'clamp(1.8rem, 7vw, 2.2rem)' : 'clamp(2.2rem, 3.5vw, 3.2rem)',
+        fontSize: compact ? 'clamp(1.4rem, 6vw, 1.8rem)' : 'clamp(1.6rem, 3vw, 2.4rem)',
         fontWeight: 900, textTransform: 'uppercase',
         color: textColor, lineHeight: 1,
         marginBottom: compact ? '0.6rem' : '1rem',
@@ -171,6 +171,8 @@ function BottomPanel({ p, i, compact, cardRadius = 30 }: { p: Project; i: number
 /* ── Main component ──────────────────────────────────────────────────────── */
 export default function Projects() {
   const [isMobile, setIsMobile] = useState(false);
+  const [projVisible, setProjVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth <= 700);
@@ -179,33 +181,89 @@ export default function Projects() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
+  // Show fixed title only when section top has scrolled above viewport (title reached nav)
+  // and section bottom is still in view — mirrors sticky-header behaviour
+  useEffect(() => {
+    if (!isMobile) return;
+    const section = sectionRef.current;
+    if (!section) return;
+    let rafId: number;
+    const update = () => {
+      const rect = section.getBoundingClientRect();
+      setProjVisible(rect.top < 0 && rect.bottom > 0);
+    };
+    const onScroll = () => { cancelAnimationFrame(rafId); rafId = requestAnimationFrame(update); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    update();
+    return () => { window.removeEventListener('scroll', onScroll); cancelAnimationFrame(rafId); };
+  }, [isMobile]);
+
   return (
+    <>
+      {/* Fixed mobile title — top:0 so background fills from viewport top, padding-top clears nav */}
+      {isMobile && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100%',
+          zIndex: 500, pointerEvents: 'none',
+          opacity: projVisible ? 1 : 0,
+          transition: 'opacity 0.3s ease',
+          paddingTop: '4.5rem', paddingLeft: '2.5rem', paddingRight: '3rem', paddingBottom: '1.2rem',
+          background: `linear-gradient(to bottom, ${CARD_BGS[0]} 65%, transparent)`,
+          fontFamily: 'Nohemi,sans-serif',
+          fontSize: 'clamp(1.8rem, 5vw, 2.2rem)',
+          fontWeight: 600, textTransform: 'uppercase',
+          letterSpacing: '-0.01em', color: 'var(--white)',
+        }}>
+          Projects
+        </div>
+      )}
+
     <section
       id="projects"
+      ref={sectionRef}
       className="snap-section"
-      style={{ background: CARD_BGS[0], position: 'relative', height: '100vh', overflow: 'hidden' }}
+      style={{
+        background: CARD_BGS[0],
+        position: 'relative',
+        ...(isMobile ? {} : { height: '100vh', overflow: 'hidden' }),
+      }}
     >
-      {/* Static title just below nav */}
-      <div style={{
-        position: 'absolute', top: '4.5rem', left: '2.5rem',
-        fontFamily: 'Nohemi,sans-serif',
-        fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)',
-        fontWeight: 600, textTransform: 'uppercase', letterSpacing: '-0.01em',
-        color: 'rgba(232,236,240,0.9)', zIndex: 10, pointerEvents: 'none',
-      }}>
-        Projects
-      </div>
+      {isMobile ? (
+        /* In-flow title on mobile — visible while section is entering view, then fixed overlay takes over */
+        <div style={{
+          paddingTop: '4.5rem', paddingLeft: '2.5rem', paddingBottom: '0.5rem',
+          fontFamily: 'Nohemi,sans-serif',
+          fontSize: 'clamp(1.8rem, 5vw, 2.2rem)',
+          fontWeight: 600, textTransform: 'uppercase', letterSpacing: '-0.01em',
+          color: 'rgba(232,236,240,0.9)', pointerEvents: 'none',
+        }}>
+          Projects
+        </div>
+      ) : (
+        /* Desktop: absolute */
+        <div style={{
+          position: 'absolute', top: '4.5rem', left: '2.5rem',
+          fontFamily: 'Nohemi,sans-serif',
+          fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)',
+          fontWeight: 600, textTransform: 'uppercase', letterSpacing: '-0.01em',
+          color: 'rgba(232,236,240,0.9)', zIndex: 10, pointerEvents: 'none',
+        }}>
+          Projects
+        </div>
+      )}
 
       {isMobile ? (
-        /* ── Mobile: vertical ScrollStack ───────────────────────────────── */
+        /* ── Mobile: vertical ScrollStack driven by window scroll ─────── */
         <ScrollStack
           className="projects-stack"
-          stackPosition="22%"
-          itemDistance={60}
-          itemScale={0.03}
-          itemStackDistance={18}
-          baseScale={0.88}
-          scaleEndPosition="8%"
+          useWindowScroll={true}
+          stackPosition="28%"
+          itemDistance={80}
+          itemScale={0.05}
+          itemStackDistance={22}
+          baseScale={0.84}
+          scaleEndPosition="5%"
+          blurAmount={1.5}
           onStackComplete={() => {}}
         >
           {PROJECTS.map((p, i) => (
@@ -213,9 +271,9 @@ export default function Projects() {
               <div style={{
                 width: '100%', height: '100%',
                 background: CARD_BGS[i % CARD_BGS.length],
-                borderRadius: 30, overflow: 'hidden',
+                borderRadius: 28, overflow: 'hidden',
                 position: 'relative',
-                boxShadow: '0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)',
+                boxShadow: '0 24px 64px rgba(0,0,0,0.65), 0 8px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07)',
               }}>
                 <div style={{ padding: '1.6rem 1.4rem 5rem' }}>
                   <CardContent p={p} i={i} compact />
@@ -256,5 +314,6 @@ export default function Projects() {
         </HorizScrollStack>
       )}
     </section>
+    </>
   );
 }

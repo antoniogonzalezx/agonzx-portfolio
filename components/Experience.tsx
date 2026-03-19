@@ -16,9 +16,9 @@ export function ExperienceTimeline() {
 
   return (
     <>
-      {/* Fixed section title */}
+      {/* Fixed section title — gradient bg on mobile so it doesn't blend with content */}
       <div
-        className="exp-timeline-fixed"
+        className="exp-timeline-fixed exp-timeline-title"
         style={{
           position: 'fixed',
           top: '4.5rem',
@@ -38,9 +38,9 @@ export function ExperienceTimeline() {
         Experience
       </div>
 
-      {/* Fixed stepper — liquid glass pill */}
+      {/* Desktop: glass pill stepper (left side) */}
       <div
-        className="exp-timeline-fixed"
+        className="exp-timeline-fixed exp-timeline-desktop"
         style={{
           position: 'fixed',
           left: 'clamp(1.2rem, 2.5vw, 2rem)',
@@ -67,7 +67,6 @@ export function ExperienceTimeline() {
           const isPast = j < activeIdx;
           return (
             <div key={j} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              {/* Dot */}
               <div style={{
                 width: isCur ? 9 : 5,
                 height: isCur ? 9 : 5,
@@ -81,6 +80,43 @@ export function ExperienceTimeline() {
           );
         })}
       </div>
+
+      {/* Mobile: parallax-dot style stepper (right side, same design as nav dots) */}
+      <div
+        className="exp-timeline-fixed exp-timeline-mobile"
+        style={{
+          position: 'fixed',
+          left: '1.5rem',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          zIndex: 1000,
+          pointerEvents: 'none',
+          opacity: visible ? 1 : 0.18,
+          filter: visible ? 'none' : 'blur(1px)',
+          transition: 'opacity 0.4s ease, filter 0.4s ease',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '0.45rem',
+        }}
+      >
+        {EXPERIENCE.map((_, j) => {
+          const isCur  = j === activeIdx;
+          const isPast = j < activeIdx;
+          return (
+            <div
+              key={j}
+              style={{
+                width: 3,
+                height: isCur ? 22 : 8,
+                borderRadius: 4,
+                background: isCur ? 'var(--accent)' : isPast ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.18)',
+                boxShadow: isCur ? '0 0 8px rgba(61,242,224,0.5)' : 'none',
+                transition: 'height 0.4s var(--ease), background 0.4s var(--ease), box-shadow 0.4s var(--ease)',
+              }}
+            />
+          );
+        })}
+      </div>
     </>
   );
 }
@@ -90,6 +126,34 @@ export default function Experience() {
   const stepRefs   = useRef<(HTMLElement | null)[]>([]);
   const [visibleIdx, setVisibleIdx] = useState(-1);
   const visibleSet = useRef(new Set<number>());
+  const [isMobile, setIsMobile] = useState(false);
+  const [expTitleVisible, setExpTitleVisible] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 700);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  // Mobile sticky-title: show as soon as the first section approaches the nav bar
+  useEffect(() => {
+    if (!isMobile) return;
+    let rafId: number;
+    const update = () => {
+      const first = stepRefs.current[0];
+      const last  = stepRefs.current[stepRefs.current.length - 1];
+      if (!first || !last) return;
+      setExpTitleVisible(
+        first.getBoundingClientRect().top <= 72 &&
+        last.getBoundingClientRect().bottom > 0
+      );
+    };
+    const onScroll = () => { cancelAnimationFrame(rafId); rafId = requestAnimationFrame(update); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    update();
+    return () => { window.removeEventListener('scroll', onScroll); cancelAnimationFrame(rafId); };
+  }, [isMobile]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -120,14 +184,33 @@ export default function Experience() {
 
   return (
     <>
+      {/* Mobile fixed title — top:0 so background fills from viewport top, padding-top clears nav */}
+      {isMobile && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100%',
+          zIndex: 500, pointerEvents: 'none',
+          opacity: expTitleVisible ? 1 : 0,
+          transition: 'opacity 0.3s ease',
+          paddingTop: '4.5rem', paddingLeft: '2.5rem', paddingRight: '3rem', paddingBottom: '1.2rem',
+          background: 'linear-gradient(to bottom, var(--bg2) 65%, transparent)',
+          fontFamily: 'Nohemi,sans-serif',
+          fontSize: 'clamp(1.8rem, 5vw, 2.2rem)',
+          fontWeight: 600, textTransform: 'uppercase', letterSpacing: '-0.01em',
+          color: 'var(--white)',
+        }}>
+          Experience
+        </div>
+      )}
+
       {EXPERIENCE.map((exp, i) => {
         const isVis = visibleIdx === i;
+        const isDimmed = isMobile && visibleIdx >= 0 && !isVis;
         return (
           <section
             key={i}
             id={i === 0 ? 'experience' : undefined}
             ref={(el) => { stepRefs.current[i] = el; }}
-            className="snap-section"
+            className="snap-section exp-section"
             style={{
               minHeight: '100vh',
               background: 'var(--bg2)',
@@ -135,15 +218,17 @@ export default function Experience() {
               overflow: 'hidden',
               display: 'flex',
               alignItems: 'center',
+              opacity: isDimmed ? 0.2 : 1,
+              filter: isDimmed ? 'blur(3px)' : 'none',
+              transition: 'opacity 0.5s var(--ease), filter 0.5s var(--ease)',
             }}
           >
-            {/* Background company logo */}
-            {exp.logoType === 'img' && exp.logoSrc ? (
+            {/* Background company logo — desktop only */}
+            {!isMobile && (exp.logoType === 'img' && exp.logoSrc ? (
               <img
                 aria-hidden="true"
                 src={exp.logoSrc}
                 alt=""
-                className="exp-bg-num"
                 style={{
                   position: 'absolute',
                   left: '50%',
@@ -160,7 +245,7 @@ export default function Experience() {
                 }}
               />
             ) : (
-              <div className="exp-bg-num" style={{
+              <div style={{
                 position: 'absolute',
                 left: '50%',
                 top: '50%',
@@ -178,14 +263,25 @@ export default function Experience() {
               }}>
                 {exp.company}
               </div>
+            ))}
+
+            {/* Accent line — desktop only */}
+            {!isMobile && (
+              <div style={{
+                position: 'absolute', left: 0, top: '22%', width: '100%', height: 1,
+                background: 'linear-gradient(to right, transparent, rgba(61,242,224,0.05) 20%, rgba(61,242,224,0.05) 80%, transparent)',
+                pointerEvents: 'none', zIndex: 0,
+              }} />
             )}
 
-            {/* Accent line */}
-            <div style={{
-              position: 'absolute', left: 0, top: '22%', width: '100%', height: 1,
-              background: 'linear-gradient(to right, transparent, rgba(61,242,224,0.05) 20%, rgba(61,242,224,0.05) 80%, transparent)',
-              pointerEvents: 'none', zIndex: 0,
-            }} />
+            {/* Mobile bottom fade */}
+            {isMobile && (
+              <div style={{
+                position: 'absolute', bottom: 0, left: 0, right: 0, height: '6rem',
+                background: 'linear-gradient(to bottom, transparent, var(--bg2))',
+                pointerEvents: 'none', zIndex: 2,
+              }} />
+            )}
 
             {/* Content */}
             <div className="exp-content" style={{
@@ -196,9 +292,11 @@ export default function Experience() {
             }}>
               {/* Context */}
               <p style={{
-                fontFamily: 'var(--font-mono)', fontSize: '0.62rem', fontWeight: 400,
+                fontFamily: 'var(--font-mono)',
+                fontSize: isMobile ? '0.68rem' : '0.62rem',
+                fontWeight: 400,
                 color: 'var(--t3)', letterSpacing: '0.06em', textTransform: 'uppercase',
-                marginBottom: '1.5rem',
+                marginBottom: isMobile ? '1.2rem' : '1.5rem',
                 opacity: isVis ? 1 : 0, transform: isVis ? 'translateY(0)' : 'translateY(12px)',
                 transition: 'all 0.7s 0.05s var(--ease)',
               }}>
@@ -207,18 +305,19 @@ export default function Experience() {
 
               {/* Logo + badge */}
               <div style={{
-                display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.2rem',
+                display: 'flex', alignItems: 'center', gap: '1rem',
+                marginBottom: isMobile ? '1rem' : '1.2rem',
                 opacity: isVis ? 1 : 0, transform: isVis ? 'translateY(0)' : 'translateY(20px)',
                 transition: 'all 0.7s 0.1s var(--ease)',
               }}>
-                <div style={{ height: 64, display: 'flex', alignItems: 'center' }}>
+                <div style={{ height: isMobile ? 48 : 64, display: 'flex', alignItems: 'center' }}>
                   {exp.logoType === 'text' ? (
-                    <span style={{ fontFamily: 'Nohemi,sans-serif', fontSize: '2.4rem', fontWeight: 700, color: '#fff' }}>
+                    <span style={{ fontFamily: 'Nohemi,sans-serif', fontSize: isMobile ? '2rem' : '2.4rem', fontWeight: 700, color: '#fff' }}>
                       {exp.company}
                     </span>
                   ) : (
                     <img src={exp.logoSrc} alt={exp.company} style={{
-                      height: 64, width: 'auto', maxWidth: 220, objectFit: 'contain',
+                      height: isMobile ? 48 : 64, width: 'auto', maxWidth: isMobile ? 180 : 220, objectFit: 'contain',
                       filter: (exp as any).logoFilter ?? 'brightness(0) invert(1)',
                     }} />
                   )}
@@ -228,9 +327,10 @@ export default function Experience() {
               {/* Role */}
               <h2 style={{
                 fontFamily: 'Nohemi,sans-serif',
-                fontSize: 'clamp(1.6rem, 4vw, 2.8rem)', fontWeight: 800,
+                fontSize: isMobile ? 'clamp(2rem, 7vw, 2.8rem)' : 'clamp(1.6rem, 4vw, 2.8rem)',
+                fontWeight: 800,
                 color: 'var(--accent)', textTransform: 'uppercase', lineHeight: 1.1,
-                marginBottom: '0.3rem',
+                marginBottom: '0.4rem',
                 opacity: isVis ? 1 : 0, transform: isVis ? 'translateY(0)' : 'translateY(24px)',
                 transition: 'all 0.7s 0.15s var(--ease)',
               }}>
@@ -240,12 +340,12 @@ export default function Experience() {
               {/* Date + badge */}
               <div style={{
                 display: 'flex', alignItems: 'center', gap: '0.8rem',
-                marginBottom: '2rem',
+                marginBottom: isMobile ? '1.4rem' : '2rem',
                 opacity: isVis ? 1 : 0, transform: isVis ? 'translateY(0)' : 'translateY(16px)',
                 transition: 'all 0.7s 0.2s var(--ease)',
               }}>
                 <span style={{
-                  fontFamily: 'var(--font-mono)', fontSize: '0.72rem', fontWeight: 400,
+                  fontFamily: 'var(--font-mono)', fontSize: isMobile ? '0.75rem' : '0.72rem', fontWeight: 400,
                   color: 'var(--t3)', letterSpacing: '0.04em',
                 }}>
                   {exp.date}
@@ -266,7 +366,8 @@ export default function Experience() {
               {/* Description */}
               <p style={{
                 fontFamily: 'Safiro,sans-serif',
-                fontSize: 'clamp(0.9rem, 1.8vw, 1.05rem)', lineHeight: 1.8,
+                fontSize: isMobile ? '0.95rem' : 'clamp(0.9rem, 1.8vw, 1.05rem)',
+                lineHeight: isMobile ? 1.75 : 1.8,
                 color: 'var(--t2)', maxWidth: 600,
                 opacity: isVis ? 1 : 0, transform: isVis ? 'translateY(0)' : 'translateY(20px)',
                 transition: 'all 0.7s 0.25s var(--ease)',
@@ -274,12 +375,13 @@ export default function Experience() {
                 {exp.desc}
               </p>
 
-              {/* Client logos — no label, smaller images */}
+              {/* Client logos */}
               {exp.clients && exp.clients.length > 0 && (
-                <div style={{
+                <div className="exp-clients" style={{
                   display: 'flex', alignItems: 'center', gap: '1.4rem',
-                  marginTop: '2.5rem', paddingTop: '1.5rem',
-                  borderTop: '1px solid rgba(255,255,255,0.04)',
+                  marginTop: isMobile ? '1.8rem' : '2.5rem',
+                  paddingTop: isMobile ? '1.2rem' : '1.5rem',
+                  borderTop: '1px solid rgba(255,255,255,0.06)',
                   opacity: isVis ? 1 : 0, transform: isVis ? 'translateY(0)' : 'translateY(16px)',
                   transition: 'all 0.7s 0.35s var(--ease)',
                 }}>

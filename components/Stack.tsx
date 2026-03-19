@@ -338,9 +338,35 @@ function BentoCard({ item, unit, isMobile }: { item: StackItem; unit: number; is
 export default function Stack() {
   const wrapperRef  = useRef<HTMLDivElement>(null);
   const gridRef     = useRef<HTMLDivElement>(null);
+  const sectionRef  = useRef<HTMLElement>(null);
   const unitRef     = useRef(0);
   const isMobileRef = useRef(false);
   const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
+  const [isMobile, setIsMobile] = useState(false);
+  const [stackTitleVisible, setStackTitleVisible] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 700);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  // Show fixed title as soon as the Stack section approaches the nav bar
+  useEffect(() => {
+    if (!isMobile) return;
+    const section = sectionRef.current;
+    if (!section) return;
+    let rafId: number;
+    const update = () => {
+      const rect = section.getBoundingClientRect();
+      setStackTitleVisible(rect.top <= 72 && rect.bottom > 0);
+    };
+    const onScroll = () => { cancelAnimationFrame(rafId); rafId = requestAnimationFrame(update); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    update();
+    return () => { window.removeEventListener('scroll', onScroll); cancelAnimationFrame(rafId); };
+  }, [isMobile]);
 
   useEffect(() => {
     const update = () => {
@@ -376,8 +402,28 @@ export default function Stack() {
   }, []);
 
   return (
+    <>
+      {/* Fixed mobile title — same sticky-header pattern as Experience/Projects */}
+      {isMobile && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100%',
+          zIndex: 500, pointerEvents: 'none',
+          opacity: stackTitleVisible ? 1 : 0,
+          transition: 'opacity 0.3s ease',
+          paddingTop: '4.5rem', paddingLeft: '2.5rem', paddingRight: '3rem', paddingBottom: '1.2rem',
+          background: 'linear-gradient(to bottom, var(--bg2) 65%, transparent)',
+          fontFamily: 'Nohemi,sans-serif',
+          fontSize: 'clamp(1.8rem, 5vw, 2.2rem)',
+          fontWeight: 600, textTransform: 'uppercase', letterSpacing: '-0.01em',
+          color: 'var(--white)',
+        }}>
+          Tech Stack
+        </div>
+      )}
+
     <section
       id="stack"
+      ref={sectionRef}
       className="snap-section stack-section"
       suppressHydrationWarning
       style={{
@@ -390,8 +436,8 @@ export default function Stack() {
         position: 'relative',
       }}
     >
-      {/* Static title just below nav */}
-      <div style={{
+      {/* Desktop title — hidden on mobile via CSS (fixed title takes over) */}
+      <div className="stack-section-title" style={{
         position: 'absolute',
         top: '4.5rem',
         left: '2rem',
@@ -427,5 +473,6 @@ export default function Stack() {
         </div>
       </div>
     </section>
+    </>
   );
 }

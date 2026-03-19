@@ -29,7 +29,7 @@ export default function Nav() {
 
   return (
     <>
-      <nav style={navStyle}>
+      <nav className="main-nav" style={navStyle}>
         <a href="#" onClick={close} style={{ fontFamily: 'Nohemi,sans-serif', fontSize: '1.05rem', fontWeight: 600, display: 'flex' }}>
           <span style={{ color: 'var(--white)' }}>agonz</span>
           <span style={{ color: 'var(--accent)' }}>{'{x}'}</span>
@@ -44,21 +44,41 @@ export default function Nav() {
           ))}
         </div>
 
-        {/* Mobile menu button */}
-        <button
-          className="nav-menu-btn"
-          onClick={() => setOpen(v => !v)}
-          aria-label={open ? 'Close menu' : 'Open menu'}
-          style={{
-            fontFamily: 'Nohemi,sans-serif', fontSize: '0.78rem', fontWeight: 600,
-            background: 'none', border: 'none', cursor: 'pointer',
-            color: 'var(--white)', alignItems: 'center', gap: '0.2rem', padding: '0.2rem 0.4rem',
-          }}
-        >
-          <span style={{ color: 'var(--accent)', fontSize: '1rem', lineHeight: 1 }}>{open ? '×' : '+'}</span>
-          <span>{open ? 'Close' : 'Menu'}</span>
-        </button>
       </nav>
+
+      {/* Mobile floating menu button — separate from navbar */}
+      <button
+        className="nav-menu-btn"
+        onClick={() => setOpen(v => !v)}
+        aria-label={open ? 'Close menu' : 'Open menu'}
+        style={{
+          position: 'fixed',
+          top: '1rem',
+          right: '1rem',
+          zIndex: 1001,
+          width: '2.66rem',
+          height: '2.66rem',
+          padding: 0,
+          borderRadius: '50%',
+          border: '1px solid rgba(255,255,255,0.08)',
+          background: 'rgba(255,255,255,0.04)',
+          backdropFilter: 'blur(32px) saturate(200%)',
+          WebkitBackdropFilter: 'blur(32px) saturate(200%)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
+          cursor: 'pointer',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <span style={{
+          color: 'var(--accent)',
+          fontSize: '1.3rem',
+          lineHeight: 1,
+          display: 'block',
+          transform: open ? 'rotate(45deg)' : 'rotate(0deg)',
+          transition: 'transform 0.35s cubic-bezier(0.34,1.56,0.64,1)',
+        }}>+</span>
+      </button>
 
       {/* Mobile fullscreen glass overlay */}
       <div

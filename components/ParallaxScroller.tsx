@@ -1,9 +1,8 @@
 'use client';
-import { useEffect, useRef, useState, useCallback, ReactNode } from 'react';
-
-function isMobile() { return typeof window !== 'undefined' && window.innerWidth <= 700; }
+import { useEffect, useLayoutEffect, useRef, useState, useCallback, ReactNode } from 'react';
 
 export default function ParallaxScroller({ children }: { children: ReactNode }) {
+  // ─── Desktop-only state ──────────────────────────────────────────────────
   const trackRef = useRef<HTMLDivElement>(null);
   const sectionsRef = useRef<HTMLElement[]>([]);
   const currentIdx = useRef(0);
@@ -15,9 +14,18 @@ export default function ParallaxScroller({ children }: { children: ReactNode }) 
   const lastNav = useRef(0);
   const vh = useRef(0);
 
+  // Detect mobile — false on SSR, set synchronously before first paint via useLayoutEffect
+  const [isMobile, setIsMobile] = useState(false);
+  useLayoutEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 700);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  // ─── Desktop helpers ─────────────────────────────────────────────────────
   const refresh = useCallback(() => {
     vh.current = window.innerHeight;
-    // Filter out sections hidden via CSS (e.g. about-desktop on mobile, about-mobile-* on desktop)
     sectionsRef.current = Array.from(
       trackRef.current?.querySelectorAll('.snap-section') ?? []
     ).filter(el => window.getComputedStyle(el as HTMLElement).display !== 'none') as HTMLElement[];
@@ -28,7 +36,6 @@ export default function ParallaxScroller({ children }: { children: ReactNode }) 
     const len = sectionsRef.current.length;
     const clamped = Math.max(0, Math.min(len - 1, idx));
     if (clamped === currentIdx.current) return;
-    // Reset horizontal scroller of target section so it starts at card 1
     const hs = sectionsRef.current[clamped]?.querySelector('.proj-horiz-scroller') as HTMLElement | null;
     if (hs) hs.scrollLeft = 0;
     currentIdx.current = clamped;
@@ -39,49 +46,39 @@ export default function ParallaxScroller({ children }: { children: ReactNode }) 
     if (id) history.replaceState(null, '', '#' + id);
   }, []);
 
-  // Lerp animation loop
+  // Lerp animation loop — desktop only
   useEffect(() => {
+    if (isMobile) return;
     refresh();
 
     const tick = () => {
-      const mobile = isMobile();
-      const lerpFactor = mobile ? 0.13 : 0.085;
-
       const diff = targetY.current - animY.current;
-      animY.current += diff * lerpFactor;
+      animY.current += diff * 0.085;
       if (Math.abs(diff) < 0.3) animY.current = targetY.current;
 
       if (trackRef.current) {
         trackRef.current.style.transform = `translateY(${animY.current}px)`;
       }
 
-      // Parallax disabled on mobile — sections snap cleanly without drift
-      if (!mobile) {
-        const progress = -animY.current / vh.current;
-        sectionsRef.current.forEach((section, i) => {
-          const dist = i - progress;
-          section.style.transform = `translateY(${dist * 35}px)`;
-          const bg = section.querySelector('[data-parallax-bg]') as HTMLElement | null;
-          if (bg) bg.style.transform = `translateY(${dist * vh.current * 0.25}px)`;
-        });
-      } else {
-        // Reset any lingering transforms when switching to mobile
-        sectionsRef.current.forEach((section) => {
-          section.style.transform = '';
-          const bg = section.querySelector('[data-parallax-bg]') as HTMLElement | null;
-          if (bg) bg.style.transform = '';
-        });
-      }
+      const progress = -animY.current / vh.current;
+      sectionsRef.current.forEach((section, i) => {
+        const dist = i - progress;
+        section.style.transform = `translateY(${dist * 35}px)`;
+        const bg = section.querySelector('[data-parallax-bg]') as HTMLElement | null;
+        if (bg) bg.style.transform = `translateY(${dist * vh.current * 0.25}px)`;
+      });
 
       raf.current = requestAnimationFrame(tick);
     };
 
     raf.current = requestAnimationFrame(tick);
     return () => { if (raf.current) cancelAnimationFrame(raf.current); };
-  }, [refresh]);
+  }, [isMobile, refresh]);
 
-  // Navigation event listeners
+  // Navigation event listeners — desktop only
   useEffect(() => {
+    if (isMobile) return;
+
     const navigate = (dir: number) => {
       const now = Date.now();
       if (now - lastNav.current < 850) return;
@@ -103,7 +100,6 @@ export default function ParallaxScroller({ children }: { children: ReactNode }) 
       if (Math.abs(e.deltaY) <= 5) return;
       const dir = e.deltaY > 0 ? 1 : -1;
 
-      // Vertical nested scroller (mobile ScrollStack)
       const ns = getNestedScroller();
       if (ns) {
         const atTop    = ns.scrollTop <= 10;
@@ -111,7 +107,6 @@ export default function ParallaxScroller({ children }: { children: ReactNode }) 
         if ((dir === 1 && !atBottom) || (dir === -1 && !atTop)) return;
       }
 
-      // Horizontal scroller (desktop projects)
       const hs = getHorizScroller();
       if (hs) {
         const atLeft  = hs.scrollLeft <= 10;
@@ -120,7 +115,6 @@ export default function ParallaxScroller({ children }: { children: ReactNode }) 
           const now = Date.now();
           if (now - lastNav.current < 850) return;
           lastNav.current = now;
-          // Scroll by ~one card width (440px) for stacking effect; fall back to viewport
           const cardStep = Math.min(440, hs.clientWidth);
           hs.scrollBy({ left: dir * cardStep, behavior: 'smooth' });
           return;
@@ -150,7 +144,6 @@ export default function ParallaxScroller({ children }: { children: ReactNode }) 
       navigate(dir);
     };
 
-    // Intercept anchor clicks from Nav
     const onClick = (e: MouseEvent) => {
       const a = (e.target as Element).closest('a[href]') as HTMLAnchorElement | null;
       if (!a) return;
@@ -189,18 +182,47 @@ export default function ParallaxScroller({ children }: { children: ReactNode }) 
       window.removeEventListener('resize', onResize);
       document.removeEventListener('click', onClick);
     };
-  }, [goTo]);
+  }, [isMobile, goTo, refresh]);
 
+  // ─── Mobile: parallax on [data-parallax-bg] elements only ────────────────
+  useEffect(() => {
+    if (!isMobile) return;
+    let rafId: number;
+    const update = () => {
+      const vh = window.innerHeight;
+      document.querySelectorAll<HTMLElement>('[data-parallax-bg]').forEach(el => {
+        const rect = el.getBoundingClientRect();
+        const dist = rect.top + rect.height / 2 - vh / 2;
+        el.style.transform = `translateY(${-dist * 0.2}px)`;
+      });
+    };
+    const onScroll = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(update);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    update();
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(rafId);
+    };
+  }, [isMobile]);
+
+  // ─── Mobile: natural document flow ───────────────────────────────────────
+  if (isMobile) {
+    return <>{children}</>;
+  }
+
+  // ─── Desktop: fixed viewport + lerp snap ─────────────────────────────────
   return (
     <>
-      {/* Fixed scroll container — owns the viewport */}
       <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', zIndex: 1 }}>
         <div ref={trackRef} style={{ willChange: 'transform' }}>
           {children}
         </div>
       </div>
 
-      {/* Side navigation dots — hidden on mobile via .parallax-dots CSS class */}
+      {/* Side navigation dots — hidden on mobile via CSS */}
       <div className="parallax-dots" style={{
         position: 'fixed', right: '1.5rem', top: '50%', transform: 'translateY(-50%)',
         zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem',

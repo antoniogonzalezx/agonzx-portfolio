@@ -28,6 +28,7 @@ const ScrollStack = ({
   const cardsRef = useRef([]);
   const lastTransformsRef = useRef(new Map());
   const isUpdatingRef = useRef(false);
+  const cleanupRef = useRef(null);
 
   const calculateProgress = useCallback((scrollTop, start, end) => {
     if (scrollTop < start) return 0;
@@ -62,8 +63,16 @@ const ScrollStack = ({
   const getElementOffset = useCallback(
     element => {
       if (useWindowScroll) {
-        const rect = element.getBoundingClientRect();
-        return rect.top + window.scrollY;
+        // offsetTop traversal: unaffected by CSS transforms.
+        // getBoundingClientRect() reflects applied transforms, causing a feedback
+        // loop (card moves → its reported top changes → new translateY → repeat = glitch).
+        let top = 0;
+        let el = element;
+        while (el) {
+          top += el.offsetTop;
+          el = el.offsetParent;
+        }
+        return top;
       } else {
         return element.offsetTop;
       }
@@ -183,30 +192,21 @@ const ScrollStack = ({
     updateCardTransforms();
   }, [updateCardTransforms]);
 
-  const setupLenis = useCallback(() => {
+  const setupScroll = useCallback(() => {
     if (useWindowScroll) {
-      const lenis = new Lenis({
-        duration: 1.2,
-        easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        smoothWheel: true,
-        touchMultiplier: 2,
-        infinite: false,
-        wheelMultiplier: 1,
-        lerp: 0.1,
-        syncTouch: true,
-        syncTouchLerp: 0.075
-      });
-
-      lenis.on('scroll', handleScroll);
-
-      const raf = time => {
-        lenis.raf(time);
-        animationFrameRef.current = requestAnimationFrame(raf);
+      // Native window scroll — no Lenis so we don't interfere with page scroll
+      const onScroll = () => {
+        if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = requestAnimationFrame(handleScroll);
       };
-      animationFrameRef.current = requestAnimationFrame(raf);
-
-      lenisRef.current = lenis;
-      return lenis;
+      const onResize = () => updateCardTransforms();
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onResize, { passive: true });
+      cleanupRef.current = () => {
+        if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('resize', onResize);
+      };
     } else {
       const scroller = scrollerRef.current;
       if (!scroller) return;
@@ -236,11 +236,14 @@ const ScrollStack = ({
         animationFrameRef.current = requestAnimationFrame(raf);
       };
       animationFrameRef.current = requestAnimationFrame(raf);
-
       lenisRef.current = lenis;
-      return lenis;
+
+      cleanupRef.current = () => {
+        if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+        lenis.destroy();
+      };
     }
-  }, [handleScroll, useWindowScroll]);
+  }, [handleScroll, updateCardTransforms, useWindowScroll]);
 
   useLayoutEffect(() => {
     const scroller = scrollerRef.current;
@@ -268,17 +271,11 @@ const ScrollStack = ({
       card.style.webkitPerspective = '1000px';
     });
 
-    setupLenis();
-
+    setupScroll();
     updateCardTransforms();
 
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      if (lenisRef.current) {
-        lenisRef.current.destroy();
-      }
+      cleanupRef.current?.();
       stackCompletedRef.current = false;
       cardsRef.current = [];
       transformsCache.clear();
@@ -296,7 +293,7 @@ const ScrollStack = ({
     blurAmount,
     useWindowScroll,
     onStackComplete,
-    setupLenis,
+    setupScroll,
     updateCardTransforms
   ]);
 

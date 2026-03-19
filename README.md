@@ -22,9 +22,10 @@ Open [http://localhost:3000](http://localhost:3000)
 
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
-- **Fonts**: N27 (display) + Safiro Medium (body) — custom webfonts in `/public/fonts/`
+- **Fonts**: Nohemi (headings) + Safiro (body) + Martian Mono (code) — custom webfonts in `/public/fonts/`
 - **Components**: [ReactBits](https://reactbits.dev) — animated UI components
-- **3D**: Three.js + react-three-fiber (for Lanyard card)
+- **3D**: Three.js + react-three-fiber + Rapier physics (for Lanyard card)
+- **Animations**: Motion (scroll/reveal), Lenis (smooth scrolling)
 - **Deploy**: Vercel
 
 ## Color Palette
@@ -199,11 +200,21 @@ Or connect your GitHub repo at [vercel.com](https://vercel.com).
 
 Recommended: **agonzx.dev** (~14€/year)
 
+## Mobile Layout
+
+The site uses a split mobile/desktop architecture:
+
+- **Navigation**: Nav pill shrinks left; floating glass circle button (top-right) toggles fullscreen overlay on mobile
+- **Experience**: Sections sized to `70svh` so adjacent items peek; non-active items dim + blur; left-side dot-bar indicator; fixed sticky section title with gradient fade
+- **Projects**: `ScrollStack` driven by `useWindowScroll` — natural page scroll stacks the cards; fixed title fades in once section scrolls past nav
+- **Tech Stack**: Same fixed sticky-title pattern as Experience/Projects
+- **Scroll snapping**: Disabled on mobile (`snap-section` unsets `min-height`); hero stays `100dvh`
+
 ## Notes
 
 - All content is in `components/data.ts` — edit there to update text, links, etc.
-- Font files are in `public/fonts/` — N27 for display, Safiro for body
+- Font files are in `public/fonts/` — Nohemi for headings, Safiro for body, Martian Mono for code
 - The fluid cursor is disabled on touch devices automatically
 - Glass effects use `backdrop-filter` which requires modern browsers
 - The Lanyard component needs Three.js — it's the heaviest dependency
-- All ReactBits components come with 4 variants (JS-CSS, JS-TW, TS-CSS, TS-TW)
+- All ReactBits components are bundled directly in `components/reactbits/`
