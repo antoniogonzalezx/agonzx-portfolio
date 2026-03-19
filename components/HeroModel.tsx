@@ -52,7 +52,7 @@ function BracesModel({ dragRef, velocityRef }: BracesModelProps) {
     <group ref={groupRef}>
       <Center>
         <Text3D
-          font={helvetikerBold}
+          font={helvetikerBold as any}
           size={1.6}
           height={0.42}
           curveSegments={20}
