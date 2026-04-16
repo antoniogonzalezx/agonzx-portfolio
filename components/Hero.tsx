@@ -1,6 +1,6 @@
 'use client';
 import dynamic from 'next/dynamic';
-import { Fragment, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ROTATING_WORDS } from './data';
 
@@ -103,12 +103,6 @@ function useSwiftCursorTrail(containerRef: React.RefObject<HTMLElement | null>) 
   }, [containerRef]);
 }
 
-const STATS = [
-  { value: '5+',   label: 'years exp.' },
-  { value: '22M+', label: 'users reached' },
-  { value: '4',    label: 'apps shipped' },
-];
-
 export default function Hero() {
   const heroRef = useRef<HTMLElement>(null);
   const nameRef = useRef<HTMLDivElement>(null);
@@ -180,20 +174,17 @@ export default function Hero() {
           <RotatingText texts={ROTATING_WORDS} mainClassName="rotating-hero" staggerFrom="last" staggerDuration={0.025} rotationInterval={3000} />
         </div>
 
-        {/* Stats bar */}
-        <div style={{ display:'flex', alignItems:'center', marginTop:'2rem', animation:'fadeUp 1s 0.72s both var(--ease)' }}>
-          {STATS.map(({ value, label }, i) => (
-            <Fragment key={label}>
-              {i > 0 && <div style={{ width:1, height:36, background:'rgba(255,255,255,0.08)', margin:'0 2rem' }} />}
-              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'0.25rem' }}>
-                <span style={{ fontFamily:'Nohemi,sans-serif', fontSize:'clamp(1.3rem,2.2vw,1.7rem)', fontWeight:800, color:'var(--white)', letterSpacing:'-0.025em', lineHeight:1 }}>
-                  {value}
-                </span>
-                <span style={{ fontFamily:'Safiro,sans-serif', fontSize:'0.6rem', fontWeight:500, color:'var(--t3)', letterSpacing:'0.1em', textTransform:'uppercase' }}>
-                  {label}
-                </span>
-              </div>
-            </Fragment>
+        {/* Agentic tag line */}
+        <div style={{ display:'flex', alignItems:'center', gap:'0.5rem', marginTop:'1.4rem', animation:'fadeUp 1s 0.72s both var(--ease)' }}>
+          {['Claude Code', 'SwiftUI', 'Agentic AI'].map((tag, i) => (
+            <span key={tag} style={{
+              fontFamily:'var(--font-mono)', fontSize:'0.58rem', fontWeight:500,
+              color: i === 0 ? 'var(--accent)' : 'var(--t3)',
+              letterSpacing:'0.08em', textTransform:'uppercase',
+              padding:'0.2rem 0.6rem',
+              border: `1px solid ${i === 0 ? 'rgba(61,242,224,0.25)' : 'rgba(255,255,255,0.07)'}`,
+              borderRadius: 4,
+            }}>{tag}</span>
           ))}
         </div>
       </div>

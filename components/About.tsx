@@ -50,7 +50,8 @@ const AboutText = () => (
     </h3>
     <p style={{ marginBottom:'1.3rem' }}>iOS engineer with a thing for clean architecture, Swift concurrency, and products that actually make sense. I don't just write code — I care about what I'm building and why.</p>
     <p style={{ marginBottom:'1.3rem' }}>At XING I owned the job application flow end-to-end — the core revenue driver of a 20M+ user jobs marketplace, serving both candidates and recruiters. Close collaboration with product and design wasn't just part of the job, it was how I liked to work: shaping decisions, running A/B tests, and pushing <strong style={{ color:'var(--white)', fontWeight:600 }}>120%</strong> improvement in apply rates while taking test coverage above <strong style={{ color:'var(--white)', fontWeight:600 }}>90%</strong>.</p>
-    <p>Now at UserTesting I own the B2C iOS experience — building the tests participants run on their devices, setting up the component infrastructure, and taking the product from decisions to App Store. Same mindset: engineer who thinks like a PM.</p>
+    <p style={{ marginBottom:'1.3rem' }}>Now at UserTesting I own the B2C iOS experience — building the tests participants run on their devices, setting up the component infrastructure, and taking the product from decisions to App Store. Same mindset: engineer who thinks like a PM.</p>
+    <p>On the side I've gone deep on <strong style={{ color:'var(--accent)', fontWeight:600 }}>agentic programming</strong> — building workflows with Claude Code and OpenAI Codex that have fundamentally changed how I ship. Tooling that automates the boring parts so the interesting parts get more attention.</p>
   </div>
 );
 

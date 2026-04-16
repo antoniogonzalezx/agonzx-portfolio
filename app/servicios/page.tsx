@@ -1,266 +1,223 @@
 'use client';
-import { useEffect, useRef, useState, useCallback, useLayoutEffect } from 'react';
-import { gsap } from 'gsap';
+import { useEffect, useRef, useState } from 'react';
 
-// ─── Data ────────────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────────────────────
+   SERVICIOS — long-form landing page
+   Same visual language as main portfolio: dark bg, teal accent, Nohemi/Safiro.
+   Continuous scroll (no snap) — designed for B2B clients to read top to bottom.
+───────────────────────────────────────────────────────────────────────────── */
 
-const SERVICES = [
-  {
-    title: 'Automatización interna',
-    desc: 'Fichaje digital, gestión de vacaciones y control horario adaptado exactamente a tu empresa. Cumple la normativa española sin pagar licencias de software genérico. Tú pones el proceso, nosotros lo digitalizamos.',
-    bg: 'https://images.pexels.com/photos/8438879/pexels-photo-8438879.jpeg',
-  },
-  {
-    title: 'Atención al cliente con IA',
-    desc: 'Asistente inteligente que responde dudas frecuentes, precualifica pacientes o clientes y gestiona citas sin intervención humana. Disponible 24/7, integrado directamente en tu web o app existente.',
-    bg: 'https://images.unsplash.com/photo-1496115965489-21be7e6e59a0?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-  },
-  {
-    title: 'Herramientas a medida',
-    desc: 'Si tienes un proceso manual que te quita tiempo, lo digitalizamos. Rápido, funcional y con tu identidad de marca. Sin atajos ni plantillas genéricas — cada solución pensada para cómo trabaja tu negocio.',
-    bg: 'https://images.unsplash.com/photo-1532186773960-85649e5cb70b?q=80&w=2342&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-  },
-];
+/* ── Reveal hook — fade+rise when element enters viewport ─────────────────── */
+function useReveal(threshold = 0.12) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (visible) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
+      { threshold },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [visible, threshold]);
+  return { ref, visible };
+}
 
-const PROJECTS = [
-  {
-    name: 'Soccer Manager',
-    desc: 'Gestión completa de pedidos, cobros y entregas de material deportivo. Panel de administración con historial y notificaciones en tiempo real.',
-    stack: ['Next.js', 'Supabase', 'Vercel'],
-    device: 'desktop' as const,
-    screenshots: ['/screenshots/soccermanager1.png', '/screenshots/soccermanager2.png'],
-    bg: '#0a1118',
-    accent: '#3DF2E0',
-  },
-  {
-    name: 'Torrenueva Futsal',
-    desc: 'PWA móvil para gestión de multas y convocatorias del equipo. Los jugadores consultan su balance e historial directamente desde el teléfono, sin instalación.',
-    stack: ['HTML', 'JavaScript', 'Supabase'],
-    device: 'mobile' as const,
-    screenshots: ['/screenshots/torrenuevafutsal1.png', '/screenshots/torrenuevafutsal2.png'],
-    bg: '#0b1015',
-    accent: '#3DF2E0',
-  },
-];
+/* ── Section label ─────────────────────────────────────────────────────────── */
+function Label({ children }: { children: string }) {
+  return (
+    <span style={{
+      fontFamily: 'var(--font-mono)', fontSize: '0.62rem', fontWeight: 500,
+      color: 'var(--accent)', letterSpacing: '0.14em', textTransform: 'uppercase',
+      display: 'block', marginBottom: '1.5rem',
+    }}>
+      {children}
+    </span>
+  );
+}
 
-const HERO_WORDS = ['SOLUCIONES', 'DIGITALES', 'A MEDIDA', 'PARA EMPRESAS'];
+/* ── Section heading ───────────────────────────────────────────────────────── */
+function Heading({ children, size = 'lg' }: { children: React.ReactNode; size?: 'sm' | 'lg' }) {
+  return (
+    <h2 style={{
+      fontFamily: 'Nohemi,sans-serif',
+      fontSize: size === 'lg' ? 'clamp(2.2rem,5vw,4rem)' : 'clamp(1.6rem,3vw,2.4rem)',
+      fontWeight: 900, textTransform: 'uppercase',
+      letterSpacing: '-0.025em', lineHeight: 1.05,
+      color: 'var(--white)', margin: 0,
+    }}>
+      {children}
+    </h2>
+  );
+}
 
-// ─── Flip Card ───────────────────────────────────────────────────────────────
+/* ── Thin divider ──────────────────────────────────────────────────────────── */
+function Divider() {
+  return <div style={{ width: '100%', height: 1, background: 'rgba(255,255,255,0.06)', margin: '0' }} />;
+}
 
-function FlipCard({ service, isMobileDevice }: { service: typeof SERVICES[0]; isMobileDevice: boolean }) {
-  const innerRef = useRef<HTMLDivElement>(null);
-  const flippedRef = useRef(false);
-
-  const flipTo = (state: boolean) => {
-    gsap.to(innerRef.current, {
-      rotationY: state ? 180 : 0,
-      duration: 0.68,
-      ease: state ? 'back.out(1.1)' : 'power3.inOut',
-    });
-  };
-
-  const handleMouseEnter = () => { if (!isMobileDevice) flipTo(true); };
-  const handleMouseLeave = () => { if (!isMobileDevice) flipTo(false); };
-  const handleClick = () => {
-    if (isMobileDevice) {
-      flippedRef.current = !flippedRef.current;
-      flipTo(flippedRef.current);
-    }
-  };
-
+/* ── Service panel ─────────────────────────────────────────────────────────── */
+function ServicePanel({
+  num, title, desc, tags, delay = 0,
+}: {
+  num: string; title: string; desc: string; tags: string[]; delay?: number;
+}) {
+  const { ref, visible } = useReveal();
   return (
     <div
-      data-cursor="view"
-      onClick={handleClick}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      ref={ref}
       style={{
-        perspective: '1200px',
-        cursor: isMobileDevice ? 'pointer' : 'default',
-        height: 'clamp(280px, 38vh, 420px)',
-        userSelect: 'none',
-        WebkitUserSelect: 'none',
+        padding: 'clamp(3rem,6vw,5rem) 0',
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(40px)',
+        transition: `opacity 0.75s ${delay}s cubic-bezier(0.16,1,0.3,1), transform 0.75s ${delay}s cubic-bezier(0.16,1,0.3,1)`,
       }}
     >
-      <div
-        ref={innerRef}
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: '100%',
-          transformStyle: 'preserve-3d',
-        }}
-      >
-        {/* Front */}
-        <div style={{
-          position: 'absolute', inset: 0, borderRadius: 20, overflow: 'hidden',
-          backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: 720 }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--t3)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+          {num}
+        </span>
+        <h3 style={{
+          fontFamily: 'Nohemi,sans-serif', fontSize: 'clamp(1.6rem,3.5vw,2.6rem)',
+          fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.02em',
+          color: 'var(--white)', lineHeight: 1.05, margin: 0,
         }}>
-          <img
-            src={service.bg}
-            alt=""
-            draggable={false}
-            style={{
-              position: 'absolute', inset: 0, width: '100%', height: '100%',
-              objectFit: 'cover', objectPosition: 'center', pointerEvents: 'none',
-            }}
-          />
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'linear-gradient(155deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 45%, rgba(0,0,0,0.9) 100%)',
-          }} />
-          <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0,
-            height: '45%',
-            background: 'linear-gradient(to top, rgba(61,242,224,0.055), transparent)',
-            pointerEvents: 'none',
-          }} />
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '1.75rem' }}>
-            <h3 style={{
-              fontFamily: 'Nohemi,sans-serif',
-              fontSize: 'clamp(1.1rem, 2.2vw, 1.5rem)',
-              fontWeight: 800, color: '#fff', lineHeight: 1.15, margin: 0,
-            }}>
-              {service.title}
-            </h3>
-          </div>
-        </div>
-
-        {/* Back */}
-        <div style={{
-          position: 'absolute', inset: 0, borderRadius: 20, overflow: 'hidden',
-          backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
-          transform: 'rotateY(180deg)',
-          background: 'rgba(14,18,25,0.98)',
-          border: '1px solid rgba(61,242,224,0.12)',
-          display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-          padding: '2rem',
-        }}>
-          <div style={{
-            position: 'absolute', top: 0, left: '2rem', right: '2rem', height: 1,
-            background: 'linear-gradient(90deg, transparent, rgba(61,242,224,0.4), transparent)',
-          }} />
-          <div>
-            <h3 style={{
-              fontFamily: 'Nohemi,sans-serif',
-              fontSize: 'clamp(1rem, 1.8vw, 1.25rem)',
-              fontWeight: 800, color: '#fff', marginBottom: '1rem', lineHeight: 1.2,
-            }}>
-              {service.title}
-            </h3>
-            <p style={{
-              fontFamily: 'Safiro,sans-serif',
-              fontSize: 'clamp(0.82rem, 1.3vw, 0.92rem)',
-              lineHeight: 1.8, color: 'var(--t2)',
-            }}>
-              {service.desc}
-            </p>
-          </div>
-          <div style={{ width: 36, height: 2, background: '#3DF2E0', borderRadius: 2 }} />
+          {title}
+        </h3>
+        <p style={{ fontFamily: 'Safiro,sans-serif', fontSize: '1rem', lineHeight: 1.75, color: 'var(--t2)', margin: 0 }}>
+          {desc}
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+          {tags.map(t => (
+            <span key={t} style={{
+              fontFamily: 'var(--font-mono)', fontSize: '0.55rem', fontWeight: 500,
+              letterSpacing: '0.08em', textTransform: 'uppercase',
+              padding: '0.22rem 0.65rem',
+              border: '1px solid rgba(61,242,224,0.18)',
+              borderRadius: 4, color: 'rgba(61,242,224,0.65)',
+            }}>{t}</span>
+          ))}
         </div>
       </div>
     </div>
   );
 }
 
-// ─── Screenshot carousel ─────────────────────────────────────────────────────
+/* ── Differentiator item ───────────────────────────────────────────────────── */
+function WhyItem({ heading, body, delay = 0 }: { heading: string; body: string; delay?: number }) {
+  const { ref, visible } = useReveal(0.1);
+  return (
+    <div
+      ref={ref}
+      style={{
+        padding: '2.5rem 0',
+        borderTop: '1px solid rgba(255,255,255,0.06)',
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(30px)',
+        transition: `opacity 0.7s ${delay}s cubic-bezier(0.16,1,0.3,1), transform 0.7s ${delay}s cubic-bezier(0.16,1,0.3,1)`,
+      }}
+    >
+      <h3 style={{
+        fontFamily: 'Nohemi,sans-serif', fontSize: 'clamp(1.1rem,2vw,1.5rem)',
+        fontWeight: 800, textTransform: 'uppercase', letterSpacing: '-0.015em',
+        color: 'var(--white)', margin: '0 0 1rem 0',
+      }}>
+        {heading}
+      </h3>
+      <p style={{ fontFamily: 'Safiro,sans-serif', fontSize: '0.95rem', lineHeight: 1.75, color: 'var(--t2)', margin: 0 }}>
+        {body}
+      </p>
+    </div>
+  );
+}
 
-function ScreenshotCarousel({
-  screenshots,
-  name,
-  deviceType,
-  onExpand,
-}: {
-  screenshots: string[];
-  name: string;
-  deviceType: 'desktop' | 'mobile';
-  onExpand: (src: string) => void;
-}) {
-  const [activeIdx, setActiveIdx] = useState(0);
-  const activeIdxRef = useRef(0);
-  const imgEls = useRef<(HTMLImageElement | null)[]>([]);
-  const isPaused = useRef(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval>>();
+/* ── Process step ──────────────────────────────────────────────────────────── */
+function Step({ num, heading, body, delay = 0 }: { num: string; heading: string; body: string; delay?: number }) {
+  const { ref, visible } = useReveal(0.1);
+  return (
+    <div
+      ref={ref}
+      style={{
+        display: 'grid', gridTemplateColumns: '3rem 1fr', gap: '0 2rem',
+        padding: '2.5rem 0', borderTop: '1px solid rgba(255,255,255,0.06)',
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(30px)',
+        transition: `opacity 0.7s ${delay}s cubic-bezier(0.16,1,0.3,1), transform 0.7s ${delay}s cubic-bezier(0.16,1,0.3,1)`,
+      }}
+    >
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--accent)', paddingTop: '0.15rem', lineHeight: 1 }}>
+        {num}
+      </span>
+      <div>
+        <h3 style={{
+          fontFamily: 'Nohemi,sans-serif', fontSize: 'clamp(1.1rem,2vw,1.4rem)',
+          fontWeight: 800, textTransform: 'uppercase', letterSpacing: '-0.015em',
+          color: 'var(--white)', margin: '0 0 0.75rem 0',
+        }}>
+          {heading}
+        </h3>
+        <p style={{ fontFamily: 'Safiro,sans-serif', fontSize: '0.92rem', lineHeight: 1.75, color: 'var(--t2)', margin: 0 }}>
+          {body}
+        </p>
+      </div>
+    </div>
+  );
+}
 
-  const crossfadeTo = useCallback((next: number) => {
-    const prev = activeIdxRef.current;
-    if (prev === next) return;
-    const prevEl = imgEls.current[prev];
-    const nextEl = imgEls.current[next];
-    if (prevEl) gsap.to(prevEl, { opacity: 0, duration: 0.55, ease: 'power2.inOut' });
-    if (nextEl) gsap.fromTo(nextEl, { opacity: 0 }, { opacity: 1, duration: 0.55, ease: 'power2.inOut' });
-    activeIdxRef.current = next;
-    setActiveIdx(next);
-  }, []);
+/* ── Screenshot carousel ───────────────────────────────────────────────────── */
+function ScreenshotCarousel({ shots, device }: { shots: string[]; device: 'desktop' | 'mobile' }) {
+  const [active, setActive] = useState(0);
+  const activeRef = useRef(0);
+  const isMobile = device === 'mobile';
+  const pausedRef = useRef(false);
 
   useEffect(() => {
-    if (screenshots.length <= 1) return;
-    intervalRef.current = setInterval(() => {
-      if (!isPaused.current) {
-        const next = (activeIdxRef.current + 1) % screenshots.length;
-        crossfadeTo(next);
+    if (shots.length <= 1) return;
+    const id = setInterval(() => {
+      if (!pausedRef.current) {
+        const next = (activeRef.current + 1) % shots.length;
+        activeRef.current = next;
+        setActive(next);
       }
-    }, 3800);
-    return () => clearInterval(intervalRef.current);
-  }, [screenshots.length, crossfadeTo]);
+    }, 3600);
+    return () => clearInterval(id);
+  }, [shots.length]);
 
   return (
     <div
       style={{ position: 'relative', width: '100%', height: '100%' }}
-      onMouseEnter={() => { isPaused.current = true; }}
-      onMouseLeave={() => { isPaused.current = false; }}
+      onMouseEnter={() => { pausedRef.current = true; }}
+      onMouseLeave={() => { pausedRef.current = false; }}
     >
-      {/* Stacked images — GSAP crossfades between them */}
-      {screenshots.map((src, i) => (
+      {shots.map((src, i) => (
         <img
-          key={i}
-          ref={el => { imgEls.current[i] = el; }}
+          key={src}
           src={src}
-          alt={`${name} screenshot ${i + 1}`}
-          onClick={() => onExpand(src)}
-          draggable={false}
+          alt=""
           style={{
-            position: 'absolute',
-            inset: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain',
-            objectPosition: 'center',
-            borderRadius: deviceType === 'mobile' ? 18 : 12,
-            cursor: 'zoom-in',
-            opacity: i === 0 ? 1 : 0,
-            display: 'block',
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
+            position: 'absolute', inset: 0, width: '100%', height: '100%',
+            objectFit: isMobile ? 'contain' : 'cover',
+            objectPosition: 'top',
+            opacity: i === active ? 1 : 0,
+            transition: 'opacity 0.8s ease',
+            pointerEvents: 'none',
           }}
         />
       ))}
-
       {/* Dot indicators */}
-      {screenshots.length > 1 && (
-        <div style={{
-          position: 'absolute',
-          bottom: '-1.75rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          gap: '0.45rem',
-          alignItems: 'center',
-        }}>
-          {screenshots.map((_, i) => (
+      {shots.length > 1 && (
+        <div style={{ position: 'absolute', bottom: '1rem', left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: '0.4rem', zIndex: 2 }}>
+          {shots.map((_, i) => (
             <button
               key={i}
-              onClick={e => { e.stopPropagation(); crossfadeTo(i); }}
+              onClick={() => { activeRef.current = i; setActive(i); }}
               style={{
-                width: i === activeIdx ? 22 : 6,
-                height: 6,
-                borderRadius: 3,
-                background: i === activeIdx ? '#3DF2E0' : 'rgba(255,255,255,0.28)',
-                border: 'none',
-                cursor: 'pointer',
-                padding: 0,
-                transition: 'width 0.35s cubic-bezier(0.16,1,0.3,1), background 0.35s ease',
-                flexShrink: 0,
+                width: i === active ? 20 : 6, height: 6,
+                borderRadius: 3, border: 'none',
+                background: i === active ? 'var(--accent)' : 'rgba(255,255,255,0.25)',
+                transition: 'all 0.3s ease', padding: 0, cursor: 'pointer',
               }}
             />
           ))}
@@ -270,778 +227,124 @@ function ScreenshotCarousel({
   );
 }
 
-// ─── Full-screen project card ─────────────────────────────────────────────────
-
-function ProjectShowcase({
-  project,
-  cardRef,
-  onExpand,
+/* ── Project card ──────────────────────────────────────────────────────────── */
+function ProjectCard({
+  name, desc, stack, shots, device, delay = 0,
 }: {
-  project: typeof PROJECTS[0];
-  cardRef: React.RefObject<HTMLDivElement>;
-  onExpand: (src: string) => void;
+  name: string; desc: string; stack: string[]; shots: string[]; device: 'desktop' | 'mobile'; delay?: number;
 }) {
-  const isMobile = project.device === 'mobile';
+  const { ref, visible } = useReveal(0.08);
+  const isMobileDevice = device === 'mobile';
 
   return (
     <div
-      ref={cardRef}
+      ref={ref}
+      data-cursor="view"
       style={{
-        position: 'absolute',
-        inset: 0,
-        background: project.bg,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        background: 'var(--card)',
+        borderRadius: 20,
         overflow: 'hidden',
+        border: '1px solid rgba(255,255,255,0.06)',
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(40px)',
+        transition: `opacity 0.75s ${delay}s cubic-bezier(0.16,1,0.3,1), transform 0.75s ${delay}s cubic-bezier(0.16,1,0.3,1)`,
       }}
     >
-      {/* Ambient accent glow */}
+      {/* Screenshot */}
       <div style={{
-        position: 'absolute',
-        top: '50%', left: '60%',
-        transform: 'translate(-50%, -50%)',
-        width: 600, height: 500,
-        background: 'radial-gradient(ellipse, rgba(61,242,224,0.05) 0%, transparent 65%)',
-        pointerEvents: 'none',
+        height: isMobileDevice ? 320 : 260,
+        background: 'var(--bg2)',
+        position: 'relative',
+        overflow: 'hidden',
+        padding: isMobileDevice ? '1.5rem 3rem 0' : '0',
+      }}>
+        <ScreenshotCarousel shots={shots} device={device} />
+      </div>
+      {/* Info */}
+      <div style={{ padding: '2rem 2rem 2.2rem' }}>
+        <h3 style={{
+          fontFamily: 'Nohemi,sans-serif', fontSize: '1.3rem', fontWeight: 900,
+          textTransform: 'uppercase', letterSpacing: '-0.02em',
+          color: 'var(--white)', margin: '0 0 0.75rem 0',
+        }}>
+          {name}
+        </h3>
+        <p style={{ fontFamily: 'Safiro,sans-serif', fontSize: '0.88rem', lineHeight: 1.7, color: 'var(--t2)', margin: '0 0 1.2rem 0' }}>
+          {desc}
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+          {stack.map(t => (
+            <span key={t} style={{
+              fontFamily: 'var(--font-mono)', fontSize: '0.52rem', fontWeight: 500,
+              letterSpacing: '0.08em', textTransform: 'uppercase',
+              padding: '0.2rem 0.55rem',
+              background: 'rgba(255,255,255,0.05)',
+              borderRadius: 4, color: 'var(--t3)',
+            }}>{t}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   MAIN PAGE
+══════════════════════════════════════════════════════════════════════════════ */
+export default function Servicios() {
+  const whatsapp = 'https://wa.me/34600000000?text=Hola%20Antonio%2C%20me%20gustar%C3%ADa%20hablar%20sobre%20un%20proyecto';
+  const email = 'mailto:antoniogonzalezvaldepenas.jobs@gmail.com?subject=Proyecto';
+
+  // Hero section reveal refs
+  const heroLabelRef   = useRef<HTMLDivElement>(null);
+  const heroHeadRef    = useRef<HTMLDivElement>(null);
+  const heroSubRef     = useRef<HTMLDivElement>(null);
+  const heroCtaRef     = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const els = [heroLabelRef, heroHeadRef, heroSubRef, heroCtaRef];
+    els.forEach((r, i) => {
+      if (!r.current) return;
+      r.current.style.opacity    = '0';
+      r.current.style.transform  = 'translateY(36px)';
+      r.current.style.transition = `opacity 0.85s ${i * 0.12 + 0.1}s cubic-bezier(0.16,1,0.3,1), transform 0.85s ${i * 0.12 + 0.1}s cubic-bezier(0.16,1,0.3,1)`;
+      setTimeout(() => {
+        if (!r.current) return;
+        r.current.style.opacity   = '1';
+        r.current.style.transform = 'translateY(0)';
+      }, 50);
+    });
+  }, []);
+
+  const { ref: servRef, visible: servVisible } = useReveal(0.05);
+  const { ref: whyRef,  visible: whyVisible  } = useReveal(0.05);
+  const { ref: projRef, visible: projVisible  } = useReveal(0.05);
+  const { ref: procRef, visible: procVisible  } = useReveal(0.05);
+  const { ref: ctaRef,  visible: ctaVisible   } = useReveal(0.1);
+
+  const fadeIn = (visible: boolean, delay = 0) => ({
+    opacity: visible ? 1 : 0,
+    transform: visible ? 'translateY(0)' : 'translateY(32px)',
+    transition: `opacity 0.75s ${delay}s cubic-bezier(0.16,1,0.3,1), transform 0.75s ${delay}s cubic-bezier(0.16,1,0.3,1)`,
+  });
+
+  return (
+    <div style={{ background: 'var(--bg)', color: 'var(--white)', overflowX: 'hidden' }}>
+
+      {/* ── Grain overlay (same as hero) ──────────────────────────────────── */}
+      <div aria-hidden style={{
+        position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+        opacity: 0.07, mixBlendMode: 'overlay',
+        backgroundRepeat: 'repeat', backgroundSize: '180px 180px',
+        backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'180\' height=\'180\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'180\' height=\'180\' filter=\'url(%23n)\'/%3E%3C/svg%3E")',
       }} />
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1.4fr',
-        gap: '4rem',
-        width: '100%',
-        maxWidth: 1060,
-        padding: '5rem 3rem 3rem',
-        alignItems: 'center',
-        position: 'relative',
-        zIndex: 1,
-      }}>
-        {/* Left: info */}
-        <div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '1.5rem' }}>
-            {project.stack.map(s => (
-              <span key={s} style={{
-                fontFamily: 'var(--font-mono)', fontSize: '0.63rem',
-                color: '#3DF2E0', background: 'rgba(61,242,224,0.08)',
-                border: '1px solid rgba(61,242,224,0.18)',
-                borderRadius: 6, padding: '0.22rem 0.55rem',
-              }}>
-                {s}
-              </span>
-            ))}
-          </div>
-
-          <h2 style={{
-            fontFamily: 'Nohemi,sans-serif',
-            fontSize: 'clamp(2rem, 4vw, 3.2rem)',
-            fontWeight: 900, textTransform: 'uppercase',
-            letterSpacing: '-0.025em', lineHeight: 1,
-            color: '#E8ECF0', marginBottom: '1.25rem',
-          }}>
-            {project.name}
-          </h2>
-
-          <p style={{
-            fontFamily: 'Safiro,sans-serif',
-            fontSize: 'clamp(0.88rem, 1.5vw, 1rem)',
-            lineHeight: 1.75, color: 'var(--t2)',
-            marginBottom: '2rem',
-          }}>
-            {project.desc}
-          </p>
-
-          <div style={{ width: 40, height: 2, background: '#3DF2E0', borderRadius: 2 }} />
-        </div>
-
-        {/* Right: auto-playing carousel */}
-        <div style={{
-          position: 'relative',
-          paddingBottom: '2.5rem', // room for dots
-        }}>
-          {isMobile ? (
-            // Mobile (Torrenueva): two portrait screenshots side by side, each in its own carousel slot
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', justifyContent: 'center' }}>
-              {project.screenshots.map((src, i) => (
-                <img
-                  key={i}
-                  src={src}
-                  alt={`${project.name} ${i + 1}`}
-                  onClick={() => onExpand(src)}
-                  draggable={false}
-                  style={{
-                    height: 'clamp(240px, 34vh, 400px)',
-                    width: 'auto',
-                    objectFit: 'contain',
-                    borderRadius: 18,
-                    cursor: 'zoom-in',
-                    display: 'block',
-                    boxShadow: '0 24px 60px rgba(0,0,0,0.55)',
-                    transition: 'transform 0.25s ease',
-                  }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLImageElement).style.transform = 'translateY(-6px) scale(1.02)'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLImageElement).style.transform = ''; }}
-                />
-              ))}
-            </div>
-          ) : (
-            // Desktop: auto-playing crossfade carousel — full image, no crop
-            <div style={{
-              position: 'relative',
-              height: 'clamp(300px, 42vh, 460px)',
-              width: '100%',
-              borderRadius: 12,
-              overflow: 'hidden',
-              boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
-            }}>
-              <ScreenshotCarousel
-                screenshots={project.screenshots}
-                name={project.name}
-                deviceType={project.device}
-                onExpand={onExpand}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Bottom project index indicator */}
-      <div style={{
-        position: 'absolute',
-        bottom: '1.75rem',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        fontFamily: 'var(--font-mono)',
-        fontSize: '0.6rem',
-        color: 'rgba(255,255,255,0.3)',
-        textTransform: 'uppercase',
-        letterSpacing: '0.12em',
-      }}>
-        {PROJECTS.indexOf(project) + 1} / {PROJECTS.length}
-      </div>
-    </div>
-  );
-}
-
-// ─── Lightbox ────────────────────────────────────────────────────────────────
-
-function Lightbox({ src, onClose }: { src: string; onClose: () => void }) {
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const imgRef = useRef<HTMLImageElement>(null);
-
-  useEffect(() => {
-    gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.22, ease: 'power2.out' });
-    gsap.fromTo(imgRef.current, { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: 'power3.out' });
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
-  return (
-    <div
-      ref={overlayRef}
-      onClick={onClose}
-      style={{
-        position: 'fixed', inset: 0, zIndex: 9999,
-        background: 'rgba(5,8,12,0.94)',
-        backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '2rem', cursor: 'zoom-out',
-      }}
-    >
-      <img
-        ref={imgRef}
-        src={src}
-        alt=""
-        onClick={e => e.stopPropagation()}
-        style={{
-          maxWidth: '90vw', maxHeight: '90vh',
-          objectFit: 'contain', borderRadius: 16,
-          boxShadow: '0 32px 100px rgba(0,0,0,0.8)',
-          cursor: 'default', display: 'block',
-        }}
-      />
-      <button
-        onClick={onClose}
-        style={{
-          position: 'absolute', top: '1.5rem', right: '1.5rem',
-          width: '2.5rem', height: '2.5rem', borderRadius: '50%',
-          border: '1px solid rgba(255,255,255,0.15)',
-          background: 'rgba(255,255,255,0.07)',
-          color: '#fff', fontSize: '1.3rem', lineHeight: 1,
-          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          backdropFilter: 'blur(12px)', transition: 'background 0.2s',
-        }}
-        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.16)'; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.07)'; }}
-      >
-        ×
-      </button>
-    </div>
-  );
-}
-
-// ─── Main page ────────────────────────────────────────────────────────────────
-
-export default function ServiciosPage() {
-  // ── State ─────────────────────────────────────────────────────────────────
-  const trackRef = useRef<HTMLDivElement>(null);
-  const currentIdx = useRef(0);
-  const [activeIdx, setActiveIdx] = useState(0);
-  const animY = useRef(0);
-  const targetY = useRef(0);
-  const raf = useRef<number>();
-  const lastNav = useRef(0);
-  const vh = useRef(0);
-  const [isMobile, setIsMobile] = useState(false);
-  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
-
-  // Inner card state for examples section (0 = Soccer Manager, 1 = Torrenueva)
-  const innerCardRef = useRef(0);
-  const projectCard1Ref = useRef<HTMLDivElement>(null);
-  const projectCard2Ref = useRef<HTMLDivElement>(null);
-
-  // GSAP targets
-  const heroWordRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const heroSubRef = useRef<HTMLParagraphElement>(null);
-  const heroCTARef = useRef<HTMLDivElement>(null);
-  const heroBadgeRef = useRef<HTMLDivElement>(null);
-  const servicesTitleRef = useRef<HTMLDivElement>(null);
-  const serviceCardsRef = useRef<HTMLDivElement>(null);
-  const ctaHeadRef = useRef<HTMLDivElement>(null);
-  const ctaBodyRef = useRef<HTMLDivElement>(null);
-
-  // ── Mobile detection ──────────────────────────────────────────────────────
-  useLayoutEffect(() => {
-    const check = () => setIsMobile(window.innerWidth <= 700);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
-
-  // ── Desktop lerp animation loop ───────────────────────────────────────────
-  useEffect(() => {
-    if (isMobile) return;
-    vh.current = window.innerHeight;
-    const tick = () => {
-      const diff = targetY.current - animY.current;
-      animY.current += diff * 0.085;
-      if (Math.abs(diff) < 0.3) animY.current = targetY.current;
-      if (trackRef.current) trackRef.current.style.transform = `translateY(${animY.current}px)`;
-      const progress = -animY.current / vh.current;
-      trackRef.current?.querySelectorAll<HTMLElement>('.sv-section').forEach((sec, i) => {
-        sec.style.transform = `translateY(${(i - progress) * 28}px)`;
-      });
-      raf.current = requestAnimationFrame(tick);
-    };
-    raf.current = requestAnimationFrame(tick);
-    return () => { if (raf.current) cancelAnimationFrame(raf.current); };
-  }, [isMobile]);
-
-  // ── goTo ──────────────────────────────────────────────────────────────────
-  const goTo = useCallback((idx: number) => {
-    const clamped = Math.max(0, Math.min(3, idx));
-    if (clamped === currentIdx.current) return;
-    currentIdx.current = clamped;
-    vh.current = window.innerHeight;
-    targetY.current = -clamped * vh.current;
-    setActiveIdx(clamped);
-  }, []);
-
-  // ── navigate (with inner card logic) ─────────────────────────────────────
-  const navigate = useCallback((dir: number) => {
-    const now = Date.now();
-    if (now - lastNav.current < 900) return;
-
-    // Inner card navigation inside examples section
-    if (currentIdx.current === 2) {
-      const newInner = innerCardRef.current + dir;
-      if (newInner >= 0 && newInner <= 1) {
-        lastNav.current = now;
-        innerCardRef.current = newInner;
-        if (dir === 1) {
-          gsap.to(projectCard2Ref.current, { y: '0%', duration: 0.78, ease: 'power3.out' });
-          gsap.to(projectCard1Ref.current, { scale: 0.93, duration: 0.78, ease: 'power3.out' });
-        } else {
-          gsap.to(projectCard2Ref.current, { y: '100%', duration: 0.65, ease: 'power3.inOut' });
-          gsap.to(projectCard1Ref.current, { scale: 1, duration: 0.65, ease: 'power3.inOut' });
-        }
-        return;
-      }
-    }
-
-    // Set inner card state when entering examples section
-    const next = currentIdx.current + dir;
-    if (next === 2) {
-      if (dir === 1) {
-        innerCardRef.current = 0;
-        gsap.set(projectCard2Ref.current, { y: '100%' });
-        gsap.set(projectCard1Ref.current, { scale: 1 });
-      } else {
-        innerCardRef.current = 1;
-        gsap.set(projectCard2Ref.current, { y: '0%' });
-        gsap.set(projectCard1Ref.current, { scale: 0.93 });
-      }
-    }
-
-    lastNav.current = now;
-    goTo(next);
-  }, [goTo]);
-
-  // ── Wheel / Key / Touch ────────────────────────────────────────────────────
-  useEffect(() => {
-    if (isMobile) return;
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      if (Math.abs(e.deltaY) <= 5) return;
-      navigate(e.deltaY > 0 ? 1 : -1);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (['ArrowDown', 'PageDown'].includes(e.key)) { e.preventDefault(); navigate(1); }
-      if (['ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); navigate(-1); }
-    };
-    let touchY = 0;
-    const onTouchStart = (e: TouchEvent) => { touchY = e.touches[0].clientY; };
-    const onTouchEnd = (e: TouchEvent) => {
-      const dy = touchY - e.changedTouches[0].clientY;
-      if (Math.abs(dy) <= 50) return;
-      navigate(dy > 0 ? 1 : -1);
-    };
-    const onResize = () => {
-      vh.current = window.innerHeight;
-      animY.current = -currentIdx.current * vh.current;
-      targetY.current = animY.current;
-    };
-    window.addEventListener('wheel', onWheel, { passive: false });
-    window.addEventListener('keydown', onKey);
-    window.addEventListener('touchstart', onTouchStart, { passive: true });
-    window.addEventListener('touchend', onTouchEnd, { passive: true });
-    window.addEventListener('resize', onResize);
-    return () => {
-      window.removeEventListener('wheel', onWheel);
-      window.removeEventListener('keydown', onKey);
-      window.removeEventListener('touchstart', onTouchStart);
-      window.removeEventListener('touchend', onTouchEnd);
-      window.removeEventListener('resize', onResize);
-    };
-  }, [isMobile, navigate]);
-
-  // ── GSAP animation triggers ───────────────────────────────────────────────
-  const animatedSections = useRef<Set<number>>(new Set());
-
-  const triggerAnimation = useCallback((idx: number, delay = 0) => {
-    if (animatedSections.current.has(idx)) return;
-    animatedSections.current.add(idx);
-
-    if (idx === 0) {
-      const words = heroWordRefs.current.filter(Boolean);
-      gsap.fromTo(heroBadgeRef.current,
-        { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out', delay }
-      );
-      gsap.fromTo(words,
-        { y: 70, opacity: 0 },
-        { y: 0, opacity: 1, stagger: 0.07, duration: 0.95, ease: 'power4.out', delay: delay + 0.15 }
-      );
-      gsap.fromTo(heroSubRef.current,
-        { y: 28, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', delay: delay + 0.65 }
-      );
-      gsap.fromTo(heroCTARef.current,
-        { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out', delay: delay + 0.88 }
-      );
-    } else if (idx === 1) {
-      if (servicesTitleRef.current) {
-        gsap.fromTo(Array.from(servicesTitleRef.current.children),
-          { y: 36, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.07, duration: 0.7, ease: 'power3.out', delay }
-        );
-      }
-      if (serviceCardsRef.current) {
-        gsap.fromTo(Array.from(serviceCardsRef.current.children),
-          { y: 55, opacity: 0, scale: 0.96 },
-          { y: 0, opacity: 1, scale: 1, stagger: 0.13, duration: 0.85, ease: 'power3.out', delay: delay + 0.25 }
-        );
-      }
-    } else if (idx === 2) {
-      gsap.fromTo(projectCard1Ref.current,
-        { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay }
-      );
-    } else if (idx === 3) {
-      if (ctaHeadRef.current) {
-        gsap.fromTo(Array.from(ctaHeadRef.current.children),
-          { y: 52, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.09, duration: 0.9, ease: 'power4.out', delay }
-        );
-      }
-      gsap.fromTo(ctaBodyRef.current,
-        { y: 28, opacity: 0 }, { y: 0, opacity: 1, duration: 0.75, ease: 'power3.out', delay: delay + 0.55 }
-      );
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!isMobile) triggerAnimation(activeIdx, activeIdx === 0 ? 0.05 : 0.1);
-  }, [activeIdx, isMobile, triggerAnimation]);
-
-  useEffect(() => {
-    if (!isMobile) return;
-    const sections = document.querySelectorAll<HTMLElement>('.sv-section');
-    const obs = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const idx = Array.from(sections).indexOf(entry.target as HTMLElement);
-          if (idx !== -1) triggerAnimation(idx, 0.05);
-        }
-      });
-    }, { threshold: 0.3 });
-    sections.forEach(s => obs.observe(s));
-    return () => obs.disconnect();
-  }, [isMobile, triggerAnimation]);
-
-  // ─── Section base styles ──────────────────────────────────────────────────
-
-  const SEC: React.CSSProperties = {
-    minHeight: '100dvh',
-    position: 'relative',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  };
-
-  const INNER: React.CSSProperties = {
-    width: '100%',
-    maxWidth: 1100,
-    padding: '6rem 2rem 4rem',
-    position: 'relative',
-    zIndex: 1,
-  };
-
-  // ─── Sections JSX ─────────────────────────────────────────────────────────
-
-  const sections = (
-    <>
-      {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <section className="sv-section" style={{ ...SEC, background: 'var(--bg)' }}>
-        <div style={{
-          position: 'absolute', top: '35%', left: '50%', transform: 'translate(-50%, -50%)',
-          width: 700, height: 500,
-          background: 'radial-gradient(ellipse, rgba(61,242,224,0.055) 0%, transparent 68%)',
-          pointerEvents: 'none',
-        }} />
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px)',
-          backgroundSize: '60px 60px', pointerEvents: 'none',
-          maskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%)',
-        }} />
-
-        <div style={{ ...INNER, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          {/* Mini brand */}
-          <div ref={heroBadgeRef} style={{ display: 'inline-flex', alignItems: 'center', marginBottom: '2.5rem', opacity: 0 }}>
-            <span style={{
-              fontFamily: 'Nohemi,sans-serif',
-              fontSize: 'clamp(1.5rem, 4vw, 2.2rem)',
-              fontWeight: 700, letterSpacing: '-0.02em',
-              color: 'var(--white)', display: 'flex',
-            }}>
-              agonz<span style={{ color: '#3DF2E0' }}>{'{x}'}</span>
-            </span>
-          </div>
-
-          {/* Headline */}
-          <h1 style={{
-            fontFamily: 'Nohemi,sans-serif',
-            fontSize: 'clamp(2.6rem, 7.5vw, 6rem)',
-            fontWeight: 900, textTransform: 'uppercase',
-            lineHeight: 1.0, letterSpacing: '-0.03em',
-            color: 'var(--white)',
-            display: 'flex', flexWrap: 'wrap',
-            justifyContent: 'center', gap: '0 0.3em',
-            maxWidth: 860,
-          }}>
-            {HERO_WORDS.map((word, i) => (
-              <span
-                key={i}
-                ref={el => { heroWordRefs.current[i] = el; }}
-                style={{
-                  display: 'inline-block', opacity: 0,
-                  color: i === 1 ? '#3DF2E0' : 'var(--white)',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {word}
-              </span>
-            ))}
-          </h1>
-
-          <p ref={heroSubRef} style={{
-            fontFamily: 'Safiro,sans-serif',
-            fontSize: 'clamp(0.95rem, 1.8vw, 1.1rem)',
-            lineHeight: 1.75, color: 'var(--t2)',
-            marginTop: '2rem', maxWidth: 580, opacity: 0,
-          }}>
-            Construyo herramientas digitales con IA adaptadas exactamente a cómo trabaja tu negocio — sin complejidades innecesarias.
-          </p>
-
-          <div ref={heroCTARef} style={{
-            marginTop: '2.5rem', display: 'flex',
-            gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', opacity: 0,
-          }}>
-            <a
-              href="https://wa.me/34697403912"
-              target="_blank" rel="noopener noreferrer"
-              style={{
-                fontFamily: 'Nohemi,sans-serif', fontSize: '0.95rem', fontWeight: 700,
-                padding: '0.9rem 2rem', borderRadius: 100,
-                background: '#3DF2E0', color: '#000', textDecoration: 'none',
-                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                boxShadow: '0 4px 28px rgba(61,242,224,0.28)',
-                transition: 'box-shadow 0.2s ease, transform 0.2s ease',
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.boxShadow = '0 6px 40px rgba(61,242,224,0.5)';
-                (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 28px rgba(61,242,224,0.28)';
-                (e.currentTarget as HTMLElement).style.transform = '';
-              }}
-            >
-              Hablamos →
-            </a>
-            <a
-              href="#"
-              onClick={e => { e.preventDefault(); navigate(1); }}
-              style={{
-                fontFamily: 'Nohemi,sans-serif', fontSize: '0.95rem', fontWeight: 600,
-                padding: '0.9rem 2rem', borderRadius: 100,
-                background: 'rgba(255,255,255,0.04)', color: 'var(--white)',
-                border: '1px solid rgba(255,255,255,0.1)', textDecoration: 'none',
-                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                backdropFilter: 'blur(12px)',
-                transition: 'background 0.2s',
-              }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; }}
-            >
-              Ver servicios ↓
-            </a>
-          </div>
-        </div>
-
-        <div style={{
-          position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem', opacity: 0.35,
-        }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--t2)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>scroll</span>
-          <div style={{ width: 1, height: 36, background: 'linear-gradient(to bottom, var(--t2), transparent)' }} />
-        </div>
-      </section>
-
-      {/* ── SERVICES ─────────────────────────────────────────────────────── */}
-      <section className="sv-section" style={{ ...SEC, background: 'var(--bg2)' }}>
-        <div style={{
-          position: 'absolute', top: 0, left: '8%', right: '8%', height: 1,
-          background: 'linear-gradient(90deg, transparent, rgba(61,242,224,0.18), transparent)',
-        }} />
-
-        <div style={{ ...INNER }}>
-          <div ref={servicesTitleRef}>
-            <h2 style={{
-              fontFamily: 'Nohemi,sans-serif',
-              fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-              fontWeight: 900, textTransform: 'uppercase',
-              letterSpacing: '-0.025em', color: 'var(--white)',
-              lineHeight: 1, marginBottom: '0.5rem',
-            }}>
-              ¿Qué hacemos?
-            </h2>
-            <p style={{
-              fontFamily: 'Safiro,sans-serif',
-              fontSize: 'clamp(0.9rem, 1.6vw, 1rem)',
-              color: 'var(--t2)', lineHeight: 1.7,
-              maxWidth: 480, marginBottom: '3rem',
-            }}>
-              Explora cada tarjeta para descubrir cómo podemos ayudarte.
-            </p>
-          </div>
-
-          <div
-            ref={serviceCardsRef}
-            className="sv-services-grid"
-            style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}
-          >
-            {SERVICES.map((s, i) => (
-              <div key={i} style={{ opacity: 0 }}>
-                <FlipCard service={s} isMobileDevice={isMobile} />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={{
-          position: 'absolute', bottom: 0, left: '8%', right: '8%', height: 1,
-          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent)',
-        }} />
-      </section>
-
-      {/* ── EXAMPLES ─────────────────────────────────────────────────────── */}
-      <section
-        className="sv-section sv-examples"
-        style={{
-          ...SEC,
-          background: PROJECTS[0].bg,
-          ...(isMobile ? { minHeight: 'auto' } : {}),
-        }}
-      >
-        {/* Section title — sits above both cards */}
-        <div style={{
-          position: 'absolute',
-          top: '5rem',
-          left: '3rem',
-          zIndex: 20,
-          pointerEvents: 'none',
-        }}>
-          <div style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.62rem',
-            color: 'rgba(255,255,255,0.32)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.14em',
-            marginBottom: '0.35rem',
-          }}>
-            03
-          </div>
-          <h2 style={{
-            fontFamily: 'Nohemi,sans-serif',
-            fontSize: 'clamp(1.3rem, 2.2vw, 1.8rem)',
-            fontWeight: 900,
-            textTransform: 'uppercase',
-            letterSpacing: '-0.02em',
-            color: 'rgba(255,255,255,0.88)',
-            lineHeight: 1,
-          }}>
-            Casos reales
-          </h2>
-        </div>
-
-        {isMobile ? (
-          // Mobile: two cards stacked vertically in flow
-          <div style={{ width: '100%' }}>
-            {PROJECTS.map((p, i) => (
-              <div key={i} style={{ position: 'relative', height: '100dvh', width: '100%', background: p.bg }}>
-                <ProjectShowcase project={p} cardRef={i === 0 ? projectCard1Ref : projectCard2Ref} onExpand={setLightboxSrc} />
-              </div>
-            ))}
-          </div>
-        ) : (
-          // Desktop: stacked absolute cards, second slides up on inner scroll
-          <>
-            <ProjectShowcase project={PROJECTS[0]} cardRef={projectCard1Ref} onExpand={setLightboxSrc} />
-            <div
-              ref={projectCard2Ref}
-              style={{
-                position: 'absolute', inset: 0,
-                transform: 'translateY(100%)',
-                willChange: 'transform',
-              }}
-            >
-              <ProjectShowcase project={PROJECTS[1]} cardRef={{ current: null }} onExpand={setLightboxSrc} />
-            </div>
-          </>
-        )}
-      </section>
-
-      {/* ── CTA ──────────────────────────────────────────────────────────── */}
-      <section className="sv-section" style={{ ...SEC, background: 'var(--bg2)' }}>
-        <div style={{
-          position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%, -50%)',
-          width: 600, height: 400,
-          background: 'radial-gradient(ellipse, rgba(61,242,224,0.05) 0%, transparent 70%)',
-          pointerEvents: 'none',
-        }} />
-        <div style={{
-          position: 'absolute', top: 0, left: '8%', right: '8%', height: 1,
-          background: 'linear-gradient(90deg, transparent, rgba(61,242,224,0.18), transparent)',
-        }} />
-
-        <div style={{ ...INNER, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div ref={ctaHeadRef}>
-            <h2 style={{
-              fontFamily: 'Nohemi,sans-serif',
-              fontSize: 'clamp(2.4rem, 6.5vw, 5rem)',
-              fontWeight: 900, textTransform: 'uppercase',
-              letterSpacing: '-0.03em', lineHeight: 1.0,
-              color: 'var(--white)', marginBottom: 0, opacity: 0,
-            }}>
-              ¿Tienes algo
-            </h2>
-            <h2 style={{
-              fontFamily: 'Nohemi,sans-serif',
-              fontSize: 'clamp(2.4rem, 6.5vw, 5rem)',
-              fontWeight: 900, textTransform: 'uppercase',
-              letterSpacing: '-0.03em', lineHeight: 1.0,
-              color: '#3DF2E0', marginBottom: '1.5rem', opacity: 0,
-            }}>
-              en mente?
-            </h2>
-          </div>
-
-          <div ref={ctaBodyRef} style={{ opacity: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
-            <p style={{
-              fontFamily: 'Safiro,sans-serif',
-              fontSize: 'clamp(0.95rem, 1.8vw, 1.1rem)',
-              color: 'var(--t2)', lineHeight: 1.75, maxWidth: 460,
-            }}>
-              Me cuentas qué necesitas y veo si puedo ayudarte. Respondo en menos de 24 horas.
-            </p>
-            <a
-              href="https://wa.me/34697403912"
-              target="_blank" rel="noopener noreferrer"
-              style={{
-                fontFamily: 'Nohemi,sans-serif', fontSize: '1.05rem', fontWeight: 700,
-                padding: '1.1rem 2.8rem', borderRadius: 100,
-                background: '#3DF2E0', color: '#000', textDecoration: 'none',
-                display: 'inline-flex', alignItems: 'center', gap: '0.6rem',
-                boxShadow: '0 4px 36px rgba(61,242,224,0.32)',
-                transition: 'box-shadow 0.2s ease, transform 0.2s ease',
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 48px rgba(61,242,224,0.55)';
-                (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)';
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 36px rgba(61,242,224,0.32)';
-                (e.currentTarget as HTMLElement).style.transform = '';
-              }}
-            >
-              <svg viewBox="0 0 24 24" style={{ width: 18, height: 18, fill: '#000', flexShrink: 0 }}>
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-              </svg>
-              Hablamos →
-            </a>
-            <p style={{
-              fontFamily: 'var(--font-mono)', fontSize: '0.63rem', color: 'var(--t3)',
-            }}>
-              agonz{'{x}'} · Antonio González · {new Date().getFullYear()}
-            </p>
-          </div>
-        </div>
-      </section>
-    </>
-  );
-
-  // ─── Render ───────────────────────────────────────────────────────────────
-
-  return (
-    <div style={{ background: 'var(--bg)', color: 'var(--white)' }}>
-
-      {/* Nav */}
+      {/* ── NAV ───────────────────────────────────────────────────────────── */}
       <nav style={{
         position: 'fixed', top: '1rem', left: '50%', transform: 'translateX(-50%)',
-        zIndex: 1001, padding: '0.7rem 1.8rem',
+        zIndex: 1000, padding: '0.7rem 1.4rem',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        width: 'min(90vw, 800px)',
+        width: 'min(92vw, 820px)',
         background: 'rgba(255,255,255,0.04)',
         backdropFilter: 'blur(32px) saturate(200%)',
         WebkitBackdropFilter: 'blur(32px) saturate(200%)',
@@ -1049,79 +352,374 @@ export default function ServiciosPage() {
         borderRadius: 100,
         boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
       }}>
-        <a href="/" style={{ fontFamily: 'Nohemi,sans-serif', fontSize: '1.05rem', fontWeight: 600, display: 'flex', textDecoration: 'none' }}>
+        {/* Logo */}
+        <a href="/" style={{ fontFamily: 'Nohemi,sans-serif', fontSize: '1rem', fontWeight: 600, display: 'flex', textDecoration: 'none' }}>
           <span style={{ color: 'var(--white)' }}>agonz</span>
-          <span style={{ color: '#3DF2E0' }}>{'{x}'}</span>
+          <span style={{ color: 'var(--accent)' }}>{'{x}'}</span>
         </a>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <a
-            href="/"
-            style={{ fontFamily: 'Nohemi,sans-serif', fontSize: '0.78rem', fontWeight: 500, color: 'var(--t2)', textDecoration: 'none', transition: 'color 0.2s' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--white)'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--t2)'; }}
-          >
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+          <a href="/" style={{ fontFamily: 'Nohemi,sans-serif', fontSize: '0.78rem', fontWeight: 500, color: 'var(--t2)', textDecoration: 'none' }}>
             ← Portfolio
           </a>
           <a
-            href="https://wa.me/34697403912"
-            target="_blank" rel="noopener noreferrer"
+            href={whatsapp}
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
-              fontFamily: 'Nohemi,sans-serif', fontSize: '0.78rem', fontWeight: 700,
-              color: '#000', background: '#3DF2E0', borderRadius: 100, padding: '0.38rem 1rem',
-              textDecoration: 'none', boxShadow: '0 2px 12px rgba(61,242,224,0.25)',
-              transition: 'box-shadow 0.2s, transform 0.2s',
+              fontFamily: 'Nohemi,sans-serif', fontSize: '0.78rem', fontWeight: 600,
+              color: '#0B0F14',
+              background: 'var(--accent)',
+              padding: '0.45rem 1.1rem',
+              borderRadius: 100, textDecoration: 'none',
+              transition: 'opacity 0.2s ease',
             }}
-            onMouseEnter={e => {
-              (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 20px rgba(61,242,224,0.45)';
-              (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLElement).style.boxShadow = '0 2px 12px rgba(61,242,224,0.25)';
-              (e.currentTarget as HTMLElement).style.transform = '';
-            }}
+            onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
+            onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
           >
             Contacto
           </a>
         </div>
       </nav>
 
-      {/* Snap wrapper */}
-      {!isMobile ? (
-        <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', zIndex: 1 }}>
-          <div ref={trackRef} style={{ willChange: 'transform' }}>
-            {sections}
+      {/* ── HERO ──────────────────────────────────────────────────────────── */}
+      <section style={{
+        minHeight: '100dvh',
+        display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start',
+        padding: 'clamp(6rem,10vw,9rem) clamp(1.5rem,7vw,7rem)',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        {/* Blob background */}
+        <div aria-hidden style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', filter: 'blur(100px)', overflow: 'hidden' }}>
+          <div style={{
+            position: 'absolute', width: '60vw', height: '60vw', top: '-10%', right: '-10%',
+            background: 'radial-gradient(circle, rgba(61,242,224,0.18) 0%, transparent 70%)',
+            borderRadius: '50%',
+          }} />
+          <div style={{
+            position: 'absolute', width: '40vw', height: '40vw', bottom: '-5%', left: '-5%',
+            background: 'radial-gradient(circle, rgba(61,242,224,0.10) 0%, transparent 70%)',
+            borderRadius: '50%',
+          }} />
+        </div>
+
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 900 }}>
+          <div ref={heroLabelRef}>
+            <Label>Soluciones digitales · Antonio González</Label>
+          </div>
+
+          <div ref={heroHeadRef}>
+            <h1 style={{
+              fontFamily: 'Nohemi,sans-serif',
+              fontSize: 'clamp(3rem,8vw,7rem)',
+              fontWeight: 900, textTransform: 'uppercase',
+              letterSpacing: '-0.03em', lineHeight: 0.95,
+              color: 'var(--white)', margin: '0 0 2rem 0',
+            }}>
+              Soluciones<br />
+              digitales que<br />
+              <span style={{ color: 'var(--accent)' }}>funcionan.</span>
+            </h1>
+          </div>
+
+          <div ref={heroSubRef}>
+            <p style={{
+              fontFamily: 'Safiro,sans-serif', fontSize: 'clamp(1rem,1.8vw,1.25rem)',
+              lineHeight: 1.7, color: 'var(--t2)',
+              maxWidth: 560, margin: '0 0 3rem 0',
+            }}>
+              Desarrollo iOS nativo, automatización con IA y herramientas a medida.
+              Para equipos que quieren ir más rápido sin sacrificar calidad.
+            </p>
+          </div>
+
+          <div ref={heroCtaRef} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <a
+              href={whatsapp}
+              target="_blank" rel="noopener noreferrer"
+              style={{
+                fontFamily: 'Nohemi,sans-serif', fontSize: '0.9rem', fontWeight: 700,
+                color: '#0B0F14', background: 'var(--accent)',
+                padding: '0.85rem 2rem', borderRadius: 100, textDecoration: 'none',
+                transition: 'opacity 0.2s ease',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+            >
+              Hablemos →
+            </a>
+            <a
+              href="#servicios"
+              style={{
+                fontFamily: 'Nohemi,sans-serif', fontSize: '0.9rem', fontWeight: 600,
+                color: 'var(--white)',
+                padding: '0.85rem 2rem', borderRadius: 100, textDecoration: 'none',
+                border: '1px solid rgba(255,255,255,0.1)',
+                transition: 'border-color 0.2s ease',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(61,242,224,0.4)')}
+              onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')}
+            >
+              Ver servicios
+            </a>
           </div>
         </div>
-      ) : (
-        <div>{sections}</div>
-      )}
 
-      {/* Side nav dots */}
-      {!isMobile && (
-        <div style={{
-          position: 'fixed', right: '1.5rem', top: '50%', transform: 'translateY(-50%)',
-          zIndex: 1002, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem',
-        }}>
-          {(['Hero', 'Servicios', 'Ejemplos', 'Contacto'] as const).map((label, i) => (
-            <button
-              key={i}
-              onClick={() => goTo(i)}
-              title={label}
-              style={{
-                width: 3, height: activeIdx === i ? 22 : 8,
-                borderRadius: 4,
-                background: activeIdx === i ? '#3DF2E0' : 'rgba(255,255,255,0.18)',
-                border: 'none', cursor: 'pointer', padding: 0,
-                transition: 'height 0.4s cubic-bezier(0.16,1,0.3,1), background 0.4s cubic-bezier(0.16,1,0.3,1)',
-                boxShadow: activeIdx === i ? '0 0 10px rgba(61,242,224,0.6)' : 'none',
-              }}
-            />
-          ))}
+        {/* Scroll hint */}
+        <div style={{ position: 'absolute', bottom: '2.5rem', left: '50%', transform: 'translateX(-50%)', opacity: 0.4 }}>
+          <div style={{
+            width: 28, height: 46, borderRadius: 14,
+            border: '1.5px solid var(--accent)',
+            display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+            paddingTop: 7,
+          }}>
+            <div style={{
+              width: 4, height: 8, borderRadius: 2,
+              background: 'var(--accent)',
+              animation: 'scrollDot 2s ease-in-out infinite',
+            }} />
+          </div>
         </div>
-      )}
+      </section>
 
-      {/* Lightbox */}
-      {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
+      <Divider />
+
+      {/* ── SERVICES ──────────────────────────────────────────────────────── */}
+      <section id="servicios" style={{ padding: 'clamp(5rem,8vw,9rem) clamp(1.5rem,7vw,7rem)' }}>
+        <div ref={servRef} style={fadeIn(servVisible)}>
+          <Label>Qué puedo hacer</Label>
+          <Heading>Tres áreas.<br />Un punto de contacto.</Heading>
+        </div>
+
+        <div style={{ marginTop: '1rem' }}>
+          <Divider />
+          <ServicePanel
+            num="01 · iOS"
+            title="Apps nativas que tus usuarios van a amar"
+            desc="SwiftUI, Swift Concurrency, integración con cualquier API o servicio externo. Diseño de arquitectura, desarrollo completo y publicación en App Store. Sin frameworks genéricos, sin atajos — código nativo que funciona exactamente como iOS espera."
+            tags={['Swift', 'SwiftUI', 'Xcode', 'App Store', 'Swift Concurrency']}
+            delay={0}
+          />
+          <Divider />
+          <ServicePanel
+            num="02 · IA"
+            title="Flujos que trabajan mientras tú duermes"
+            desc="Implemento agentes con Claude API y OpenAI Codex que automatizan tareas repetitivas de tu empresa: clasificar emails, generar documentos, procesar datos, responder consultas. Flujos agénticos que se ejecutan solos, aprenden del contexto y escalan sin esfuerzo."
+            tags={['Claude API', 'OpenAI Codex', 'Agentic AI', 'Automatización', 'Workflows']}
+            delay={0.08}
+          />
+          <Divider />
+          <ServicePanel
+            num="03 · Herramientas"
+            title="El sistema que necesitas, construido para ti"
+            desc="Dashboards de administración, CRMs internos, sistemas de gestión de pedidos o inventario. Construido con el stack que mejor resuelve tu problema — Next.js, Supabase, integraciones con herramientas que ya usas. Sin tecnología de moda que no encaja."
+            tags={['Next.js', 'Supabase', 'React', 'APIs REST', 'Bases de datos']}
+            delay={0.16}
+          />
+          <Divider />
+        </div>
+      </section>
+
+      {/* ── WHY ME ────────────────────────────────────────────────────────── */}
+      <section style={{ padding: 'clamp(5rem,8vw,9rem) clamp(1.5rem,7vw,7rem)', background: 'var(--bg2)' }}>
+        <div ref={whyRef} style={fadeIn(whyVisible)}>
+          <Label>Por qué trabajar conmigo</Label>
+          <Heading>Lo que me hace<br /><span style={{ color: 'var(--accent)' }}>diferente.</span></Heading>
+        </div>
+
+        <div style={{ marginTop: '3rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '0 6rem' }}>
+          <div>
+            <WhyItem
+              heading="Programación agéntica nativa"
+              body="Uso Claude Code y OpenAI Codex en mi flujo de trabajo diario. Automatizo mi propio proceso de desarrollo — lo que a otros les lleva semanas, a mí me lleva días. Y puedo implementar esas mismas capacidades en tu empresa."
+              delay={0}
+            />
+            <WhyItem
+              heading="Experiencia en producto real"
+              body="Más de 5 años construyendo apps que usa gente de verdad: desde un SDK de streaming con clientes como HBO y Sky hasta la app de empleo de XING, usada por más de 20 millones de personas. Sé qué funciona cuando hay presión real."
+              delay={0.08}
+            />
+          </div>
+          <div>
+            <WhyItem
+              heading="Un solo punto de contacto"
+              body="Hablas directamente con quien diseña, desarrolla y entrega. Sin gestores de proyecto de por medio. Sin reuniones que podrían haber sido un email. Solo trabajo real, comunicación directa y decisiones rápidas."
+              delay={0.04}
+            />
+            <WhyItem
+              heading="iOS + Web + IA, sin cuellos de botella"
+              body="La mayoría de desarrolladores eligen un carril. Yo conozco los tres. Eso significa que puedo ver el problema completo y elegir la solución que realmente lo resuelve, no la que más se parece a mis últimos proyectos."
+              delay={0.12}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ── REAL PROJECTS ─────────────────────────────────────────────────── */}
+      <section style={{ padding: 'clamp(5rem,8vw,9rem) clamp(1.5rem,7vw,7rem)' }}>
+        <div ref={projRef} style={fadeIn(projVisible)}>
+          <Label>Trabajo real</Label>
+          <Heading>Algunos proyectos<br />recientes.</Heading>
+          <p style={{ fontFamily: 'Safiro,sans-serif', fontSize: '0.95rem', lineHeight: 1.7, color: 'var(--t2)', marginTop: '1.5rem', maxWidth: 520 }}>
+            Proyectos construidos y en uso — no mockups, no demos. Gente real usándolos cada semana.
+          </p>
+        </div>
+
+        <div style={{ marginTop: '4rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+          <ProjectCard
+            name="Soccer Manager"
+            desc="Gestión completa de pedidos, cobros y entregas de material deportivo. Panel de administración con historial y notificaciones en tiempo real."
+            stack={['Next.js', 'Supabase', 'Vercel']}
+            shots={['/screenshots/soccermanager1.png', '/screenshots/soccermanager2.png']}
+            device="desktop"
+            delay={0}
+          />
+          <ProjectCard
+            name="Torrenueva Futsal"
+            desc="App web para gestión de sanciones económicas del equipo de fútbol sala. Los jugadores consultan su saldo e historial en tiempo real."
+            stack={['JavaScript', 'Web App', 'GitHub Pages']}
+            shots={['/screenshots/torrenuevafutsal1.png', '/screenshots/torrenuevafutsal2.png']}
+            device="mobile"
+            delay={0.1}
+          />
+        </div>
+      </section>
+
+      <Divider />
+
+      {/* ── PROCESS ───────────────────────────────────────────────────────── */}
+      <section style={{ padding: 'clamp(5rem,8vw,9rem) clamp(1.5rem,7vw,7rem)', background: 'var(--bg2)' }}>
+        <div ref={procRef} style={fadeIn(procVisible)}>
+          <Label>Cómo trabajamos</Label>
+          <Heading>El proceso,<br />sin sorpresas.</Heading>
+        </div>
+
+        <div style={{ marginTop: '3rem', maxWidth: 720 }}>
+          <Step
+            num="01"
+            heading="Hablamos"
+            body="Sin compromiso. Entiendo tu problema y te doy mi opinión honesta sobre si puedo ayudarte y de qué forma. Si no soy la persona adecuada, te lo digo."
+            delay={0}
+          />
+          <Step
+            num="02"
+            heading="Propuesta"
+            body="Solución técnica detallada, timeline claro y precio cerrado. Sin módulos extra que aparecen después. Sin sorpresas."
+            delay={0.06}
+          />
+          <Step
+            num="03"
+            heading="Desarrollo"
+            body="Trabajo en iteraciones cortas con entregas visibles cada semana. Siempre sabes en qué estoy y puedes dar feedback en tiempo real."
+            delay={0.12}
+          />
+          <Step
+            num="04"
+            heading="Lanzamiento y soporte"
+            body="Te acompaño el día del lanzamiento y las semanas siguientes. El trabajo no termina cuando el código está listo — termina cuando la solución funciona en producción."
+            delay={0.18}
+          />
+        </div>
+      </section>
+
+      {/* ── CTA ───────────────────────────────────────────────────────────── */}
+      <section style={{
+        minHeight: '60dvh',
+        display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start',
+        padding: 'clamp(5rem,10vw,9rem) clamp(1.5rem,7vw,7rem)',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        {/* Accent blob */}
+        <div aria-hidden style={{
+          position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none',
+          filter: 'blur(120px)',
+        }}>
+          <div style={{
+            position: 'absolute', width: '50vw', height: '50vw', top: '-10%', right: '-10%',
+            background: 'radial-gradient(circle, rgba(61,242,224,0.14) 0%, transparent 70%)',
+            borderRadius: '50%',
+          }} />
+        </div>
+
+        <div ref={ctaRef} style={{ ...fadeIn(ctaVisible), position: 'relative', zIndex: 1 }}>
+          <Label>Siguiente paso</Label>
+          <h2 style={{
+            fontFamily: 'Nohemi,sans-serif',
+            fontSize: 'clamp(2.5rem,7vw,6rem)',
+            fontWeight: 900, textTransform: 'uppercase',
+            letterSpacing: '-0.03em', lineHeight: 0.95,
+            color: 'var(--white)', margin: '0 0 2rem 0',
+          }}>
+            ¿Tienes un<br />
+            <span style={{ color: 'var(--accent)' }}>proyecto?</span>
+          </h2>
+          <p style={{
+            fontFamily: 'Safiro,sans-serif', fontSize: 'clamp(0.95rem,1.6vw,1.15rem)',
+            lineHeight: 1.7, color: 'var(--t2)',
+            maxWidth: 460, margin: '0 0 3rem 0',
+          }}>
+            La primera consulta es gratis y sin compromiso. Cuéntame qué necesitas y vemos si encajamos.
+          </p>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <a
+              href={whatsapp}
+              target="_blank" rel="noopener noreferrer"
+              style={{
+                fontFamily: 'Nohemi,sans-serif', fontSize: '0.9rem', fontWeight: 700,
+                color: '#0B0F14', background: 'var(--accent)',
+                padding: '0.9rem 2.2rem', borderRadius: 100, textDecoration: 'none',
+                transition: 'opacity 0.2s ease',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+            >
+              WhatsApp →
+            </a>
+            <a
+              href={email}
+              style={{
+                fontFamily: 'Nohemi,sans-serif', fontSize: '0.9rem', fontWeight: 600,
+                color: 'var(--white)',
+                padding: '0.9rem 2.2rem', borderRadius: 100, textDecoration: 'none',
+                border: '1px solid rgba(255,255,255,0.12)',
+                transition: 'border-color 0.2s ease',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(61,242,224,0.35)')}
+              onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)')}
+            >
+              Email
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FOOTER ────────────────────────────────────────────────────────── */}
+      <footer style={{
+        padding: '2rem clamp(1.5rem,7vw,7rem)',
+        borderTop: '1px solid rgba(255,255,255,0.06)',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        flexWrap: 'wrap', gap: '1rem',
+      }}>
+        <span style={{ fontFamily: 'Nohemi,sans-serif', fontSize: '0.95rem', fontWeight: 600 }}>
+          <span style={{ color: 'var(--white)' }}>agonz</span>
+          <span style={{ color: 'var(--accent)' }}>{'{x}'}</span>
+        </span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--t3)', letterSpacing: '0.08em' }}>
+          © 2026 · Antonio González
+        </span>
+      </footer>
+
+      <style>{`
+        @keyframes scrollDot {
+          0%   { transform: translateY(0);    opacity: 1 }
+          60%  { transform: translateY(16px); opacity: 0 }
+          61%  { transform: translateY(0);    opacity: 0 }
+          100% { transform: translateY(0);    opacity: 1 }
+        }
+        @media (max-width: 700px) {
+          nav { left: 1rem !important; transform: none !important; width: auto !important; right: 1rem !important; }
+        }
+      `}</style>
     </div>
   );
 }
