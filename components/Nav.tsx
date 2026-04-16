@@ -42,6 +42,9 @@ export default function Nav() {
               {l}
             </a>
           ))}
+          <a href="/servicios" style={{ fontFamily: 'Nohemi,sans-serif', fontSize: '0.78rem', fontWeight: 500, color: 'var(--t2)', transition: 'color 0.3s' }}>
+            Services
+          </a>
         </div>
 
       </nav>
@@ -100,6 +103,15 @@ export default function Nav() {
               {l}
             </a>
           ))}
+          <a
+            href="/servicios"
+            className="mobile-nav-link"
+            style={{ transitionDelay: open ? `${NAV_LINKS.length * 0.055}s` : '0s' }}
+            onClick={close}
+          >
+            <span className="link-idx">0{NAV_LINKS.length + 1}</span>
+            Services
+          </a>
         </div>
       </div>
     </>
