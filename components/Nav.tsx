@@ -30,7 +30,7 @@ export default function Nav() {
   return (
     <>
       <nav className="main-nav" style={navStyle}>
-        <a href="#" onClick={close} style={{ fontFamily: 'Nohemi,sans-serif', fontSize: '1.05rem', fontWeight: 600, display: 'flex' }}>
+        <a href="#" onClick={close} data-magnetic style={{ fontFamily: 'Nohemi,sans-serif', fontSize: '1.05rem', fontWeight: 600, display: 'flex' }}>
           <span style={{ color: 'var(--white)' }}>agonz</span>
           <span style={{ color: 'var(--accent)' }}>{'{x}'}</span>
         </a>

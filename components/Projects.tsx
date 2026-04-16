@@ -268,7 +268,7 @@ export default function Projects() {
         >
           {PROJECTS.map((p, i) => (
             <ScrollStackItem key={i}>
-              <div style={{
+              <div data-cursor="view" style={{
                 width: '100%', height: '100%',
                 background: CARD_BGS[i % CARD_BGS.length],
                 borderRadius: 28, overflow: 'hidden',
@@ -295,7 +295,7 @@ export default function Projects() {
         >
           {PROJECTS.map((p, i) => (
             <HorizStackItem key={i}>
-              <div style={{
+              <div data-cursor="view" style={{
                 width: 380,
                 aspectRatio: '0.718',
                 background: CARD_BGS[i % CARD_BGS.length],

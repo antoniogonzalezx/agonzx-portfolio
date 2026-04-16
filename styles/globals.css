@@ -173,6 +173,11 @@ a{color:inherit;text-decoration:none}
 .bento-hero:hover .icon-gray      { filter: grayscale(1) brightness(2.3) drop-shadow(0 0 26px rgba(255,255,255,0.48)); }
 /* Bento grid columns/rows are managed entirely by ResizeObserver in Stack.tsx */
 
+/* ── Custom cursor — hide system cursor on pointer:fine (mouse) devices ─────── */
+@media (pointer: fine) {
+  *, *::before, *::after { cursor: none !important; }
+}
+
 /* ── Servicios page ─────────────────────────────────────────────────────────── */
 @media(max-width:900px){
   .sv-services-grid { grid-template-columns: 1fr !important; }

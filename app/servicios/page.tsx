@@ -70,6 +70,7 @@ function FlipCard({ service, isMobileDevice }: { service: typeof SERVICES[0]; is
 
   return (
     <div
+      data-cursor="view"
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

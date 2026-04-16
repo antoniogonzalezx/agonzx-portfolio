@@ -18,7 +18,22 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(curl:*)",
       "Bash(npm install:*)",
-      "WebFetch(domain:app.spline.design)"
+      "WebFetch(domain:app.spline.design)",
+      "Bash(gh repo:*)",
+      "Bash(rm app/icon.tsx app/apple-icon.tsx)",
+      "Bash(cp public/logos/5.png app/icon.png)",
+      "Bash(sips -z 180 180 public/logos/2.png --out app/apple-icon.png)",
+      "Bash(\"/Users/antoniogonzalez/Personal Projects/RATTA/PRODUCT.md\":*)",
+      "Bash(\"/Users/antoniogonzalez/Personal Projects/RATTA/DESIGN.md\":*)",
+      "Bash(claude mcp:*)",
+      "Bash(brew upgrade:*)",
+      "Bash(mkdir -p \"/Users/antoniogonzalez/Personal Projects/PORTFOLIO/agonzx-portfolio/public/screenshots\")",
+      "Bash(cp /Users/antoniogonzalez/Desktop/soccermanager1.png \"/Users/antoniogonzalez/Personal Projects/PORTFOLIO/agonzx-portfolio/public/screenshots/soccermanager1.png\")",
+      "Bash(cp /Users/antoniogonzalez/Desktop/soccermanager2.png \"/Users/antoniogonzalez/Personal Projects/PORTFOLIO/agonzx-portfolio/public/screenshots/soccermanager2.png\")",
+      "Bash(cp /Users/antoniogonzalez/Desktop/torrenuevafutsal1.png \"/Users/antoniogonzalez/Personal Projects/PORTFOLIO/agonzx-portfolio/public/screenshots/torrenuevafutsal1.png\")",
+      "Bash(cp /Users/antoniogonzalez/Desktop/torrenuevafutsal2.png \"/Users/antoniogonzalez/Personal Projects/PORTFOLIO/agonzx-portfolio/public/screenshots/torrenuevafutsal2.png\")",
+      "Bash(open:*)",
+      "Bash(find /Users/antoniogonzalez/Personal Projects/PORTFOLIO/agonzx-portfolio -type f -name *cursor* -o -name *Cursor*)"
     ]
   }
 }

@@ -1,6 +1,7 @@
 'use client';
 import dynamic from 'next/dynamic';
-import { useEffect, useRef } from 'react';
+import { Fragment, useEffect, useRef } from 'react';
+import gsap from 'gsap';
 import { ROTATING_WORDS } from './data';
 
 const LiquidEther  = dynamic(() => import('./reactbits/LiquidEther/LiquidEther'),  { ssr: false });
@@ -102,9 +103,27 @@ function useSwiftCursorTrail(containerRef: React.RefObject<HTMLElement | null>) 
   }, [containerRef]);
 }
 
+const STATS = [
+  { value: '5+',   label: 'years exp.' },
+  { value: '22M+', label: 'users reached' },
+  { value: '4',    label: 'apps shipped' },
+];
+
 export default function Hero() {
   const heroRef = useRef<HTMLElement>(null);
+  const nameRef = useRef<HTMLDivElement>(null);
   useSwiftCursorTrail(heroRef);
+
+  // GSAP character stagger — premium letter reveal
+  useEffect(() => {
+    if (!nameRef.current) return;
+    const chars = nameRef.current.querySelectorAll<HTMLElement>('.hc');
+    gsap.fromTo(
+      chars,
+      { y: 90, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.8, stagger: 0.032, ease: 'power4.out', delay: 0.15 },
+    );
+  }, []);
 
   return (
     <section ref={heroRef} id="hero" className="snap-section" style={{ minHeight:'100vh',display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',textAlign:'center',position:'relative',overflow:'hidden',background:'var(--bg)' }}>
@@ -133,15 +152,49 @@ export default function Hero() {
           <HeroModel />
         </div>
 
-        <h1 className="hero-name" style={{ animation:'fadeUp 1s 0.2s both var(--ease)', lineHeight:0.9 }}>
-          <span style={{ display:'block',fontFamily:'"Martian Grotesk",sans-serif',fontSize:'clamp(3.5rem,12vw,10.5rem)',fontWeight:900,textTransform:'uppercase',letterSpacing:'-0.03em',color:'#E8ECF0' }}>ANTONIO</span>
-          <span style={{ display:'block',fontFamily:'"Martian Grotesk",sans-serif',fontSize:'clamp(3.5rem,12vw,10.5rem)',fontWeight:900,textTransform:'uppercase',letterSpacing:'-0.03em',color:'#E8ECF0' }}>GONZALEZ</span>
-        </h1>
+        {/* Letter-stagger name — GSAP reveals chars from below overflow clip */}
+        <div ref={nameRef}>
+          <h1 className="hero-name" style={{ lineHeight: 0.9 }}>
+            {['ANTONIO', 'GONZALEZ'].map(word => (
+              <span
+                key={word}
+                style={{
+                  display: 'block', overflow: 'hidden',
+                  fontFamily: '"Martian Grotesk",sans-serif',
+                  fontSize: 'clamp(3.5rem,12vw,10.5rem)', fontWeight: 900,
+                  textTransform: 'uppercase', letterSpacing: '-0.03em', color: '#E8ECF0',
+                }}
+              >
+                {word.split('').map((c, i) => (
+                  <span key={i} className="hc" style={{ display: 'inline-block', opacity: 0 }}>{c}</span>
+                ))}
+              </span>
+            ))}
+          </h1>
+        </div>
 
-        <div style={{ display:'flex',alignItems:'center',gap:'1rem',marginTop:'2rem',animation:'fadeUp 1s 0.4s both var(--ease)',background:'rgba(255,255,255,0.04)',backdropFilter:'blur(12px)',padding:'0.6rem 1.5rem',borderRadius:100,border:'1px solid rgba(255,255,255,0.08)' }}>
+        {/* Role pill */}
+        <div style={{ display:'flex',alignItems:'center',gap:'1rem',marginTop:'2rem',animation:'fadeUp 1s 0.55s both var(--ease)',background:'rgba(255,255,255,0.04)',backdropFilter:'blur(12px)',padding:'0.6rem 1.5rem',borderRadius:100,border:'1px solid rgba(255,255,255,0.08)' }}>
           <span style={{ fontFamily:'Safiro,sans-serif',fontSize:'0.9rem',fontWeight:700,letterSpacing:'0.02em',color:'var(--white)' }}>iOS Engineer</span>
           <span style={{ width:1,height:16,background:'rgba(255,255,255,0.15)' }} />
           <RotatingText texts={ROTATING_WORDS} mainClassName="rotating-hero" staggerFrom="last" staggerDuration={0.025} rotationInterval={3000} />
+        </div>
+
+        {/* Stats bar */}
+        <div style={{ display:'flex', alignItems:'center', marginTop:'2rem', animation:'fadeUp 1s 0.72s both var(--ease)' }}>
+          {STATS.map(({ value, label }, i) => (
+            <Fragment key={label}>
+              {i > 0 && <div style={{ width:1, height:36, background:'rgba(255,255,255,0.08)', margin:'0 2rem' }} />}
+              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'0.25rem' }}>
+                <span style={{ fontFamily:'Nohemi,sans-serif', fontSize:'clamp(1.3rem,2.2vw,1.7rem)', fontWeight:800, color:'var(--white)', letterSpacing:'-0.025em', lineHeight:1 }}>
+                  {value}
+                </span>
+                <span style={{ fontFamily:'Safiro,sans-serif', fontSize:'0.6rem', fontWeight:500, color:'var(--t3)', letterSpacing:'0.1em', textTransform:'uppercase' }}>
+                  {label}
+                </span>
+              </div>
+            </Fragment>
+          ))}
         </div>
       </div>
 
