@@ -7,32 +7,30 @@ const CASES = [
   {
     id:      'soccer',
     client:  'Soccer Manager',
-    title:   'Gestión de pedidos para 4 clubs. Sin llamadas, sin Excel perdidos.',
-    body:    'Centralicé pedidos de material deportivo, cobros y entregas para cuatro equipos. Panel con historial completo y estados en tiempo real. Antes: todo por WhatsApp.',
+    title:   'Gestión de pedidos y material deportivo',
+    body:    'Gestión completa de pedidos, cobros y entregas de material deportivo. Panel de administración con historial y notificaciones en tiempo real.',
     tags:    ['Next.js', 'Supabase', 'Vercel'],
-    metric:  '2 temporadas en producción',
     img:     '/screenshots/soccermanager1.png',
     imgAlt:  'Panel de gestión de pedidos de Soccer Manager',
-    bg:      '#E8EFF7',
+    bg:      '#EEF2F7',
     device:  'desktop',
     reverse: false,
   },
   {
     id:      'futsal',
     client:  'Torrenueva Futsal',
-    title:   'Los socios consultan su saldo sin llamar al tesorero.',
-    body:    'PWA instalable en móvil. Cada miembro ve su estado de pagos, sanciones e historial en tiempo real. El tesorero dejó de gestionar 50 consultas manuales al mes.',
-    tags:    ['JavaScript', 'PWA', 'GitHub Pages'],
-    metric:  '50+ jugadores activos',
+    title:   'Gestión de multas y convocatorias',
+    body:    'PWA móvil para gestión de multas y convocatorias del equipo. Los jugadores consultan su balance e historial directamente desde el teléfono, sin instalación.',
+    tags:    ['HTML', 'JavaScript', 'Supabase'],
     img:     '/screenshots/torrenuevafutsal1.png',
     imgAlt:  'PWA de Torrenueva Futsal mostrando estado de pagos',
-    bg:      '#EBF0E8',
+    bg:      '#EEF3EE',
     device:  'mobile',
     reverse: true,
   },
 ];
 
-function CaseRow({ c, delay }: { c: typeof CASES[0]; delay: number }) {
+function CaseRow({ c, delay }: { c: (typeof CASES)[0]; delay: number }) {
   const ref           = useRef<HTMLDivElement>(null);
   const [show, setShow] = useState(false);
 
@@ -105,19 +103,6 @@ function CaseRow({ c, delay }: { c: typeof CASES[0]; delay: number }) {
             {t}
           </span>
         ))}
-        {/* Metric pill */}
-        <span
-          style={{
-            fontFamily:   'Martian Mono, monospace',
-            fontSize:     '0.62rem',
-            padding:      '4px 10px',
-            borderRadius:  9999,
-            background:   'var(--s-accent-soft)',
-            color:        '#0B6B62',
-          }}
-        >
-          {c.metric}
-        </span>
       </div>
     </div>
   );

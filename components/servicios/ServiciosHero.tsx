@@ -86,7 +86,7 @@ export default function ServiciosHero({ wa }: Props) {
             whiteSpace:   'nowrap',
           }}
         >
-          agonz<span style={{ color:'var(--s-accent)' }}>{'{'}x{'}'}</span>
+          agonz<span style={{ color:'var(--s-accent)' }}>{'{'}<span style={{ position:'relative', top:'-0.046em' }}>x</span>{'}'}</span>
         </span>
       </div>
 

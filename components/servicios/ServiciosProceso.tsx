@@ -153,50 +153,40 @@ export default function ServiciosProceso({ wa }: Props) {
           ))}
         </div>
 
-        {/* Pricing */}
+        {/* CTA block */}
         <div
           style={{
             borderTop: '1px solid var(--s-line)',
             paddingTop:'clamp(1.5rem,3vw,2.5rem)',
             display:   'flex',
-            alignItems:'baseline',
-            gap:       'clamp(1.5rem,4vw,4rem)',
+            alignItems:'center',
+            gap:       'clamp(2rem,5vw,6rem)',
             flexWrap:  'wrap',
           }}
         >
-          <div style={{ display:'flex', flexDirection:'column', gap:'0.25rem' }}>
-            <span
-              style={{
-                fontFamily:   'Martian Mono, monospace',
-                fontSize:     '0.65rem',
-                color:        'var(--s-ink-3)',
-                letterSpacing:'0.06em',
-                textTransform:'uppercase',
-              }}
-            >
-              Desde
-            </span>
+          <div style={{ display:'flex', flexDirection:'column', gap:'0.5rem' }}>
             <span
               style={{
                 fontFamily:   'Nohemi, sans-serif',
-                fontSize:     'clamp(3.5rem,8vw,7rem)',
+                fontSize:     'clamp(1.4rem,2.5vw,2.2rem)',
                 fontWeight:   600,
-                letterSpacing:'-0.04em',
-                lineHeight:    0.9,
+                letterSpacing:'-0.03em',
+                lineHeight:    1.1,
                 color:        'var(--s-ink)',
               }}
             >
-              500 €
+              Retainer mensual.
+              <br />Sin permanencia.
             </span>
             <span
               style={{
                 fontFamily:'Safiro, sans-serif',
-                fontSize:  '0.85rem',
+                fontSize:  '0.88rem',
+                lineHeight: 1.6,
                 color:     'var(--s-ink-3)',
-                marginTop: '0.25rem',
               }}
             >
-              / mes · sin permanencia
+              Empieza con lo que necesitas. Escala cuando funcione.
             </span>
           </div>
 
@@ -221,7 +211,7 @@ export default function ServiciosProceso({ wa }: Props) {
                 transition:    'background 0.2s ease',
               }}
             >
-              Agendar diagnóstico gratuito →
+              Diagnóstico gratuito por WhatsApp →
             </a>
             <span
               style={{
@@ -230,7 +220,7 @@ export default function ServiciosProceso({ wa }: Props) {
                 color:     'var(--s-ink-3)',
               }}
             >
-              IVA no incluido. Facturación a nombre de agonzx.
+              Te respondo en menos de 24 h. Siempre yo.
             </span>
           </div>
         </div>

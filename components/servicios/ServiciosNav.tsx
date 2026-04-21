@@ -49,6 +49,8 @@ export default function ServiciosNav({ wa }: Props) {
   return (
     <AnimatePresence>
       {visible && (
+        /* Static wrapper handles centering so framer-motion's y doesn't conflict with translateX */
+        <div style={{ position:'fixed', top:'1rem', left:'50%', transform:'translateX(-50%)', zIndex:1000, width:'min(92vw, 820px)' }}>
         <motion.nav
           aria-label="Navegación principal"
           initial={reduceMotion ? { opacity:0 } : { opacity:0, y:-16 }}
@@ -56,15 +58,10 @@ export default function ServiciosNav({ wa }: Props) {
           exit={reduceMotion    ? { opacity:0 } : { opacity:0, y:-16 }}
           transition={{ duration:0.45, ease:[0.16,1,0.3,1] }}
           style={{
-            position:             'fixed',
-            top:                  '1rem',
-            left:                 '50%',
-            transform:            'translateX(-50%)',
-            zIndex:               1000,
             display:              'flex',
             justifyContent:       'space-between',
             alignItems:           'center',
-            width:                'min(92vw, 820px)',
+            width:                '100%',
             padding:              '0.65rem 1rem 0.65rem 1.3rem',
             borderRadius:         9999,
             /* Light-mode glass — same system as dark nav, inverted */
@@ -118,6 +115,7 @@ export default function ServiciosNav({ wa }: Props) {
             </a>
           </div>
         </motion.nav>
+        </div>
       )}
     </AnimatePresence>
   );

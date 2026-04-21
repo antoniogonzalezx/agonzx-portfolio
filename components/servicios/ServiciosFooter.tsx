@@ -137,7 +137,7 @@ export default function ServiciosFooter({ wa }: Props) {
               padding:      '0 6px',
             }}
           >
-            agonz<span style={{ color:'var(--s-accent)' }}>{'{'}x{'}'}</span>
+            agonz<span style={{ color:'var(--s-accent)' }}>{'{'}<span style={{ position:'relative', top:'-0.046em' }}>x</span>{'}'}</span>
           </span>
           <span
             style={{
@@ -194,13 +194,7 @@ export default function ServiciosFooter({ wa }: Props) {
       </div>
 
       {/* ── Footer ── */}
-      <footer
-        style={{
-          position: 'relative',
-          zIndex:    1,
-          padding:  '0 clamp(1.5rem,5vw,5rem) clamp(1rem,2vw,1.75rem)',
-        }}
-      >
+      <footer style={{ position:'relative', zIndex:1 }}>
         {/* Links row */}
         <div
           style={{
@@ -211,6 +205,7 @@ export default function ServiciosFooter({ wa }: Props) {
             borderBottom:  '1px solid var(--s-line)',
             flexWrap:      'wrap',
             gap:           '0.5rem 2rem',
+            padding:       '0 clamp(1.5rem,5vw,5rem) 0.75rem',
           }}
         >
           <nav aria-label="Footer" style={{ display:'flex', gap:'1.25rem', flexWrap:'wrap' }}>
@@ -247,24 +242,33 @@ export default function ServiciosFooter({ wa }: Props) {
           </span>
         </div>
 
-        {/* Monumental wordmark */}
-        <div ref={wordmarkRef} style={{ overflow:'hidden', lineHeight:0.8, marginTop:'0.25rem' }}>
-          <span
-            ref={wordmarkText}
-            style={{
-              display:       'inline-block',
-              fontFamily:    'Nohemi, sans-serif',
-              fontWeight:    600,
-              fontSize:      '18vw',
-              letterSpacing: '-0.04em',
-              lineHeight:    0.8,
-              color:         'var(--s-ink)',
-              userSelect:    'none',
-              whiteSpace:    'nowrap',
-            }}
-          >
-            agonz<span style={{ color:'var(--s-accent)' }}>{'{'}x{'}'}</span>
-          </span>
+        {/* Monumental wordmark — dark background like main portfolio */}
+        <div
+          style={{
+            background:  '#0B0F14',
+            overflow:    'hidden',
+            padding:     '0.2rem clamp(1.5rem,5vw,5rem) 0',
+            lineHeight:  0.8,
+          }}
+        >
+          <div ref={wordmarkRef} style={{ overflow:'hidden', lineHeight:0.8 }}>
+            <span
+              ref={wordmarkText}
+              style={{
+                display:       'inline-block',
+                fontFamily:    'Nohemi, sans-serif',
+                fontWeight:    600,
+                fontSize:      '18vw',
+                letterSpacing: '-0.04em',
+                lineHeight:    0.8,
+                color:         '#F4F6F9',
+                userSelect:    'none',
+                whiteSpace:    'nowrap',
+              }}
+            >
+              agonz<span style={{ color:'var(--s-accent)' }}>{'{'}<span style={{ position:'relative', top:'-0.046em' }}>x</span>{'}'}</span>
+            </span>
+          </div>
         </div>
       </footer>
     </section>
