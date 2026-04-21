@@ -33,7 +33,22 @@
       "Bash(cp /Users/antoniogonzalez/Desktop/torrenuevafutsal1.png \"/Users/antoniogonzalez/Personal Projects/PORTFOLIO/agonzx-portfolio/public/screenshots/torrenuevafutsal1.png\")",
       "Bash(cp /Users/antoniogonzalez/Desktop/torrenuevafutsal2.png \"/Users/antoniogonzalez/Personal Projects/PORTFOLIO/agonzx-portfolio/public/screenshots/torrenuevafutsal2.png\")",
       "Bash(open:*)",
-      "Bash(find /Users/antoniogonzalez/Personal Projects/PORTFOLIO/agonzx-portfolio -type f -name *cursor* -o -name *Cursor*)"
+      "Bash(find /Users/antoniogonzalez/Personal Projects/PORTFOLIO/agonzx-portfolio -type f -name *cursor* -o -name *Cursor*)",
+      "Bash(grep -n \"minHeight: ''100vh''\" app/servicios/page.tsx)",
+      "mcp__claude_ai_Notion__notion-create-pages",
+      "WebFetch(domain:www.reddit.com)",
+      "WebFetch(domain:www.anthropic.com)",
+      "WebFetch(domain:techcrunch.com)",
+      "mcp__claude_ai_Canva__generate-design",
+      "WebSearch",
+      "WebFetch(domain:www.instagram.com)",
+      "WebFetch(domain:toolfolio.io)",
+      "WebFetch(domain:www.passionfroot.me)",
+      "WebFetch(domain:www.threads.com)",
+      "WebFetch(domain:www.tiktok.com)",
+      "WebFetch(domain:www.linkedin.com)",
+      "WebFetch(domain:ar.linkedin.com)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }
