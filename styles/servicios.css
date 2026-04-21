@@ -1,0 +1,76 @@
+/*
+ * Design system tokens — /servicios ONLY
+ * Import exclusively from app/servicios. Never modify globals.css.
+ * All tokens scoped to .s-page to avoid bleeding into other routes.
+ */
+
+.s-page {
+  /* ── Palette ────────────────────────────────────────────────────── */
+  --s-bg:          #F4F6F9;   /* base background: cold blue-white     */
+  --s-bg-blob:     #E5E9F0;   /* subtle blob fills                    */
+  --s-surface:     #FFFFFF;   /* elevated cards, floating pill        */
+  --s-ink:         #0B0F14;   /* primary text, monumental type        */
+  --s-ink-2:       #4A556A;   /* body copy                            */
+  --s-ink-3:       #8A95A8;   /* meta, labels                         */
+  --s-line:        #D5DAE3;   /* 1 px hairlines, dividers             */
+  --s-accent:      #3DF2E0;   /* cyan — use sparingly                 */
+  --s-accent-soft: #D6FBF6;   /* pill tag backgrounds                 */
+  --s-ease:        cubic-bezier(0.16, 1, 0.3, 1);
+
+  background:              var(--s-bg);
+  color:                   var(--s-ink);
+  -webkit-font-smoothing:  antialiased;
+  min-height:              100dvh;
+}
+
+.s-page ::selection { background: var(--s-accent); color: #000; }
+
+/* ── Snap container ──────────────────────────────────────────────── */
+.s-snap-container {
+  height:                  100svh;
+  overflow-y:              scroll;
+  scroll-snap-type:        y mandatory;
+  overscroll-behavior-y:   contain;
+}
+
+.s-snap-section {
+  height:             100svh;
+  scroll-snap-align:  start;
+  scroll-snap-stop:   always;
+  position:           relative;
+  overflow:           hidden;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────────── */
+.s-snap-container::-webkit-scrollbar       { width: 3px; }
+.s-snap-container::-webkit-scrollbar-track { background: var(--s-bg); }
+.s-snap-container::-webkit-scrollbar-thumb { background: var(--s-line); border-radius: 2px; }
+
+/* ── Mobile: natural scroll, sections at content height ─────────── */
+@media (max-width: 768px) {
+  .s-snap-container {
+    height:           auto;
+    overflow-y:       visible;
+    scroll-snap-type: none;
+  }
+  .s-snap-section {
+    height:            auto;
+    min-height:        100svh;
+    scroll-snap-align: none;
+    overflow:          visible;
+  }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .s-snap-container { scroll-behavior: auto; }
+}
+
+/* ── Floating pill — mobile responsive ──────────────────────────── */
+@media (max-width: 768px) {
+  .s-pill-positioner {
+    width:      min(85vw, 320px);
+    left:       50% !important;
+    transform:  translateX(-50%) !important;
+  }
+}

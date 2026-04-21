@@ -1,5 +1,7 @@
 'use client';
+import '@/styles/servicios.css';
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react';
+import FloatingPill from '@/components/servicios/FloatingPill';
 import gsap from 'gsap';
 
 /* ══ ICONS ═══════════════════════════════════════════════════════════════════ */
@@ -304,7 +306,7 @@ function HeroSection({ wa, email }: { wa: string; email: string }) {
   }, []);
 
   return (
-    <section style={{ ...SEC_H, justifyContent:'center', alignItems:'center', textAlign:'center', background:'var(--bg)' }}>
+    <section data-servicios-section="hero" style={{ ...SEC_H, justifyContent:'center', alignItems:'center', textAlign:'center', background:'var(--bg)' }}>
       {/* blobs */}
       <div aria-hidden style={{ position:'absolute', inset:0, zIndex:0, pointerEvents:'none', filter:'blur(100px)' }}>
         <div style={{ position:'absolute', width:'60vw', height:'60vw', top:'-20%', right:'-15%', background:'radial-gradient(circle, rgba(61,242,224,0.1) 0%, transparent 70%)', borderRadius:'50%' }} />
@@ -826,7 +828,7 @@ function CTAFooter({ wa, email }: { wa:string; email:string }) {
   }, []);
 
   return (
-    <section style={{ ...SEC_H, justifyContent:'space-between', background:'var(--bg)', paddingBottom:'1.5rem' }}>
+    <section data-servicios-section="footer" style={{ ...SEC_H, justifyContent:'space-between', background:'var(--bg)', paddingBottom:'1.5rem' }}>
       {/* bg glow */}
       <div aria-hidden style={{ position:'absolute', inset:0, zIndex:0, pointerEvents:'none', filter:'blur(120px)' }}>
         <div style={{ position:'absolute', width:'50vw', height:'50vw', top:'-15%', right:'-10%', background:'radial-gradient(circle, rgba(61,242,224,0.08) 0%, transparent 70%)', borderRadius:'50%' }} />
@@ -899,6 +901,8 @@ export default function Servicios() {
 
   return (
     <>
+      <FloatingPill />
+
       {/* Grain */}
       <div aria-hidden style={{ position:'fixed', inset:0, zIndex:500, pointerEvents:'none', opacity:0.06, mixBlendMode:'overlay', backgroundRepeat:'repeat', backgroundSize:'180px 180px', backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
 
