@@ -1,44 +1,44 @@
 /*
  * Design system tokens — /servicios ONLY
- * Import exclusively from app/servicios. Never modify globals.css.
- * All tokens scoped to .s-page to avoid bleeding into other routes.
+ * Imported exclusively from app/servicios. Never touch globals.css.
  */
 
+/* ── Page wrapper: contains the snap container ───────────────────── */
 .s-page {
-  /* ── Palette ────────────────────────────────────────────────────── */
-  --s-bg:          #F4F6F9;   /* base background: cold blue-white     */
-  --s-bg-blob:     #E5E9F0;   /* subtle blob fills                    */
-  --s-surface:     #FFFFFF;   /* elevated cards, floating pill        */
-  --s-ink:         #0B0F14;   /* primary text, monumental type        */
-  --s-ink-2:       #4A556A;   /* body copy                            */
-  --s-ink-3:       #8A95A8;   /* meta, labels                         */
-  --s-line:        #D5DAE3;   /* 1 px hairlines, dividers             */
-  --s-accent:      #3DF2E0;   /* cyan — use sparingly                 */
-  --s-accent-soft: #D6FBF6;   /* pill tag backgrounds                 */
+  --s-bg:          #F4F6F9;
+  --s-bg-blob:     #E5E9F0;
+  --s-surface:     #FFFFFF;
+  --s-ink:         #0B0F14;
+  --s-ink-2:       #4A556A;
+  --s-ink-3:       #8A95A8;
+  --s-line:        #D5DAE3;
+  --s-accent:      #3DF2E0;
+  --s-accent-soft: #D6FBF6;
   --s-ease:        cubic-bezier(0.16, 1, 0.3, 1);
 
-  background:              var(--s-bg);
-  color:                   var(--s-ink);
-  -webkit-font-smoothing:  antialiased;
-  min-height:              100dvh;
+  height:                 100dvh;
+  overflow:               hidden;
+  background:             var(--s-bg);
+  color:                  var(--s-ink);
+  -webkit-font-smoothing: antialiased;
 }
 
 .s-page ::selection { background: var(--s-accent); color: #000; }
 
-/* ── Snap container ──────────────────────────────────────────────── */
+/* ── Scroll-snap container ───────────────────────────────────────── */
 .s-snap-container {
-  height:                  100svh;
-  overflow-y:              scroll;
-  scroll-snap-type:        y mandatory;
-  overscroll-behavior-y:   contain;
+  height:                100%;
+  overflow-y:            scroll;
+  scroll-snap-type:      y mandatory;
+  overscroll-behavior-y: contain;
 }
 
 .s-snap-section {
-  height:             100svh;
-  scroll-snap-align:  start;
-  scroll-snap-stop:   always;
-  position:           relative;
-  overflow:           hidden;
+  height:            100svh;
+  scroll-snap-align: start;
+  scroll-snap-stop:  always;
+  position:          relative;
+  overflow:          hidden;
 }
 
 /* ── Scrollbar ───────────────────────────────────────────────────── */
@@ -46,8 +46,12 @@
 .s-snap-container::-webkit-scrollbar-track { background: var(--s-bg); }
 .s-snap-container::-webkit-scrollbar-thumb { background: var(--s-line); border-radius: 2px; }
 
-/* ── Mobile: natural scroll, sections at content height ─────────── */
+/* ── Mobile: natural scroll, no snap ────────────────────────────── */
 @media (max-width: 768px) {
+  .s-page {
+    height:   auto;
+    overflow: visible;
+  }
   .s-snap-container {
     height:           auto;
     overflow-y:       visible;
@@ -64,13 +68,4 @@
 /* ── Reduced motion ──────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .s-snap-container { scroll-behavior: auto; }
-}
-
-/* ── Floating pill — mobile responsive ──────────────────────────── */
-@media (max-width: 768px) {
-  .s-pill-positioner {
-    width:      min(85vw, 320px);
-    left:       50% !important;
-    transform:  translateX(-50%) !important;
-  }
 }
