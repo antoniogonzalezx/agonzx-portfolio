@@ -25,6 +25,18 @@
 
 .s-page ::selection { background: var(--s-accent); color: #000; }
 
+/* Paint the viewport behind /servicios with the light token — otherwise the
+   dark `body { background: var(--bg) }` from globals bleeds through on mobile
+   (where .s-page has height:auto) and during iOS overscroll bounce. */
+.s-page::before {
+  content:        '';
+  position:       fixed;
+  inset:          0;
+  z-index:        -1;
+  background:     var(--s-bg);
+  pointer-events: none;
+}
+
 /* ── Scroll-snap container ───────────────────────────────────────── */
 .s-snap-container {
   height:                100%;
@@ -63,9 +75,122 @@
     scroll-snap-align: none;
     overflow:          visible;
   }
+
+  /* Hero: wordmark pinned as sticky overlay — content scrolls under it */
+  [data-servicios-section="hero"] img[alt="agonzx"] {
+    min-height: 44px;
+  }
+  .s-hero-logo {
+    position:       fixed !important;
+    top:            0;
+    left:           0;
+    right:          0;
+    z-index:        900;      /* below nav (1000) */
+    padding:        8px 12px !important;
+    background:     transparent;
+    pointer-events: none;     /* CTAs underneath stay tappable */
+    transition:     opacity 0.3s var(--s-ease);
+  }
+  [data-servicios-section="hero"] > div:last-child {
+    /* body pushed to lower half — content passes under the sticky logo */
+    flex:            1 !important;
+    justify-content: flex-end !important;
+    padding:         calc(24vw + 2rem) 1.25rem 3rem !important;
+    gap:             1.5rem !important;
+  }
+  /* Headline grows on mobile, wraps at spaces (per-char animation preserved) */
+  .s-hero-headline {
+    font-size:   clamp(3rem, 13vw, 4.75rem) !important;
+    line-height: 0.95 !important;
+  }
+  /* On mobile the first row stacks: "Software" / "a medida." / "Sin rodeos." */
+  .s-hero-row {
+    flex-direction: column !important;
+    gap:            0 !important;
+  }
+
+  /* CTAs: full-width stack */
+  [data-servicios-section="hero"] a[role],
+  [data-servicios-section="hero"] a[href^="https://wa.me"],
+  [data-servicios-section="hero"] a[href="#servicios"] {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+}
+
+/* Very small phones: grid title fits (hero headline already handled by clamp) */
+@media (max-width: 380px) {
+  .s-grid-title    { font-size: 1.75rem !important; }
 }
 
 /* ── Reduced motion ──────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .s-snap-container { scroll-behavior: auto; }
+}
+
+/* ── ServiciosGrid: mobile stack ─────────────────────────────────── */
+@media (max-width: 900px) {
+  .s-grid-bento {
+    grid-template-columns: 1fr !important;
+    min-height:             auto !important;
+    /* Drop the 1px outer lines — each cell becomes its own glass surface */
+    border-top:    none !important;
+    border-bottom: none !important;
+    gap:           1rem;
+  }
+  .s-grid-bento .s-cell {
+    border-right:  none !important;
+    border-radius: 20px;
+    /* Liquid-glass refraction: inner border + inset highlight */
+    background:           rgba(255,255,255,0.55) !important;
+    backdrop-filter:      blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border:               1px solid rgba(11,15,20,0.06);
+    box-shadow:           0 1px 0 rgba(255,255,255,0.9) inset,
+                          0 8px 24px -12px rgba(11,15,20,0.08);
+    padding:              1.5rem !important;
+  }
+  /* Scale the card titles up so the flagship + others feel equal when stacked */
+  .s-grid-bento .s-cell-title {
+    font-size: 1.6rem !important;
+  }
+}
+
+/* ── ServiciosGrid animations ────────────────────────────────────── */
+@keyframes s-pulse {
+  0%   { box-shadow: 0 0 0 0   rgba(61,242,224,0.55); }
+  70%  { box-shadow: 0 0 0 12px rgba(61,242,224,0);    }
+  100% { box-shadow: 0 0 0 0   rgba(61,242,224,0);    }
+}
+@keyframes s-chat-scroll {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+@keyframes s-caret {
+  0%, 50%  { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .s-grid-bento * {
+    animation: none !important;
+  }
+}
+
+/* ── Scroll cue ─────────────────────────────────────────────────── */
+@keyframes s-cue-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.s-cue-ring {
+  animation: s-cue-spin 18s linear infinite;
+  transform-origin: center;
+}
+.s-cue-badge:hover .s-cue-core {
+  background: var(--s-accent);
+  color:      var(--s-ink);
+  transform:  translateY(2px);
+  box-shadow: 0 10px 24px rgba(61,242,224,0.4), 0 2px 6px rgba(11,15,20,0.15);
+}
+@media (prefers-reduced-motion: reduce) {
+  .s-cue-ring { animation: none; }
 }

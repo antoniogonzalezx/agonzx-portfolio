@@ -46,10 +46,13 @@ export default function FloatingPill() {
   const visible = heroGone && !footerNear;
 
   useEffect(() => {
-    const heroEl    = document.querySelector('[data-servicios-section="hero"]');
-    const footerEl  = document.querySelector('[data-servicios-section="footer"]');
-    const container = document.querySelector('.s-snap-container') as Element | null;
+    const heroEl   = document.querySelector('[data-servicios-section="hero"]');
+    const footerEl = document.querySelector('[data-servicios-section="footer"]');
     if (!heroEl || !footerEl) return;
+
+    /* Desktop: snap container is the scroller. Mobile: viewport (root:null). */
+    const isMobile  = window.matchMedia('(max-width: 768px)').matches;
+    const container = isMobile ? null : (document.querySelector('.s-snap-container') as Element | null);
 
     const heroObs = new IntersectionObserver(
       ([e]) => setHeroGone(!e.isIntersecting),
