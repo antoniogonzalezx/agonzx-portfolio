@@ -24,7 +24,7 @@ export default function Servicios() {
       <main className="s-snap-container" aria-label="Contenido de servicios">
         <ServiciosHero       wa={WA} />   {/* sec 1 — hero            */}
         <ServiciosGrid />                   {/* sec 2 — 3 servicios     */}
-        <ServiciosParaQuien />              {/* sec 3 — para quién      */}
+        <ServiciosParaQuien wa={WA} />      {/* sec 3 — para quién      */}
         <ServiciosProceso    wa={WA} />   {/* sec 4 — proceso         */}
         <ServiciosCasos />                  {/* sec 5 — casos reales    */}
         <ServiciosFooter     wa={WA} />   {/* sec 6 — CTA + footer    */}

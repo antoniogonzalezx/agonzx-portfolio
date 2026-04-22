@@ -172,6 +172,40 @@ html:has(.s-page) body {
   }
 }
 
+/* ── ParaQuien: hover pulls row, industries grid stacks on mobile ── */
+.s-pq-row .s-pq-arrow {
+  color:     var(--s-ink-3);
+  opacity:    0;
+  transform: translateX(-6px);
+  transition: opacity 0.3s var(--s-ease), transform 0.3s var(--s-ease), color 0.3s var(--s-ease);
+  display:   inline-flex;
+}
+.s-pq-row:hover {
+  background: rgba(255,255,255,0.55);
+  padding-left: clamp(1rem,2vw,1.6rem) !important;
+}
+.s-pq-row:hover .s-pq-arrow {
+  opacity:    1;
+  transform:  translateX(0);
+  color:     var(--s-ink);
+}
+.s-pq-pain:hover {
+  background: rgba(255,255,255,0.4);
+}
+
+@media (max-width: 900px) {
+  .s-pq-grid {
+    grid-template-columns: 1fr !important;
+    gap:                   1.75rem !important;
+  }
+  .s-pq-left {
+    position: static !important;
+  }
+  .s-pq-industries {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* ── Scroll cue ─────────────────────────────────────────────────── */
 @keyframes s-cue-spin {
   from { transform: rotate(0deg); }
