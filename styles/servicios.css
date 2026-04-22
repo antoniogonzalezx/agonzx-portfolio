@@ -28,13 +28,9 @@
 /* Paint the viewport behind /servicios with the light token — otherwise the
    dark `body { background: var(--bg) }` from globals bleeds through on mobile
    (where .s-page has height:auto) and during iOS overscroll bounce. */
-.s-page::before {
-  content:        '';
-  position:       fixed;
-  inset:          0;
-  z-index:        -1;
-  background:     var(--s-bg);
-  pointer-events: none;
+html:has(.s-page),
+html:has(.s-page) body {
+  background: #F4F6F9;
 }
 
 /* ── Scroll-snap container ───────────────────────────────────────── */
