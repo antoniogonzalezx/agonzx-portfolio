@@ -215,26 +215,31 @@ html:has(.s-page) body {
   min-height:      72vh;
   position:        relative;
 }
-/* Ambient {x} brand mark — big, soft, floats gently */
+/* Ambient {x} brand mark — mounted at the .s-diag section root so inset:0
+   spans the full viewport, not just the 1280 content stage. No gradients,
+   no filters — just the monumental glyph centered over the bg color. */
 .s-diag-cta-visual {
-  position:      absolute;
-  inset:         0;
-  display:       flex;
-  align-items:   center;
+  position:       absolute;
+  inset:          0;
+  display:        flex;
+  align-items:    center;
   justify-content: center;
   pointer-events: none;
-  z-index:       0;
+  z-index:        0;
 }
 .s-diag-cta-visual svg {
-  width:       clamp(520px, 85vw, 1080px);
+  /* vh × 1.49 (viewBox aspect 32.91/22) so the height constraint actually
+     scales the width — otherwise 82vh treated as 738px would shrink the
+     mark instead of letting it fill the screen. */
+  width:       min(92vw, calc(95vh * 1.49), 1500px);
   height:      auto;
-  opacity:      0.07;
+  opacity:      0.09;
   animation:   s-diag-cta-float 9s var(--s-ease) infinite;
   will-change: transform;
 }
 @keyframes s-diag-cta-float {
-  0%, 100% { transform: translateY(-8px)  scale(1);    }
-  50%      { transform: translateY( 8px)  scale(1.02); }
+  0%, 100% { transform: translateY(-6px) scale(1);    }
+  50%      { transform: translateY( 6px) scale(1.02); }
 }
 @media (prefers-reduced-motion: reduce) {
   .s-diag-cta-visual svg { animation: none !important; }
@@ -248,12 +253,15 @@ html:has(.s-page) body {
   align-items:     center;
   text-align:      center;
   gap:             clamp(1.5rem, 2.2vw, 2.25rem);
-  max-width:       1100px;
+  max-width:       1300px;
 }
-.s-diag-title-cta {
-  font-size:      clamp(2.75rem, 7vw, 6rem);
+.s-diag-title.s-diag-title-cta {
+  /* Multi-line headline (3 lines, ~23 chars/line) — legibility trumps
+     maximal size. Kept noticeably bigger than body h2 but smaller than
+     the single-word footer CTA. */
+  font-size:      clamp(2.5rem, 6vw, 5.25rem);
   letter-spacing: -0.045em;
-  line-height:     0.92;
+  line-height:     0.95;
   text-align:      center;
 }
 .s-diag-sub-cta {
@@ -320,9 +328,23 @@ html:has(.s-page) body {
 
 .s-diag-bento {
   display:              grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap:                   clamp(0.75rem, 1vw, 1rem);
-  grid-auto-rows:        clamp(200px, 24vh, 260px);
+  grid-auto-rows:        clamp(170px, 20vh, 220px);
+}
+/* Uneven bento — 4-col × 3-row grid. Spans sum to 4 per row so tiles
+   never get too narrow. Row 1: 2+2 · Row 2: 1+3 · Row 3: 3+1. */
+.s-diag-tile[data-span="1"] { grid-column: span 1; }
+.s-diag-tile[data-span="2"] { grid-column: span 2; }
+.s-diag-tile[data-span="3"] { grid-column: span 3; }
+
+/* Narrow (span=1) cells — in 4-col grid these are ~¼ width, so keep
+   default padding but slightly smaller title to breathe. */
+.s-diag-tile[data-span="1"] .s-diag-tile-title {
+  font-size: clamp(1.2rem, 1.55vw, 1.5rem);
+}
+.s-diag-tile[data-span="1"] .s-diag-tile-sub {
+  padding-right: 1.75rem;
 }
 
 .s-diag-tile {
@@ -474,8 +496,8 @@ html:has(.s-page) body {
 }
 .s-diag-step {
   display:         flex;
-  align-items:     baseline;
-  gap:             clamp(0.9rem, 1.5vw, 1.35rem);
+  align-items:     center;
+  gap:             clamp(0.25rem, 0.45vw, 0.5rem);
   position:        relative;
   transition:      opacity 0.45s var(--s-ease);
 }
@@ -724,15 +746,16 @@ html:has(.s-page) body {
 .s-diag-thinking {
   display:         flex;
   flex-direction:  column;
-  align-items:     flex-start;
+  align-items:     center;
   justify-content: center;
-  gap:             clamp(1.25rem, 2.5vw, 2rem);
-  min-height:      320px;
+  text-align:      center;
+  gap:             clamp(1.5rem, 2.8vw, 2.25rem);
+  min-height:      420px;
   padding:         clamp(1rem, 2vw, 1.5rem) 0;
 }
 .s-diag-thinking-mark {
   position:   relative;
-  width:      clamp(88px, 10vw, 128px);
+  width:      clamp(160px, 18vw, 240px);
   aspect-ratio: 32.91 / 22;
   display:    inline-block;
 }
@@ -755,7 +778,8 @@ html:has(.s-page) body {
 .s-diag-thinking-copy {
   display:        flex;
   flex-direction: column;
-  gap:            0.35rem;
+  align-items:    center;
+  gap:            0.45rem;
 }
 .s-diag-thinking-line {
   display:        inline-flex;
@@ -787,6 +811,72 @@ html:has(.s-page) body {
   0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
   40%           { opacity: 1;    transform: translateY(-3px); }
 }
+/* Progress bar — fills linearly over the thinking duration. Ticks
+   underneath flip to accent as each copy step lands, giving the user
+   a clear read of what's happening behind the scenes. */
+.s-diag-thinking-progress {
+  position:      relative;
+  width:         clamp(240px, 22vw, 320px);
+  height:        4px;
+  background:    var(--s-line);
+  border-radius: 9999px;
+  overflow:      hidden;
+  margin-top:    1.1rem;
+}
+.s-diag-thinking-progress-fill {
+  position:        absolute;
+  inset:           0;
+  background:      var(--s-accent);
+  transform:       scaleX(0);
+  transform-origin: left center;
+  /* Jerky fill — three quick bursts (each easing out into a hold) instead
+   * of a smooth linear sweep. Reads as "thinking in stages" rather than
+   * "loading bar". */
+  animation:       s-diag-progress-jerky forwards;
+  border-radius:   inherit;
+}
+@keyframes s-diag-progress-jerky {
+  /* Burst 1 → 33% (Leyendo) */
+  0%   { transform: scaleX(0);    animation-timing-function: cubic-bezier(0.25, 1, 0.4, 1); }
+  18%  { transform: scaleX(0.33); animation-timing-function: linear; }
+  /* Hold */
+  32%  { transform: scaleX(0.34); animation-timing-function: cubic-bezier(0.25, 1, 0.4, 1); }
+  /* Burst 2 → 67% (Analizando) */
+  52%  { transform: scaleX(0.67); animation-timing-function: linear; }
+  /* Hold */
+  64%  { transform: scaleX(0.68); animation-timing-function: cubic-bezier(0.25, 1, 0.4, 1); }
+  /* Burst 3 → 100% (Cocinando) */
+  92%  { transform: scaleX(1);    animation-timing-function: linear; }
+  100% { transform: scaleX(1); }
+}
+.s-diag-thinking-progress-ticks {
+  position:       absolute;
+  inset:          0;
+  display:        flex;
+  justify-content: space-between;
+  align-items:    center;
+  padding:        0 2px;
+  pointer-events: none;
+}
+.s-diag-thinking-tick {
+  width:         3px;
+  height:        3px;
+  border-radius: 9999px;
+  background:    var(--s-bg);
+  opacity:        0.9;
+  transition:    background 0.35s var(--s-ease), transform 0.35s var(--s-ease);
+}
+.s-diag-thinking-tick[data-active] {
+  background: #FFFFFF;
+  transform:  scale(1.4);
+}
+@media (prefers-reduced-motion: reduce) {
+  .s-diag-thinking-progress-fill { animation: none !important; transform: scaleX(1); }
+}
+/* Hide the segmented ticks now that the bar fills in jerky bursts —
+   the bursts themselves communicate the staging clearly. */
+.s-diag-thinking-progress-ticks { display: none; }
+
 .s-diag-thinking-sub {
   font-family:    'Safiro', sans-serif;
   font-size:       13.5px;
@@ -860,6 +950,7 @@ html:has(.s-page) body {
     grid-template-columns: repeat(2, 1fr) !important;
     grid-auto-rows:        clamp(170px, 22vh, 210px) !important;
   }
+  .s-diag-tile[data-span] { grid-column: span 1 !important; }
   .s-diag-wizard {
     grid-template-columns: 1fr !important;
     gap:                    clamp(1.5rem, 4vw, 2.5rem) !important;

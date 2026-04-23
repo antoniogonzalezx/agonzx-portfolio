@@ -182,9 +182,14 @@ const D_CLOSE =
 
 const THINKING_COPY = [
   'Leyendo tu sector',
-  'Cruzando tus procesos',
-  'Preparando tu propuesta',
+  'Analizando tus procesos',
+  'Cocinando tu respuesta',
 ];
+const THINKING_DURATION_MS = 12000;
+/* Copy switches roughly aligned with the progress-bar bursts (~33 / 67 / 100).
+ * Slightly shorter than perfect thirds so each new label lands JUST before
+ * its burst, giving the user time to read it while the bar fills.        */
+const THINKING_STEPS_MS = [0, 3800, 7600];
 
 /* ──────────────────────── Component ──────────────────────── */
 
@@ -235,7 +240,7 @@ export default function ServiciosDiagnostico({ wa }: Props) {
     window.setTimeout(() => {
       setStep(2);
       setThinking(false);
-    }, 3600);
+    }, THINKING_DURATION_MS);
   };
 
   const waHref = useMemo(() => {
@@ -248,9 +253,9 @@ export default function ServiciosDiagnostico({ wa }: Props) {
 
   const promptText =
     thinking      ? 'Cruzando lo que me has contado…'
-    : step === 0  ? 'Empieza por tu sector. Seis opciones — solo necesitas una.'
-    : step === 1  ? 'Señala lo que te suena familiar.'
-    :               'Esto es lo que montaría para ti.';
+    : step === 0  ? 'Empecemos por aquí: elige el sector que mejor te describe. Un solo clic.'
+    : step === 1  ? 'Marca los puntos que reconozcas. Uno, dos o todos — cuanto más claro, mejor afino la propuesta.'
+    :               'Esto es lo que te montaría. Pásate por WhatsApp y cerramos plazo y precio.';
 
   return (
     <section
@@ -258,6 +263,18 @@ export default function ServiciosDiagnostico({ wa }: Props) {
       className="s-snap-section s-diag"
     >
       <div ref={sectionRef} style={{ position:'absolute', inset:0, pointerEvents:'none' }} aria-hidden />
+
+      {/* Ambient {x} — positioned at the section level (not stage) so it
+          spans the full viewport, not just the 1280-wide content box. */}
+      {!started && (
+        <div className="s-diag-cta-visual" aria-hidden>
+          <svg viewBox="0 0 32.91 22" focusable="false">
+            <path d={D_OPEN}  fill="var(--s-accent)" />
+            <path d={D_X}     fill="var(--s-accent)" />
+            <path d={D_CLOSE} fill="var(--s-accent)" />
+          </svg>
+        </div>
+      )}
 
       <AnimatePresence mode="wait" initial={false}>
         {!started ? (
@@ -270,14 +287,6 @@ export default function ServiciosDiagnostico({ wa }: Props) {
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -16 }}
             transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="s-diag-cta-visual" aria-hidden>
-              <svg viewBox="0 0 32.91 22" focusable="false">
-                <path d={D_OPEN}  fill="var(--s-accent)" />
-                <path d={D_X}     fill="var(--s-accent)" />
-                <path d={D_CLOSE} fill="var(--s-accent)" />
-              </svg>
-            </div>
-
             <div className="s-diag-cta-inner">
               <h2 className="s-diag-title s-diag-title-cta">
                 Diagnóstico.
@@ -287,7 +296,7 @@ export default function ServiciosDiagnostico({ wa }: Props) {
                 Una propuesta concreta.
               </h2>
               <p className="s-diag-sub s-diag-sub-cta">
-                Dime a qué te dedicas y te digo qué te montaría, con plazos y precio. Sin rollos.
+                Conoce en menos de un minuto cómo puedo ayudarte a ganar tiempo y clientes.
               </p>
               <button
                 type="button"
@@ -376,7 +385,19 @@ export default function ServiciosDiagnostico({ wa }: Props) {
                       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                     >
                       <div className="s-diag-bento" role="list">
-                        {INDUSTRIES.map((it, i) => {
+                        {/* Uneven bento · 4-col × 3-row grid, spans sum to 4 per row.
+                         * Row 1: Clínicas(2) · Hostelería(2)
+                         * Row 2: Clubs(1)    · Inmobiliarias(3)
+                         * Row 3: Gestorías(3)· Tiendas(1)                          */}
+                        {([
+                          { idx: 0, span: 2 }, // Clínicas
+                          { idx: 5, span: 2 }, // Hostelería
+                          { idx: 1, span: 1 }, // Clubs
+                          { idx: 4, span: 3 }, // Inmobiliarias
+                          { idx: 3, span: 3 }, // Gestorías
+                          { idx: 2, span: 1 }, // Tiendas
+                        ] as const).map(({ idx, span }, i) => {
+                          const it   = INDUSTRIES[idx];
                           const Icon = it.Icon;
                           return (
                             <button
@@ -384,6 +405,7 @@ export default function ServiciosDiagnostico({ wa }: Props) {
                               type="button"
                               role="listitem"
                               className="s-diag-tile"
+                              data-span={span}
                               onClick={() => pickIndustry(it.id)}
                               style={{
                                 animationDelay: `${0.05 + i * 0.05}s`,
@@ -537,11 +559,13 @@ function ThinkingMark() {
   const haloRef   = useRef<HTMLDivElement>(null);
   const [copyIdx, setCopyIdx] = useState(0);
 
+  /* Copy advances at handcrafted timestamps that line up with the
+   * jerky progress-bar bursts (rather than equal-spaced ticks). */
   useEffect(() => {
-    const id = window.setInterval(() => {
-      setCopyIdx(i => (i + 1) % THINKING_COPY.length);
-    }, 1500);
-    return () => window.clearInterval(id);
+    const timers = THINKING_STEPS_MS.map((ms, i) =>
+      window.setTimeout(() => setCopyIdx(i), ms),
+    );
+    return () => { timers.forEach(window.clearTimeout); };
   }, []);
 
   useEffect(() => {
@@ -617,6 +641,28 @@ function ThinkingMark() {
         <span className="s-diag-thinking-sub">
           Un segundo, montando la imagen mental de tu negocio.
         </span>
+
+        <div
+          className="s-diag-thinking-progress"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label="Generando propuesta"
+        >
+          <div
+            className="s-diag-thinking-progress-fill"
+            style={{ animationDuration: `${THINKING_DURATION_MS}ms` }}
+          />
+          <div className="s-diag-thinking-progress-ticks" aria-hidden>
+            {THINKING_COPY.map((_, i) => (
+              <span
+                key={i}
+                className="s-diag-thinking-tick"
+                data-active={i <= copyIdx || undefined}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

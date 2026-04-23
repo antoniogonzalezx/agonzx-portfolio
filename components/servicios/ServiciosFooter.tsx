@@ -99,7 +99,7 @@ export default function ServiciosFooter({ wa }: Props) {
             margin:     0,
           }}
         >
-          Te respondo en menos de 24 h. Siempre yo.
+          Te respondo en menos de 24 h.
         </p>
 
         {/* WhatsApp pill — larger version of the floating one */}
