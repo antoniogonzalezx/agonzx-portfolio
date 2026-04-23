@@ -3,6 +3,15 @@
 import { useRef, useEffect, useState, memo } from 'react';
 import Image from 'next/image';
 import Wordmark from './Wordmark';
+import {
+  WhatsappLogo,
+  Database,
+  Cursor,
+  CalendarDots,
+  Tag as TagIcon,
+  ListChecks,
+  TrendUp,
+} from '@phosphor-icons/react';
 
 type Stat =
   | { kind: 'text'; text: string; label: string }
@@ -16,10 +25,12 @@ type Step = {
   stats: Stat[];
 };
 
-/* ────────── Halaska-style stroke icons ──────────────────────────────────
- * 24×24 viewBox · stroke 1.5 · rounded caps · fill none · currentColor.
- * pathLength="1" on every drawn element so the s-stat-icon-draw keyframe in
- * styles/servicios.css traces each stroke uniformly (regardless of length).
+/* ────────── Icon system · Phosphor base + accent-blue narrative overlay ──
+ * Same icon family (@phosphor-icons/react) for consistent aesthetic.
+ * For "pure marketing" moments (database, cursor, checklist, trend) we
+ * layer a second SVG on top with accent-colored circles/pulses that animate
+ * forever via keyframes in styles/servicios.css.
+ * Static icons (whatsapp, calendar, tag) render only the Phosphor base.
  * ──────────────────────────────────────────────────────────────────────── */
 
 type IconName =
@@ -27,117 +38,64 @@ type IconName =
   | 'calendar' | 'tag'      | 'checklist'
   | 'trend';
 
-const SVG_PROPS = {
-  viewBox:        '0 0 24 24',
-  fill:           'none',
-  stroke:         'currentColor',
-  strokeWidth:    1.5,
-  strokeLinecap:  'round'  as const,
-  strokeLinejoin: 'round'  as const,
-};
+const PH_SIZE = { size: '100%' } as const;
 
 function Icon({ name }: { name: IconName }) {
-  if (name === 'whatsapp') {
-    /* Stylized chat bubble + curl — keeps the WhatsApp character without
-       reproducing the corporate glyph (which fights stroke-line aesthetic). */
-    return (
-      <svg {...SVG_PROPS} aria-hidden>
-        <path pathLength="1" d="M4 12a8 8 0 1 1 3.4 6.55L4 19.5l1-3.45A7.96 7.96 0 0 1 4 12z" />
-        <path pathLength="1" d="M9.5 9.7c.2 1.5 1.4 3.7 3.6 4.4 1 .35 1.7.1 2.1-.45" />
-      </svg>
-    );
-  }
-
-  if (name === 'checklist') {
-    /* Three log rows — each tick draws on its own delay (kept for the
-       infinite checklist sequence in CSS). */
-    return (
-      <svg {...SVG_PROPS} aria-hidden>
-        <rect pathLength="1" x="3" y="4"    width="5" height="5" rx="1" />
-        <rect pathLength="1" x="3" y="9.5"  width="5" height="5" rx="1" />
-        <rect pathLength="1" x="3" y="15"   width="5" height="5" rx="1" />
-        <path pathLength="1" d="M10 6.5h11" opacity="0.5" />
-        <path pathLength="1" d="M10 12h11"  opacity="0.5" />
-        <path pathLength="1" d="M10 17.5h8" opacity="0.5" />
-        <path className="s-tick s-tick-1" pathLength="1" d="M4 6.5l1.2 1.2 1.7-1.7" />
-        <path className="s-tick s-tick-2" pathLength="1" d="M4 12l1.2 1.2 1.7-1.7" />
-        <path className="s-tick s-tick-3" pathLength="1" d="M4 17.5l1.2 1.2 1.7-1.7" />
-      </svg>
-    );
-  }
+  if (name === 'whatsapp') return <WhatsappLogo {...PH_SIZE} weight="fill" />;
+  if (name === 'calendar') return <CalendarDots {...PH_SIZE} weight="regular" />;
+  if (name === 'tag')      return <TagIcon      {...PH_SIZE} weight="regular" />;
 
   if (name === 'database') {
     return (
-      <svg {...SVG_PROPS} aria-hidden>
-        <ellipse pathLength="1" cx="12" cy="5"  rx="8" ry="2.6" />
-        <path    pathLength="1" d="M4 5v6c0 1.4 3.6 2.6 8 2.6s8-1.2 8-2.6V5" />
-        <path    pathLength="1" d="M4 11v6c0 1.4 3.6 2.6 8 2.6s8-1.2 8-2.6v-6" />
-        {/* Data drops — fall from above and fade as they hit the cylinder */}
-        <g className="s-ico-db-drops" fill="currentColor" stroke="none">
-          <circle className="s-ico-db-drop s-db-1" cx="8"  cy="2" r="0.75" />
-          <circle className="s-ico-db-drop s-db-2" cx="12" cy="2" r="0.75" />
-          <circle className="s-ico-db-drop s-db-3" cx="16" cy="2" r="0.75" />
-        </g>
-      </svg>
+      <>
+        <Database {...PH_SIZE} weight="regular" />
+        <svg className="s-ph-overlay" viewBox="0 0 256 256" aria-hidden>
+          <circle className="s-ph-drop s-ph-drop-1" cx="96"  cy="28" r="8" />
+          <circle className="s-ph-drop s-ph-drop-2" cx="128" cy="28" r="8" />
+          <circle className="s-ph-drop s-ph-drop-3" cx="160" cy="28" r="8" />
+        </svg>
+      </>
     );
   }
 
   if (name === 'cursor') {
     return (
-      <svg {...SVG_PROPS} aria-hidden style={{ overflow: 'visible' }}>
-        {/* Ripple emitted from the cursor tip */}
-        <circle
-          className="s-ico-cur-ripple"
-          cx="5.5" cy="3.2"
-          r="2"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1"
-        />
-        <g className="s-ico-cur-arrow">
-          <path pathLength="1" d="M5.5 3.2 19 9.6l-6 2.2 4.2 5-3 2.4L10 14.2l-4.5 3.6z" />
-        </g>
-      </svg>
+      <>
+        <Cursor {...PH_SIZE} weight="regular" />
+        <svg className="s-ph-overlay" viewBox="0 0 256 256" aria-hidden>
+          <circle
+            className="s-ph-ripple"
+            cx="72" cy="72"
+            r="22"
+            fill="none"
+            strokeWidth="10"
+          />
+        </svg>
+      </>
     );
   }
 
-  if (name === 'calendar') {
+  if (name === 'checklist') {
     return (
-      <svg {...SVG_PROPS} aria-hidden>
-        <rect pathLength="1" x="3.5" y="5" width="17" height="15" rx="1.5" />
-        <path pathLength="1" d="M3.5 10h17" />
-        <path pathLength="1" d="M8 3v3" />
-        <path pathLength="1" d="M16 3v3" />
-        <rect
-          className="s-ico-cal-day"
-          pathLength="1"
-          x="7.5" y="14"
-          width="2" height="2"
-          rx="0.3"
-          fill="currentColor"
-          stroke="none"
-        />
-      </svg>
-    );
-  }
-
-  if (name === 'tag') {
-    return (
-      <svg {...SVG_PROPS} aria-hidden>
-        <g className="s-ico-tag-grp">
-          <path   pathLength="1" d="M3 3.5h8a1.5 1.5 0 0 1 1.06.44l8 8a1.5 1.5 0 0 1 0 2.12l-6.44 6.44a1.5 1.5 0 0 1-2.12 0l-8-8A1.5 1.5 0 0 1 3 11.5z" />
-          <circle pathLength="1" cx="7.5" cy="7.5" r="1.6" />
-        </g>
-      </svg>
+      <>
+        <ListChecks {...PH_SIZE} weight="regular" />
+        <svg className="s-ph-overlay" viewBox="0 0 256 256" aria-hidden>
+          <circle className="s-ph-pulse s-ph-pulse-1" cx="44" cy="72"  r="14" />
+          <circle className="s-ph-pulse s-ph-pulse-2" cx="44" cy="128" r="14" />
+          <circle className="s-ph-pulse s-ph-pulse-3" cx="44" cy="184" r="14" />
+        </svg>
+      </>
     );
   }
 
   /* trend */
   return (
-    <svg {...SVG_PROPS} aria-hidden>
-      <path className="s-ico-trend-line"  pathLength="1" d="M3 17 9 11l4 4 7-8" />
-      <path className="s-ico-trend-arrow" pathLength="1" d="M14 7h6v6" />
-    </svg>
+    <>
+      <TrendUp {...PH_SIZE} weight="regular" />
+      <svg className="s-ph-overlay" viewBox="0 0 256 256" aria-hidden>
+        <circle className="s-ph-sparkle" cx="208" cy="80" r="12" />
+      </svg>
+    </>
   );
 }
 

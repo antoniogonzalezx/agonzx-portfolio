@@ -7,7 +7,6 @@ import ServiciosCursor      from '@/components/servicios/ServiciosCursor';
 import ServiciosNav         from '@/components/servicios/ServiciosNav';
 import ServiciosHero        from '@/components/servicios/ServiciosHero';
 import ServiciosGrid        from '@/components/servicios/ServiciosGrid';
-import ServiciosParaQuien   from '@/components/servicios/ServiciosParaQuien';
 import ServiciosDiagnostico from '@/components/servicios/ServiciosDiagnostico';
 import ServiciosProceso     from '@/components/servicios/ServiciosProceso';
 import ServiciosFooter      from '@/components/servicios/ServiciosFooter';
@@ -26,10 +25,9 @@ export default function Servicios() {
       <main className="s-snap-container" aria-label="Contenido de servicios">
         <ServiciosHero        wa={WA} />   {/* sec 1 — hero            */}
         <ServiciosGrid />                    {/* sec 2 — 3 servicios     */}
-        <ServiciosParaQuien   wa={WA} />     {/* sec 3 — para quién      */}
-        <ServiciosDiagnostico wa={WA} />     {/* sec 4 — diagnóstico    */}
-        <ServiciosProceso />                 {/* sec 5 — proceso         */}
-        <ServiciosFooter      wa={WA} />   {/* sec 6 — CTA + footer    */}
+        <ServiciosDiagnostico wa={WA} />     {/* sec 3 — diagnóstico     */}
+        <ServiciosProceso />                 {/* sec 4 — proceso         */}
+        <ServiciosFooter      wa={WA} />   {/* sec 5 — CTA + footer    */}
       </main>
     </div>
   );

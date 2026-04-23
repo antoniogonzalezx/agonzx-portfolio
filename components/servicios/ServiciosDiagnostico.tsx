@@ -2,105 +2,49 @@
 
 import { useRef, useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { gsap } from 'gsap';
+import { ArrowRight, Check } from '@phosphor-icons/react';
+import {
+  SolarStethoscope,
+  SolarFootball,
+  SolarShop,
+  SolarFolder,
+  SolarBuildings,
+  SolarChefHat,
+  type SolarIcon,
+} from './SolarIcons';
 
 /* ─────────────────────────────────────────────────────────────────
- * ServiciosDiagnostico — Diagnóstico express en 3 pasos
- * 1 · Sector   2 · Dolores   3 · Propuesta a medida + CTA
+ * ServiciosDiagnostico — Diagnóstico express
+ * Stage CTA · Centered "Elige tu sector"
+ * Stage split · sticky rail (Diagnóstico express + stepper) + right
+ *   right step 0 · bento de sectores
+ *   right step 1 · procesos + nota libre
+ *   right thinking · {x} GSAP loop
+ *   right step 2 · propuesta + CTA WhatsApp
  * ───────────────────────────────────────────────────────────────── */
 
 interface Props { wa: string; }
 
 type Industry = {
-  id:        string;
-  name:      string;
-  Icon:      (props: { size?: number }) => JSX.Element;
-  pains:     string[];
-  proposal:  { headline: string; deliverables: string[] };
+  id:       string;
+  name:     string;
+  short:    string;
+  blurb:    string;
+  kickerTarget: string; // e.g. "tu clínica" — used in proposal kicker copy
+  Icon:     SolarIcon;
+  pains:    string[];
+  proposal: { headline: string; deliverables: string[] };
 };
-
-/* ─────────────────────────── Industry icons ───────────────────────────
- * Quiet line-art glyphs for the sector list. 1.5 stroke, rounded caps.
- * Inherit color from the row (ink-3 default → accent on hover).
- * ─────────────────────────────────────────────────────────────────────── */
-
-const ICON_SVG = {
-  width:        24,
-  height:       24,
-  viewBox:      '0 0 24 24',
-  fill:         'none',
-  stroke:       'currentColor',
-  strokeWidth:  1.5,
-  strokeLinecap:  'round' as const,
-  strokeLinejoin: 'round' as const,
-};
-
-function IconClinicas({ size = 22 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} {...ICON_SVG} aria-hidden>
-      <path d="M5 3v2" />
-      <path d="M11 3v2" />
-      <path d="M5 5c0 5 1 7 3.5 7.5" />
-      <path d="M11 5c0 5-1 7-3.5 7.5" />
-      <path d="M14 4v6a4 4 0 0 0 4 4" />
-      <circle cx="18" cy="17" r="2.5" />
-    </svg>
-  );
-}
-
-function IconClubs({ size = 22 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} {...ICON_SVG} aria-hidden>
-      <path d="M3 11h11a4 4 0 0 1 0 8H3z" />
-      <path d="M7 8.5v2.5" />
-      <circle cx="7" cy="7.5" r="1.2" />
-    </svg>
-  );
-}
-
-function IconRetail({ size = 22 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} {...ICON_SVG} aria-hidden>
-      <path d="M3 13 12 4h7a1.5 1.5 0 0 1 1.5 1.5V13l-9 8z" />
-      <circle cx="16" cy="8" r="1.5" />
-    </svg>
-  );
-}
-
-function IconGestorias({ size = 22 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} {...ICON_SVG} aria-hidden>
-      <path d="M3 7h6l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z" />
-      <circle cx="14" cy="15" r="2.4" />
-    </svg>
-  );
-}
-
-function IconInmo({ size = 22 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} {...ICON_SVG} aria-hidden>
-      <circle cx="6.5" cy="12" r="3.5" />
-      <path d="M10 12h11" />
-      <path d="M18 12v3" />
-      <path d="M15 12v2.2" />
-    </svg>
-  );
-}
-
-function IconHoreca({ size = 22 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} {...ICON_SVG} aria-hidden>
-      <path d="M7 3h10l-1 5a4 4 0 0 1-8 0z" />
-      <path d="M12 12v7" />
-      <path d="M8.5 19h7" />
-    </svg>
-  );
-}
 
 const INDUSTRIES: Industry[] = [
   {
-    id:   'clinicas',
-    name: 'Clínicas y consultas',
-    Icon: IconClinicas,
+    id:    'clinicas',
+    name:  'Clínicas y consultas',
+    short: 'Clínicas',
+    blurb: 'Médicos, dentistas, fisioterapeutas.',
+    kickerTarget: 'tu clínica',
+    Icon:   SolarStethoscope,
     pains: [
       'Cito por WhatsApp y recuerdo a los pacientes a mano.',
       'La ficha del paciente vive en papel o en un Word.',
@@ -117,9 +61,12 @@ const INDUSTRIES: Industry[] = [
     },
   },
   {
-    id:   'clubs',
-    name: 'Clubs y asociaciones deportivas',
-    Icon: IconClubs,
+    id:    'clubs',
+    name:  'Clubs y asociaciones deportivas',
+    short: 'Clubs',
+    blurb: 'Deportivos y sociales.',
+    kickerTarget: 'tu club',
+    Icon:   SolarFootball,
     pains: [
       'Las cuotas y multas las llevo en un Excel.',
       'Convoco entrenos y partidos por grupos de WhatsApp.',
@@ -136,9 +83,12 @@ const INDUSTRIES: Industry[] = [
     },
   },
   {
-    id:   'retail',
-    name: 'Tiendas y e-commerce',
-    Icon: IconRetail,
+    id:    'retail',
+    name:  'Tiendas y e-commerce',
+    short: 'Tiendas',
+    blurb: 'Físicas y online.',
+    kickerTarget: 'tu tienda',
+    Icon:   SolarShop,
     pains: [
       'El stock de la tienda y la web van desincronizados.',
       'Los pedidos llegan por email, WhatsApp e Instagram.',
@@ -155,9 +105,12 @@ const INDUSTRIES: Industry[] = [
     },
   },
   {
-    id:   'gestorias',
-    name: 'Gestorías y asesorías',
-    Icon: IconGestorias,
+    id:    'gestorias',
+    name:  'Gestorías y asesorías',
+    short: 'Gestorías',
+    blurb: 'Fiscal y laboral.',
+    kickerTarget: 'tu gestoría',
+    Icon:   SolarFolder,
     pains: [
       'Pido documentación al cliente por email, una y otra vez.',
       'Los expedientes viven entre Drive, Dropbox y carpetas locales.',
@@ -174,9 +127,12 @@ const INDUSTRIES: Industry[] = [
     },
   },
   {
-    id:   'inmo',
-    name: 'Inmobiliarias',
-    Icon: IconInmo,
+    id:    'inmo',
+    name:  'Inmobiliarias',
+    short: 'Inmobiliarias',
+    blurb: 'Agencias y promotoras.',
+    kickerTarget: 'tu inmobiliaria',
+    Icon:   SolarBuildings,
     pains: [
       'Los leads se reparten entre CRM, email y WhatsApp.',
       'La documentación está en carpetas dispersas.',
@@ -193,9 +149,12 @@ const INDUSTRIES: Industry[] = [
     },
   },
   {
-    id:   'horeca',
-    name: 'Hostelería y restauración',
-    Icon: IconHoreca,
+    id:    'horeca',
+    name:  'Hostelería y restauración',
+    short: 'Hostelería',
+    blurb: 'Restaurantes, cafés y bares.',
+    kickerTarget: 'tu negocio de hostelería',
+    Icon:   SolarChefHat,
     pains: [
       'Las reservas llegan por teléfono, Instagram y Google.',
       'Los pedidos a proveedor se piden por WhatsApp.',
@@ -213,55 +172,44 @@ const INDUSTRIES: Industry[] = [
   },
 ];
 
-/* ──────────────────────────── Icons ──────────────────────────── */
+/* ─── {x} brand mark — same paths as FloatingPill (Nohemi SemiBold) ─── */
+const D_OPEN =
+  'M8.639 2.367H7.988Q6.958 2.367 6.467 2.923Q5.976 3.479 5.976 4.615V6.379Q5.976 7.024 5.864 7.627Q5.751 8.231 5.482 8.710Q5.213 9.189 4.766 9.506Q4.320 9.822 3.651 9.905Q4.331 9.982 4.778 10.293Q5.225 10.604 5.491 11.083Q5.757 11.562 5.867 12.169Q5.976 12.775 5.976 13.450V15.213Q5.976 16.320 6.470 16.876Q6.964 17.432 7.988 17.432H8.639V20.107H7.438Q4.970 20.107 3.728 18.879Q2.485 17.651 2.485 15.201V13.284Q2.485 12.781 2.396 12.420Q2.308 12.059 2.118 11.825Q1.929 11.592 1.636 11.482Q1.343 11.373 0.935 11.373H0.639V8.426H0.935Q1.349 8.426 1.642 8.320Q1.935 8.213 2.121 7.982Q2.308 7.751 2.396 7.388Q2.485 7.024 2.485 6.515V4.598Q2.485 2.124 3.716 0.908Q4.947 -0.308 7.438 -0.308H8.639Z';
+const D_X =
+  'M19.083 9.802L23.669 16.423H19.550L16.349 11.547L13.237 16.423H9.343L13.728 9.849L9.391 3.376H13.509L16.467 8.151L19.373 3.376H23.266Z';
+const D_CLOSE =
+  'M24.267 17.431H24.918Q25.947 17.431 26.438 16.875Q26.929 16.319 26.929 15.183V13.419Q26.929 12.775 27.042 12.171Q27.154 11.567 27.423 11.088Q27.693 10.609 28.139 10.292Q28.586 9.976 29.255 9.893Q28.574 9.816 28.128 9.505Q27.681 9.195 27.415 8.716Q27.148 8.236 27.039 7.630Q26.929 7.023 26.929 6.349V4.586Q26.929 3.479 26.435 2.923Q25.941 2.367 24.918 2.367H24.267V-0.308H25.468Q27.935 -0.308 29.178 0.920Q30.420 2.148 30.420 4.598V6.515Q30.420 7.017 30.509 7.378Q30.598 7.739 30.787 7.973Q30.976 8.207 31.269 8.316Q31.562 8.426 31.970 8.426H32.266V11.372H31.970Q31.556 11.372 31.263 11.479Q30.971 11.585 30.784 11.816Q30.598 12.047 30.509 12.411Q30.420 12.775 30.420 13.283V15.201Q30.420 17.674 29.190 18.890Q27.959 20.105 25.468 20.105H24.267Z';
 
-function IconArrow({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="5" y1="12" x2="19" y2="12" />
-      <polyline points="12 5 19 12 12 19" />
-    </svg>
-  );
-}
-function IconCheck({ size = 14 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
+const THINKING_COPY = [
+  'Leyendo tu sector',
+  'Cruzando tus procesos',
+  'Preparando tu propuesta',
+];
 
 /* ──────────────────────── Component ──────────────────────── */
 
 export default function ServiciosDiagnostico({ wa }: Props) {
-  const sectionRef = useRef<HTMLDivElement>(null);
+  const sectionRef   = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
 
-  const [show, setShow]                   = useState(false);
-  const [started, setStarted]             = useState(false);
-  const [step, setStep]                   = useState<0 | 1 | 2>(0);
-  const [industryId, setIndustryId]       = useState<string | null>(null);
+  const [started,       setStarted]       = useState(false);
+  const [step,          setStep]          = useState<0 | 1 | 2>(0);
+  const [industryId,    setIndustryId]    = useState<string | null>(null);
   const [selectedPains, setSelectedPains] = useState<Set<number>>(new Set());
+  const [note,          setNote]          = useState('');
+  const [thinking,      setThinking]      = useState(false);
 
   const industry = useMemo(
     () => INDUSTRIES.find(i => i.id === industryId) ?? null,
     [industryId],
   );
 
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setShow(true); obs.disconnect(); } },
-      { threshold: 0.05 },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
+  const beginDiagnostic = () => setStarted(true);
 
   const pickIndustry = (id: string) => {
     setIndustryId(id);
     setSelectedPains(new Set());
+    setNote('');
     setStep(1);
   };
 
@@ -277,585 +225,399 @@ export default function ServiciosDiagnostico({ wa }: Props) {
     setStep(0);
     setIndustryId(null);
     setSelectedPains(new Set());
+    setNote('');
+    setThinking(false);
   };
 
-  const closePoster = () => {
-    setStarted(false);
-    setStep(0);
-    setIndustryId(null);
-    setSelectedPains(new Set());
+  const goToProposal = () => {
+    if (reduceMotion) { setStep(2); return; }
+    setThinking(true);
+    window.setTimeout(() => {
+      setStep(2);
+      setThinking(false);
+    }, 3600);
   };
 
-  const stepLabel =
-    step === 0 ? 'Cuéntame a qué te dedicas.'
-  : step === 1 ? 'Señala lo que te suena familiar.'
-               : 'Esto es lo que montaría para ti.';
-
-  /* WhatsApp URL — composes the message contextually when reaching step 2 */
   const waHref = useMemo(() => {
     if (step !== 2 || !industry) return wa;
     const checked = Array.from(selectedPains).map(i => `• ${industry.pains[i]}`).join('\n');
-    const body = `Hola Antonio. Tengo ${industry.name.toLowerCase()} y me interesa: ${industry.proposal.headline}\n\nLo que me suena familiar:\n${checked}`;
+    const extra = note.trim() ? `\n\nContexto:\n${note.trim()}` : '';
+    const body = `Hola Antonio. Tengo ${industry.name.toLowerCase()} y me interesa: ${industry.proposal.headline}\n\nLo que me suena familiar:\n${checked}${extra}`;
     return `${wa}?text=${encodeURIComponent(body)}`;
-  }, [wa, step, industry, selectedPains]);
+  }, [wa, step, industry, selectedPains, note]);
+
+  const promptText =
+    thinking      ? 'Cruzando lo que me has contado…'
+    : step === 0  ? 'Empieza por tu sector. Seis opciones — solo necesitas una.'
+    : step === 1  ? 'Señala lo que te suena familiar.'
+    :               'Esto es lo que montaría para ti.';
 
   return (
     <section
       data-servicios-section="diagnostico"
       className="s-snap-section s-diag"
-      style={{
-        display:        'flex',
-        flexDirection:  'column',
-        justifyContent: 'center',
-        padding:        'clamp(1.5rem,4vw,3.5rem) clamp(1.5rem,5vw,5rem)',
-        background:     'var(--s-bg)',
-        overflow:       'hidden',
-        position:       'relative',
-      }}
     >
       <div ref={sectionRef} style={{ position:'absolute', inset:0, pointerEvents:'none' }} aria-hidden />
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
         {!started ? (
+          /* ───────── Stage CTA · centered ───────── */
           <motion.div
-            key="poster"
+            key="cta"
+            className="s-diag-stage s-diag-stage-cta"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -16 }}
+            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="s-diag-cta-visual" aria-hidden>
+              <svg viewBox="0 0 32.91 22" focusable="false">
+                <path d={D_OPEN}  fill="var(--s-accent)" />
+                <path d={D_X}     fill="var(--s-accent)" />
+                <path d={D_CLOSE} fill="var(--s-accent)" />
+              </svg>
+            </div>
+
+            <div className="s-diag-cta-inner">
+              <h2 className="s-diag-title s-diag-title-cta">
+                Diagnóstico.
+                <br />
+                <span className="s-diag-title-muted">Tres preguntas.</span>
+                <br />
+                Una propuesta concreta.
+              </h2>
+              <p className="s-diag-sub s-diag-sub-cta">
+                Dime a qué te dedicas y te digo qué te montaría, con plazos y precio. Sin rollos.
+              </p>
+              <button
+                type="button"
+                onClick={beginDiagnostic}
+                className="s-diag-cta-btn"
+              >
+                ¿Cuál es tu sector?
+                <ArrowRight size={20} weight="bold" />
+              </button>
+            </div>
+          </motion.div>
+        ) : (
+          /* ───────── Stage split · rail + right ───────── */
+          <motion.div
+            key="split"
+            className="s-diag-stage"
             initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 18 }}
             animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
             exit={reduceMotion    ? { opacity: 0 } : { opacity: 0, y: -12 }}
             transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-            style={{
-              display:        'flex',
-              flexDirection:  'column',
-              alignItems:     'center',
-              justifyContent: 'center',
-              textAlign:      'center',
-              gap:            'clamp(1.25rem,2.5vw,2rem)',
-              padding:        'clamp(2rem,5vw,4rem) 0',
-              maxWidth:        780,
-              margin:         '0 auto',
-            }}
           >
-            <span
-              style={{
-                fontFamily:    'Safiro, sans-serif',
-                fontSize:       13,
-                letterSpacing: '-0.01em',
-                color:         'var(--s-ink-3)',
-              }}
-            >
-              Diagnóstico express · 60 segundos
-            </span>
+            <div className="s-diag-wizard">
+              {/* ── LEFT rail ── */}
+              <aside className="s-diag-left">
+                <h2 className="s-diag-rail-title">
+                  Diagnóstico
+                  <br />
+                  <span>express.</span>
+                </h2>
 
-            <h2
-              style={{
-                fontFamily:   'Nohemi, sans-serif',
-                fontSize:     'clamp(2.4rem,6vw,5.5rem)',
-                fontWeight:    600,
-                letterSpacing:'-0.04em',
-                lineHeight:    0.95,
-                color:        'var(--s-ink)',
-                margin:        0,
-              }}
-            >
-              Diagnóstico.
-              <br />
-              <span style={{ color:'var(--s-ink-3)', fontWeight: 400 }}>Tres preguntas.</span>
-              <br />
-              Una propuesta concreta.
-            </h2>
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={thinking ? 'thinking' : step}
+                    className="s-diag-rail-prompt"
+                    initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
+                    animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                    exit={reduceMotion    ? { opacity: 0 } : { opacity: 0, y: -8 }}
+                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    {promptText}
+                  </motion.p>
+                </AnimatePresence>
 
-            <p
-              style={{
-                fontFamily:   'Safiro, sans-serif',
-                fontSize:     'clamp(1rem,1.2vw,1.1rem)',
-                lineHeight:    1.55,
-                color:        'var(--s-ink-2)',
-                margin:        0,
-                maxWidth:      520,
-                letterSpacing:'-0.005em',
-              }}
-            >
-              Cuéntame a qué te dedicas y qué te suena familiar. Te devuelvo qué montaría para ti, sin compromiso.
-            </p>
-
-            <button
-              type="button"
-              onClick={() => setStarted(true)}
-              className="s-cta-primary"
-              style={{
-                display:       'inline-flex',
-                alignItems:    'center',
-                gap:            10,
-                marginTop:     '0.5rem',
-                fontFamily:    'Safiro, sans-serif',
-                fontSize:       15,
-                fontWeight:     500,
-                letterSpacing: '-0.01em',
-                color:          '#FFFFFF',
-                padding:       '16px 32px',
-                borderRadius:   9999,
-                cursor:        'pointer',
-              }}
-            >
-              Empezar
-              <IconArrow size={16} />
-            </button>
-          </motion.div>
-        ) : (
-      <motion.div
-        key="wizard"
-        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 18 }}
-        animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-        exit={reduceMotion    ? { opacity: 0 } : { opacity: 0, y: -12 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        style={{
-          display:             'grid',
-          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.15fr)',
-          gap:                 'clamp(2rem,6vw,7rem)',
-          alignItems:          'start',
-        }}
-      >
-        {/* ── LEFT · headline + step indicator ── */}
-        <div
-          className="s-diag-left"
-          style={{
-            position:       'sticky',
-            top:             0,
-            display:        'flex',
-            flexDirection:  'column',
-            gap:            'clamp(1.25rem,2vw,2rem)',
-          }}
-        >
-          <h2
-            style={{
-              fontFamily:   'Nohemi, sans-serif',
-              fontSize:     'clamp(2rem,3.8vw,3.5rem)',
-              fontWeight:    600,
-              letterSpacing:'-0.03em',
-              lineHeight:    1.0,
-              color:        'var(--s-ink)',
-              margin:        0,
-            }}
-          >
-            Diagnóstico
-            <br />
-            <span style={{ color:'var(--s-ink-3)' }}>express.</span>
-          </h2>
-
-          <AnimatePresence mode="wait">
-            <motion.p
-              key={step}
-              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
-              animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-              exit={reduceMotion    ? { opacity: 0 } : { opacity: 0, y: -8 }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              style={{
-                fontFamily: 'Safiro, sans-serif',
-                fontSize:   'clamp(0.95rem,1.1vw,1.05rem)',
-                lineHeight:  1.6,
-                color:      'var(--s-ink-2)',
-                margin:      0,
-                maxWidth:    360,
-              }}
-            >
-              {stepLabel}
-            </motion.p>
-          </AnimatePresence>
-
-          {/* step indicator */}
-          <div style={{ display:'flex', alignItems:'center', gap:'0.75rem', marginTop:'0.5rem' }}>
-            {[0, 1, 2].map(i => (
-              <div key={i} style={{ display:'flex', alignItems:'center', gap:'0.75rem' }}>
-                <div
-                  style={{
-                    display:        'flex',
-                    alignItems:     'center',
-                    justifyContent: 'center',
-                    width:           28,
-                    height:          28,
-                    borderRadius:    9999,
-                    fontFamily:     'Nohemi, sans-serif',
-                    fontSize:        12,
-                    fontWeight:      500,
-                    color:           i === step ? 'var(--s-accent)' : (i < step ? 'var(--s-ink)' : 'var(--s-ink-3)'),
-                    background:      i === step ? 'var(--s-accent-soft)' : 'transparent',
-                    border:          `1px solid ${i === step ? 'var(--s-accent)' : (i < step ? 'var(--s-ink)' : 'var(--s-line)')}`,
-                    transition:     'all 0.35s var(--s-ease)',
-                  }}
-                >
-                  {i + 1}
-                </div>
-                {i < 2 && (
-                  <div
-                    style={{
-                      width:       24,
-                      height:      1,
-                      background: i < step ? 'var(--s-ink)' : 'var(--s-line)',
-                      transition:'background 0.35s var(--s-ease)',
-                    }}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div style={{ display:'flex', gap:'1.25rem', marginTop:'0.25rem' }}>
-            <button
-              type="button"
-              onClick={closePoster}
-              style={{
-                padding:         0,
-                background:     'none',
-                border:         'none',
-                cursor:         'pointer',
-                fontFamily:     'Safiro, sans-serif',
-                fontSize:        13,
-                color:          'var(--s-ink-3)',
-                letterSpacing:  '-0.01em',
-                textDecoration: 'underline',
-                textUnderlineOffset: 3,
-              }}
-            >
-              ← Cerrar
-            </button>
-            {step > 0 && (
-              <button
-                type="button"
-                onClick={restart}
-                style={{
-                  padding:         0,
-                  background:     'none',
-                  border:         'none',
-                  cursor:         'pointer',
-                  fontFamily:     'Safiro, sans-serif',
-                  fontSize:        13,
-                  color:          'var(--s-ink-3)',
-                  letterSpacing:  '-0.01em',
-                  textDecoration: 'underline',
-                  textUnderlineOffset: 3,
-                }}
-              >
-                Empezar de nuevo
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* ── RIGHT · step content ── */}
-        <div style={{ minHeight: 360, position: 'relative' }}>
-          <AnimatePresence mode="wait">
-            {step === 0 && (
-              <motion.div
-                key="step-0"
-                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
-                animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                exit={reduceMotion    ? { opacity: 0 } : { opacity: 0, y: -12 }}
-                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <ul
-                  className="s-diag-industries"
-                  style={{ listStyle:'none', margin:0, padding:0, display:'grid', gridTemplateColumns:'1fr 1fr', gap:0 }}
-                >
-                  {INDUSTRIES.map((it, i) => {
-                    const Icon = it.Icon;
+                {/* Stepper · big Nohemi numerals, no lines */}
+                <ol className="s-diag-stepper" aria-hidden>
+                  {[0, 1, 2].map(i => {
+                    const state = i === step ? 'current' : i < step ? 'done' : 'todo';
                     return (
-                    <li
-                      key={it.id}
-                      style={{
-                        borderTop:    '1px solid var(--s-line)',
-                        borderBottom: i >= INDUSTRIES.length - 2 ? '1px solid var(--s-line)' : undefined,
-                      }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => pickIndustry(it.id)}
-                        className="s-diag-row"
-                        style={{
-                          display:        'flex',
-                          alignItems:     'center',
-                          justifyContent: 'space-between',
-                          gap:             '1rem',
-                          width:           '100%',
-                          padding:         'clamp(1rem,1.5vw,1.4rem) clamp(0.6rem,1.2vw,1.2rem)',
-                          background:     'none',
-                          border:         'none',
-                          cursor:         'pointer',
-                          textAlign:      'left',
-                          fontFamily:     'Nohemi, sans-serif',
-                          fontSize:       'clamp(0.95rem,1.15vw,1.1rem)',
-                          fontWeight:      500,
-                          letterSpacing:  '-0.015em',
-                          color:          'var(--s-ink)',
-                          transition:     'background 0.3s var(--s-ease), padding 0.3s var(--s-ease)',
-                        }}
-                      >
-                        <span style={{ display:'flex', alignItems:'center', gap:'0.85rem' }}>
-                          <span className="s-diag-row-icon" style={{ color:'var(--s-ink-3)', display:'flex', transition:'color 0.3s var(--s-ease), transform 0.3s var(--s-ease)' }}>
-                            <Icon />
-                          </span>
-                          <span>{it.name}</span>
+                      <li key={i} className="s-diag-step" data-state={state}>
+                        <span className="s-diag-step-num">{i + 1}</span>
+                        <span className="s-diag-step-label">
+                          {i === 0 ? 'Sector' : i === 1 ? 'Procesos' : 'Propuesta'}
                         </span>
-                        <span className="s-diag-arrow" aria-hidden>
-                          <IconArrow />
-                        </span>
-                      </button>
-                    </li>
-                    );
-                  })}
-                </ul>
-              </motion.div>
-            )}
-
-            {step === 1 && industry && (
-              <motion.div
-                key={`step-1-${industry.id}`}
-                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
-                animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                exit={reduceMotion    ? { opacity: 0 } : { opacity: 0, y: -12 }}
-                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                style={{ display:'flex', flexDirection:'column', gap:'1.25rem' }}
-              >
-                <div
-                  style={{
-                    fontFamily:   'Nohemi, sans-serif',
-                    fontSize:      13,
-                    letterSpacing:'-0.01em',
-                    color:        'var(--s-ink-3)',
-                  }}
-                >
-                  Sector seleccionado · <span style={{ color:'var(--s-ink)' }}>{industry.name}</span>
-                </div>
-
-                <ul style={{ listStyle:'none', margin:0, padding:0, display:'flex', flexDirection:'column' }}>
-                  {industry.pains.map((p, i) => {
-                    const on = selectedPains.has(i);
-                    return (
-                      <li key={i} style={{ borderTop: '1px solid var(--s-line)' }}>
-                        <button
-                          type="button"
-                          onClick={() => togglePain(i)}
-                          className="s-diag-pain"
-                          aria-pressed={on}
-                          style={{
-                            display:        'flex',
-                            alignItems:     'center',
-                            gap:             '1rem',
-                            width:           '100%',
-                            padding:         '1rem 0.4rem',
-                            background:     'none',
-                            border:         'none',
-                            cursor:         'pointer',
-                            textAlign:      'left',
-                            transition:    'background 0.3s var(--s-ease)',
-                          }}
-                        >
-                          <span
-                            aria-hidden
-                            style={{
-                              flexShrink:      0,
-                              display:        'flex',
-                              alignItems:     'center',
-                              justifyContent: 'center',
-                              width:           22,
-                              height:          22,
-                              borderRadius:    6,
-                              background:      on ? 'var(--s-accent)' : 'transparent',
-                              border:          `1.5px solid ${on ? 'var(--s-accent)' : 'var(--s-line)'}`,
-                              color:           '#FFFFFF',
-                              transition:     'background 0.25s var(--s-ease), border-color 0.25s var(--s-ease)',
-                            }}
-                          >
-                            {on && <IconCheck />}
-                          </span>
-                          <span
-                            style={{
-                              fontFamily:   'Safiro, sans-serif',
-                              fontSize:     'clamp(0.95rem,1.1vw,1.02rem)',
-                              lineHeight:    1.5,
-                              color:         on ? 'var(--s-ink)' : 'var(--s-ink-2)',
-                              letterSpacing:'-0.01em',
-                              transition:   'color 0.25s var(--s-ease)',
-                            }}
-                          >
-                            {p}
-                          </span>
-                        </button>
                       </li>
                     );
                   })}
-                  <li style={{ borderTop: '1px solid var(--s-line)' }} />
-                </ul>
+                </ol>
 
-                <div style={{ display:'flex', flexWrap:'wrap', gap:'1rem', alignItems:'center', paddingTop:'0.5rem' }}>
-                  <button
-                    type="button"
-                    onClick={() => setStep(2)}
-                    disabled={selectedPains.size === 0}
-                    style={{
-                      fontFamily:    'Safiro, sans-serif',
-                      fontSize:       14,
-                      fontWeight:     500,
-                      letterSpacing: '-0.01em',
-                      color:         selectedPains.size === 0 ? 'var(--s-ink-3)' : '#FFFFFF',
-                      background:    selectedPains.size === 0 ? 'rgba(11,15,20,0.08)' : 'var(--s-ink)',
-                      padding:       '12px 22px',
-                      borderRadius:   9999,
-                      border:        `1px solid ${selectedPains.size === 0 ? 'transparent' : 'var(--s-ink)'}`,
-                      cursor:        selectedPains.size === 0 ? 'not-allowed' : 'pointer',
-                      transition:   'background 0.25s var(--s-ease), color 0.25s var(--s-ease)',
-                    }}
-                  >
-                    Ver mi propuesta {selectedPains.size > 0 && <span style={{ opacity: 0.7, marginLeft: 6 }}>({selectedPains.size})</span>}
+                {step > 0 && (
+                  <button type="button" onClick={restart} className="s-diag-restart">
+                    ← Cambiar sector
                   </button>
-                  <span style={{ fontFamily:'Safiro, sans-serif', fontSize:13, color:'var(--s-ink-3)' }}>
-                    Puedes marcar las que quieras.
-                  </span>
-                </div>
-              </motion.div>
-            )}
+                )}
+              </aside>
 
-            {step === 2 && industry && (
-              <motion.div
-                key={`step-2-${industry.id}`}
-                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
-                animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                exit={reduceMotion    ? { opacity: 0 } : { opacity: 0, y: -12 }}
-                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                style={{ display:'flex', flexDirection:'column', gap:'1.5rem' }}
-              >
-                <div
-                  style={{
-                    fontFamily:   'Nohemi, sans-serif',
-                    fontSize:      13,
-                    letterSpacing:'-0.01em',
-                    color:        'var(--s-ink-3)',
-                  }}
-                >
-                  Para {industry.name} · {selectedPains.size} {selectedPains.size === 1 ? 'proceso detectado' : 'procesos detectados'}
-                </div>
-
-                <h3
-                  style={{
-                    fontFamily:   'Nohemi, sans-serif',
-                    fontSize:     'clamp(1.5rem,2.3vw,2.1rem)',
-                    fontWeight:    600,
-                    letterSpacing:'-0.025em',
-                    lineHeight:    1.1,
-                    color:        'var(--s-ink)',
-                    margin:        0,
-                  }}
-                >
-                  {industry.proposal.headline}
-                </h3>
-
-                <ul style={{ listStyle:'none', margin:0, padding:0, display:'flex', flexDirection:'column', gap:'0.5rem' }}>
-                  {industry.proposal.deliverables.map((d, i) => (
-                    <li
-                      key={i}
-                      style={{
-                        display:     'flex',
-                        alignItems:  'flex-start',
-                        gap:          '0.85rem',
-                        padding:      '0.6rem 0',
-                        borderTop:    i === 0 ? '1px solid var(--s-line)' : undefined,
-                        borderBottom: '1px solid var(--s-line)',
-                      }}
+              {/* ── RIGHT panel ── */}
+              <div className="s-diag-right">
+                <AnimatePresence mode="wait">
+                  {thinking ? (
+                    <motion.div
+                      key="thinking"
+                      className="s-diag-thinking"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                     >
-                      <span
-                        aria-hidden
-                        style={{
-                          flexShrink:      0,
-                          marginTop:        4,
-                          display:        'inline-flex',
-                          alignItems:     'center',
-                          justifyContent: 'center',
-                          width:           20,
-                          height:          20,
-                          borderRadius:    9999,
-                          background:     'var(--s-accent)',
-                          color:          '#FFFFFF',
-                        }}
-                      >
-                        <IconCheck size={12} />
-                      </span>
-                      <span
-                        style={{
-                          fontFamily:   'Safiro, sans-serif',
-                          fontSize:     'clamp(0.95rem,1.1vw,1.02rem)',
-                          lineHeight:    1.5,
-                          color:        'var(--s-ink)',
-                          letterSpacing:'-0.01em',
-                        }}
-                      >
-                        {d}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                      <ThinkingMark />
+                    </motion.div>
+                  ) : step === 0 ? (
+                    <motion.div
+                      key="step-0-bento"
+                      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
+                      animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                      exit={reduceMotion    ? { opacity: 0 } : { opacity: 0, y: -12 }}
+                      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <div className="s-diag-bento" role="list">
+                        {INDUSTRIES.map((it, i) => {
+                          const Icon = it.Icon;
+                          return (
+                            <button
+                              key={it.id}
+                              type="button"
+                              role="listitem"
+                              className="s-diag-tile"
+                              onClick={() => pickIndustry(it.id)}
+                              style={{
+                                animationDelay: `${0.05 + i * 0.05}s`,
+                              }}
+                            >
+                              <span className="s-diag-tile-icon" aria-hidden>
+                                <Icon size="100%" weight="duotone" />
+                              </span>
 
-                <div style={{ display:'flex', flexWrap:'wrap', gap:'0.75rem', paddingTop:'0.5rem' }}>
-                  <a
-                    href={waHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display:       'inline-flex',
-                      alignItems:    'center',
-                      gap:            8,
-                      fontFamily:    'Safiro, sans-serif',
-                      fontSize:       14,
-                      fontWeight:     500,
-                      letterSpacing: '-0.01em',
-                      color:          '#FFFFFF',
-                      background:    'var(--s-ink)',
-                      padding:       '12px 22px',
-                      borderRadius:   9999,
-                      textDecoration:'none',
-                      border:        '1px solid var(--s-ink)',
-                    }}
-                  >
-                    Hablemos por WhatsApp <IconArrow size={14} />
-                  </a>
-                  <button
-                    type="button"
-                    onClick={restart}
-                    style={{
-                      fontFamily:    'Safiro, sans-serif',
-                      fontSize:       14,
-                      fontWeight:     500,
-                      letterSpacing: '-0.01em',
-                      color:         'var(--s-ink)',
-                      background:    'transparent',
-                      padding:       '12px 22px',
-                      borderRadius:   9999,
-                      border:        '1px solid rgba(11,15,20,0.12)',
-                      cursor:        'pointer',
-                    }}
-                  >
-                    Probar otro sector
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </motion.div>
+                              <span className="s-diag-tile-body">
+                                <span className="s-diag-tile-title">{it.short}</span>
+                                <span className="s-diag-tile-sub">{it.blurb}</span>
+                              </span>
+
+                              <span className="s-diag-tile-arrow" aria-hidden>
+                                <ArrowRight size={16} weight="bold" />
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  ) : step === 1 && industry ? (
+                    <motion.div
+                      key={`step-1-${industry.id}`}
+                      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
+                      animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                      exit={reduceMotion    ? { opacity: 0 } : { opacity: 0, y: -12 }}
+                      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                      className="s-diag-panel"
+                    >
+                      <div className="s-diag-panel-eyebrow">
+                        <span className="s-diag-panel-eyebrow-label">Sector seleccionado</span>
+                        <span className="s-diag-panel-eyebrow-chip">
+                          <industry.Icon size={16} weight="duotone" />
+                          {industry.name}
+                        </span>
+                      </div>
+
+                      <ul className="s-diag-pains">
+                        {industry.pains.map((p, i) => {
+                          const on = selectedPains.has(i);
+                          return (
+                            <li key={i}>
+                              <button
+                                type="button"
+                                onClick={() => togglePain(i)}
+                                className="s-diag-pain"
+                                aria-pressed={on}
+                              >
+                                <span className="s-diag-pain-box" data-on={on || undefined}>
+                                  {on && <Check size={14} weight="bold" />}
+                                </span>
+                                <span className="s-diag-pain-text" data-on={on || undefined}>{p}</span>
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+
+                      <label className="s-diag-note">
+                        <span className="s-diag-note-label">¿Algo más? Cuéntamelo en tus palabras</span>
+                        <textarea
+                          className="s-diag-note-field"
+                          placeholder="Ej. Usamos tres Excels distintos y el equipo de sala no sabe qué mesa está libre…"
+                          value={note}
+                          onChange={e => setNote(e.target.value)}
+                          rows={3}
+                          maxLength={400}
+                        />
+                        <span className="s-diag-note-count">{note.length}/400</span>
+                      </label>
+
+                      <div className="s-diag-panel-footer">
+                        <button
+                          type="button"
+                          onClick={goToProposal}
+                          disabled={selectedPains.size === 0 && note.trim().length === 0}
+                          className="s-diag-next"
+                        >
+                          Ver mi propuesta
+                          {selectedPains.size > 0 && <span className="s-diag-next-count">({selectedPains.size})</span>}
+                        </button>
+                        <span className="s-diag-hint">
+                          Puedes marcar las que quieras.
+                        </span>
+                      </div>
+                    </motion.div>
+                  ) : step === 2 && industry ? (
+                    <motion.div
+                      key={`step-2-${industry.id}`}
+                      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
+                      animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                      exit={reduceMotion    ? { opacity: 0 } : { opacity: 0, y: -12 }}
+                      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                      className="s-diag-panel"
+                    >
+                      <p className="s-diag-proposal-kicker">
+                        Cómo mejoraría los procesos de {industry.kickerTarget}.
+                      </p>
+
+                      <h3 className="s-diag-proposal-title">
+                        {industry.proposal.headline}
+                      </h3>
+
+                      <ul className="s-diag-deliverables">
+                        {industry.proposal.deliverables.map((d, i) => (
+                          <li key={i}>
+                            <span className="s-diag-deliverable-badge" aria-hidden>
+                              <Check size={12} weight="bold" />
+                            </span>
+                            <span className="s-diag-deliverable-text">{d}</span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      <div className="s-diag-panel-footer">
+                        <a
+                          href={waHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="s-diag-next"
+                        >
+                          Hablemos por WhatsApp
+                          <ArrowRight size={14} weight="bold" />
+                        </a>
+                        <button type="button" onClick={restart} className="s-diag-secondary">
+                          Probar otro sector
+                        </button>
+                      </div>
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+              </div>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
-
-      <style>{`
-        .s-diag-row:hover { background: rgba(35,51,92,0.03); padding-left: 1.4rem !important; }
-        .s-diag-row:hover .s-diag-arrow { transform: translateX(4px); }
-        .s-diag-row:hover .s-diag-row-icon { color: var(--s-accent); transform: scale(1.05); }
-        .s-diag-arrow { transition: transform 0.3s var(--s-ease); }
-        .s-diag-pain:hover { background: rgba(11,15,20,0.02); }
-
-        @media (max-width: 768px) {
-          .s-diag-grid { grid-template-columns: 1fr !important; gap: clamp(1.5rem, 4vw, 2.5rem) !important; }
-          .s-diag-left { position: static !important; }
-          .s-diag-industries { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
     </section>
+  );
+}
+
+/* ───────────────────── Thinking mark ─────────────────────
+ * GSAP timeline · whole logo translates L→R while x rotates 360° CW,
+ * then R→L while x rotates 360° CCW. Brackets fade as it sways.
+ * ─────────────────────────────────────────────────────── */
+function ThinkingMark() {
+  const wrapRef   = useRef<HTMLDivElement>(null);
+  const markRef   = useRef<HTMLDivElement>(null);
+  const xRef      = useRef<SVGPathElement>(null);
+  const haloRef   = useRef<HTMLDivElement>(null);
+  const [copyIdx, setCopyIdx] = useState(0);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setCopyIdx(i => (i + 1) % THINKING_COPY.length);
+    }, 1500);
+    return () => window.clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.set(xRef.current,    { transformOrigin: '50% 50%' });
+      gsap.set(markRef.current, { x: 0 });
+
+      const SWAY = 22;
+
+      const tl = gsap.timeline({ repeat: -1, defaults: { ease: 'power2.inOut' } });
+
+      // Phase 1 · logo glides L→R while x rotates 360° clockwise
+      tl.fromTo(markRef.current,
+        { x: -SWAY },
+        { x:  SWAY, duration: 1.8 }, 0,
+      )
+      .fromTo(xRef.current,
+        { rotate: 0   },
+        { rotate: 360, duration: 1.8, ease: 'none' }, 0,
+      )
+      // Phase 2 · logo glides R→L while x rotates 360° counter-clockwise
+      .fromTo(markRef.current,
+        { x:  SWAY },
+        { x: -SWAY, duration: 1.8 }, 1.8,
+      )
+      .fromTo(xRef.current,
+        { rotate: 360 },
+        { rotate: 0,   duration: 1.8, ease: 'none' }, 1.8,
+      );
+
+      if (haloRef.current) {
+        gsap.to(haloRef.current, {
+          scale: 1.35,
+          opacity: 0.1,
+          duration: 1.6,
+          ease: 'power2.inOut',
+          yoyo: true,
+          repeat: -1,
+        });
+      }
+    }, wrapRef);
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <div ref={wrapRef} style={{ display:'contents' }}>
+      <div ref={markRef} className="s-diag-thinking-mark">
+        <div ref={haloRef} className="s-diag-thinking-halo" aria-hidden />
+        <svg viewBox="0 0 32.91 22" aria-hidden focusable="false">
+          <path d={D_OPEN}  fill="var(--s-accent)" />
+          <path ref={xRef} d={D_X} fill="var(--s-accent)" />
+          <path d={D_CLOSE} fill="var(--s-accent)" />
+        </svg>
+      </div>
+
+      <div className="s-diag-thinking-copy">
+        <span className="s-diag-thinking-line">
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={copyIdx}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {THINKING_COPY[copyIdx]}
+            </motion.span>
+          </AnimatePresence>
+          <span className="s-diag-thinking-ellipsis" aria-hidden>
+            <i /><i /><i />
+          </span>
+        </span>
+        <span className="s-diag-thinking-sub">
+          Un segundo, montando la imagen mental de tu negocio.
+        </span>
+      </div>
+    </div>
   );
 }

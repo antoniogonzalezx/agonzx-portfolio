@@ -30,9 +30,9 @@ function LogoMark() {
       focusable="false"
       style={{ display: 'block', flexShrink: 0 }}
     >
-      <path d={D_OPEN}  fill="#23335C" />
+      <path d={D_OPEN}  fill="#4F4FFF" />
       <path d={D_X}     fill="#4F4FFF" />
-      <path d={D_CLOSE} fill="#23335C" />
+      <path d={D_CLOSE} fill="#4F4FFF" />
     </svg>
   );
 }
