@@ -30,9 +30,9 @@ function LogoMark() {
       focusable="false"
       style={{ display: 'block', flexShrink: 0 }}
     >
-      <path d={D_OPEN}  fill="#0B0F14" />
-      <path d={D_X}     fill="#0B0F14" />
-      <path d={D_CLOSE} fill="#0B0F14" />
+      <path d={D_OPEN}  fill="#23335C" />
+      <path d={D_X}     fill="#4F4FFF" />
+      <path d={D_CLOSE} fill="#23335C" />
     </svg>
   );
 }
@@ -106,7 +106,7 @@ export default function FloatingPill() {
               onMouseLeave={() => setHovered(false)}
               style={{
                 display:        'block',
-                background:     hovered ? '#1E2B3C' : '#0B0F14',
+                background:     hovered ? '#4F4FFF' : '#23335C',
                 color:          '#FFFFFF',
                 borderRadius:   9999,
                 padding:        '11px 20px',

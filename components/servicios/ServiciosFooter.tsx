@@ -19,7 +19,6 @@ export default function ServiciosFooter({ wa }: Props) {
   const wordmarkRef  = useRef<HTMLDivElement>(null);
   const wordmarkText = useRef<HTMLSpanElement>(null);
   const [copied,  setCopied]  = useState(false);
-  const [hovered, setHovered] = useState(false);
 
   /* Fit wordmark to full section width */
   useEffect(() => {
@@ -109,8 +108,7 @@ export default function ServiciosFooter({ wa }: Props) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Hablar por WhatsApp con Antonio"
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
+          className="s-footer-wa"
           style={{
             display:              'flex',
             alignItems:           'center',
@@ -140,9 +138,9 @@ export default function ServiciosFooter({ wa }: Props) {
             agonz<span style={{ color:'var(--s-accent)' }}>{'{'}<span style={{ position:'relative', top:'-0.046em' }}>x</span>{'}'}</span>
           </span>
           <span
+            className="s-footer-wa-pill"
             style={{
               display:       'block',
-              background:    hovered ? '#1E2B3C' : '#0B0F14',
               color:         '#FFFFFF',
               borderRadius:  9999,
               padding:       '12px 24px',
@@ -245,7 +243,7 @@ export default function ServiciosFooter({ wa }: Props) {
         {/* Monumental wordmark — dark background like main portfolio */}
         <div
           style={{
-            background:  '#0B0F14',
+            background:  '#23335C',
             overflow:    'hidden',
             padding:     '0.2rem clamp(1.5rem,5vw,5rem) 0',
             lineHeight:  0.8,
@@ -261,7 +259,7 @@ export default function ServiciosFooter({ wa }: Props) {
                 fontSize:      '18vw',
                 letterSpacing: '-0.04em',
                 lineHeight:    0.8,
-                color:         '#F4F6F9',
+                color:         '#FAFBFD',
                 userSelect:    'none',
                 whiteSpace:    'nowrap',
               }}

@@ -1,8 +1,9 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
 import gsap from 'gsap';
 import SectionBlob from './SectionBlob';
+import Wordmark from './Wordmark';
 
 interface Props { wa: string; }
 
@@ -46,7 +47,6 @@ export default function ServiciosHero({ wa }: Props) {
   const bodyRef     = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const spotRef     = useRef<HTMLDivElement>(null);
-  const [ctaHover, setCtaHover] = useState(false);
 
   /* Spotlight — radial teal gradient follows cursor (rAF-throttled) */
   useEffect(() => {
@@ -68,7 +68,7 @@ export default function ServiciosHero({ wa }: Props) {
       cx += (tx - cx) * 0.08;
       cy += (ty - cy) * 0.08;
       spot.style.background =
-        `radial-gradient(520px circle at ${cx}% ${cy}%, rgba(61,242,224,0.32), rgba(61,242,224,0.08) 40%, transparent 70%)`;
+        `radial-gradient(520px circle at ${cx}% ${cy}%, rgba(79,79,255,0.22), rgba(79,79,255,0.06) 40%, transparent 70%)`;
       raf = requestAnimationFrame(tick);
     };
 
@@ -164,7 +164,7 @@ export default function ServiciosHero({ wa }: Props) {
           inset:          0,
           zIndex:          0,
           pointerEvents:  'none',
-          background:     'radial-gradient(520px circle at 50% 30%, rgba(61,242,224,0.32), rgba(61,242,224,0.08) 40%, transparent 70%)',
+          background:     'radial-gradient(520px circle at 50% 30%, rgba(79,79,255,0.22), rgba(79,79,255,0.06) 40%, transparent 70%)',
           mixBlendMode:   'multiply',
         }}
       />
@@ -191,19 +191,7 @@ export default function ServiciosHero({ wa }: Props) {
         className="s-hero-logo"
         style={{ width:'100%', lineHeight:0, position:'relative', zIndex:1, padding:'8px 0' }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/logos/agonzx-wordmark.svg"
-          alt="agonzx"
-          draggable={false}
-          style={{
-            width:       '100%',
-            height:      'auto',
-            display:     'block',
-            userSelect:  'none',
-            aspectRatio: '4.295 / 1',
-          }}
-        />
+        <Wordmark main="#23335C" accent="#4F4FFF" width="100%" />
       </div>
 
       {/* ── Body: headline + CTAs ── */}
@@ -233,38 +221,35 @@ export default function ServiciosHero({ wa }: Props) {
             margin:        0,
           }}
         >
-          <span className="s-hero-row" style={{ display:'flex', flexDirection:'row', gap:'0.28em', flexWrap:'nowrap' }}>
-            <Line text="Software"   color="var(--s-ink)" weight={600} />
-            <Line text="a medida."  color="var(--s-ink)" weight={600} />
+          {/* Desktop: single inline phrase */}
+          <span className="s-hero-row s-hero-row-desktop">
+            <Line text="Software a medida." color="var(--s-ink)" weight={600} />
+          </span>
+          {/* Mobile: stacked into two lines */}
+          <span className="s-hero-row s-hero-row-mobile">
+            <Line text="Software"  color="var(--s-ink)" weight={600} />
+            <Line text="a medida." color="var(--s-ink)" weight={600} />
           </span>
           <Line text="Sin rodeos." color="var(--s-ink-3)" weight={400} />
         </h1>
 
         <div style={{ display:'flex', gap:'0.75rem', flexWrap:'wrap', paddingTop:'0.5rem' }}>
-          {/* Primary CTA — teal + ink + ink border + lift on hover */}
+          {/* Primary CTA */}
           <a
             href={wa}
             target="_blank"
             rel="noopener noreferrer"
-            onMouseEnter={() => setCtaHover(true)}
-            onMouseLeave={() => setCtaHover(false)}
+            className="s-cta-primary"
             style={{
               display:       'inline-block',
               fontFamily:    'Safiro, sans-serif',
               fontSize:      '1rem',
               fontWeight:    500,
               letterSpacing: '-0.01em',
-              color:         ctaHover ? 'var(--s-ink)' : '#FFFFFF',
-              background:    ctaHover ? 'var(--s-accent)' : '#0B0F14',
+              color:         '#FFFFFF',
               padding:       '14px 28px',
               borderRadius:  9999,
               textDecoration:'none',
-              border:        `1px solid ${ctaHover ? 'var(--s-ink)' : '#0B0F14'}`,
-              transform:     ctaHover ? 'translateY(-2px)' : 'translateY(0)',
-              boxShadow:     ctaHover
-                ? '0 10px 24px rgba(61,242,224,0.35), 0 2px 6px rgba(11,15,20,0.12)'
-                : '0 1px 2px rgba(11,15,20,0.08)',
-              transition:    'background 0.22s var(--s-ease), color 0.22s var(--s-ease), border-color 0.22s var(--s-ease), transform 0.22s var(--s-ease), box-shadow 0.22s var(--s-ease)',
             }}
           >
             Hablemos →
@@ -272,34 +257,17 @@ export default function ServiciosHero({ wa }: Props) {
           {/* Secondary CTA — glass */}
           <a
             href="#servicios"
-            onMouseEnter={e => {
-              e.currentTarget.style.borderColor = 'rgba(11,15,20,0.2)';
-              e.currentTarget.style.background  = 'rgba(255,255,255,0.75)';
-              e.currentTarget.style.transform   = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow   = '0 10px 24px rgba(11,15,20,0.08), inset 0 1px 0 rgba(255,255,255,0.95)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.borderColor = 'rgba(11,15,20,0.08)';
-              e.currentTarget.style.background  = 'rgba(255,255,255,0.5)';
-              e.currentTarget.style.transform   = 'translateY(0)';
-              e.currentTarget.style.boxShadow   = 'inset 0 1px 0 rgba(255,255,255,0.85)';
-            }}
+            className="s-cta-ghost"
             style={{
-              display:              'inline-block',
-              fontFamily:           'Safiro, sans-serif',
-              fontSize:             '1rem',
-              fontWeight:           500,
-              letterSpacing:        '-0.01em',
-              color:                'var(--s-ink)',
-              background:           'rgba(255,255,255,0.5)',
-              backdropFilter:       'blur(24px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-              padding:              '14px 28px',
-              borderRadius:         9999,
-              textDecoration:       'none',
-              border:               '1px solid rgba(11,15,20,0.08)',
-              boxShadow:            'inset 0 1px 0 rgba(255,255,255,0.85)',
-              transition:           'background 0.22s var(--s-ease), border-color 0.22s var(--s-ease), transform 0.22s var(--s-ease), box-shadow 0.22s var(--s-ease)',
+              display:        'inline-block',
+              fontFamily:     'Safiro, sans-serif',
+              fontSize:       '1rem',
+              fontWeight:     500,
+              letterSpacing:  '-0.01em',
+              color:          'var(--s-ink)',
+              padding:        '14px 28px',
+              borderRadius:   9999,
+              textDecoration: 'none',
             }}
           >
             Ver servicios

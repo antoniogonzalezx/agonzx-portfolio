@@ -29,7 +29,7 @@ export default function SectionBlob({
         left,
         right,
         bottom,
-        background:   '#E5E9F0',
+        background:   '#F0F2F8',
         borderRadius: '43% 57% 61% 39% / 51% 44% 56% 49%',
         filter:       'blur(80px)',
         opacity,

@@ -14,12 +14,12 @@ function Wordmark() {
         fontSize:      '1.02rem',
         letterSpacing: '-0.03em',
         lineHeight:    1,
-        color:         '#0B0F14',
+        color:         '#23335C',
         userSelect:    'none',
         whiteSpace:    'nowrap',
       }}
     >
-      agonz{'{'}<span style={{ position: 'relative', top: '-0.046em' }}>x</span>{'}'}
+      agonz<span style={{ color: '#4F4FFF' }}>{'{'}<span style={{ position: 'relative', top: '-0.046em' }}>x</span>{'}'}</span>
     </span>
   );
 }
@@ -28,7 +28,6 @@ interface Props { wa: string; }
 
 export default function ServiciosNav({ wa }: Props) {
   const [visible, setVisible]   = useState(false);
-  const [hovered, setHovered]   = useState(false);
   const reduceMotion            = useReducedMotion();
 
   /* Appear once the hero section leaves the viewport */
@@ -68,11 +67,11 @@ export default function ServiciosNav({ wa }: Props) {
             padding:              '0.65rem 1rem 0.65rem 1.3rem',
             borderRadius:         9999,
             /* Light-mode glass — same system as dark nav, inverted */
-            background:           'rgba(244,246,249,0.85)',
+            background:           'rgba(250,251,253,0.85)',
             backdropFilter:       'blur(32px) saturate(200%)',
             WebkitBackdropFilter: 'blur(32px) saturate(200%)',
-            border:               '1px solid rgba(11,15,20,0.06)',
-            boxShadow:            '0 8px 32px rgba(11,15,20,0.06), inset 0 1px 0 rgba(255,255,255,0.9)',
+            border:               '1px solid rgba(35,51,92,0.06)',
+            boxShadow:            '0 8px 32px rgba(35,51,92,0.06), inset 0 1px 0 rgba(255,255,255,0.9)',
           }}
         >
           {/* Full wordmark */}
@@ -88,7 +87,7 @@ export default function ServiciosNav({ wa }: Props) {
                 fontFamily:    'Nohemi, sans-serif',
                 fontSize:      '0.78rem',
                 fontWeight:    500,
-                color:         '#4A556A',
+                color:         '#4E5C84',
                 textDecoration:'none',
                 letterSpacing: '-0.01em',
               }}
@@ -99,14 +98,12 @@ export default function ServiciosNav({ wa }: Props) {
               href={wa}
               target="_blank"
               rel="noopener noreferrer"
-              onMouseEnter={() => setHovered(true)}
-              onMouseLeave={() => setHovered(false)}
+              className="s-nav-contact"
               style={{
                 fontFamily:    'Nohemi, sans-serif',
                 fontSize:      '0.78rem',
                 fontWeight:    600,
                 color:         '#FFFFFF',
-                background:    hovered ? '#1E2B3C' : '#0B0F14',
                 padding:       '0.45rem 1.1rem',
                 borderRadius:  9999,
                 textDecoration:'none',
