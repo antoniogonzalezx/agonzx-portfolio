@@ -3,15 +3,15 @@
 import { useRef, useEffect, useState, memo } from 'react';
 import Image from 'next/image';
 import Wordmark from './Wordmark';
+import { WhatsappLogo } from '@phosphor-icons/react';
 import {
-  WhatsappLogo,
-  Database,
-  Cursor,
-  CalendarDots,
-  Tag as TagIcon,
-  ListChecks,
-  TrendUp,
-} from '@phosphor-icons/react';
+  SolarDatabase,
+  SolarCursor,
+  SolarCalendar,
+  SolarTag,
+  SolarChecklist,
+  SolarGraphUp,
+} from './SolarIcons';
 
 type Stat =
   | { kind: 'text'; text: string; label: string }
@@ -38,65 +38,16 @@ type IconName =
   | 'calendar' | 'tag'      | 'checklist'
   | 'trend';
 
-const PH_SIZE = { size: '100%' } as const;
+const SL_SIZE = { size: '100%' } as const;
 
 function Icon({ name }: { name: IconName }) {
-  if (name === 'whatsapp') return <WhatsappLogo {...PH_SIZE} weight="fill" />;
-  if (name === 'calendar') return <CalendarDots {...PH_SIZE} weight="regular" />;
-  if (name === 'tag')      return <TagIcon      {...PH_SIZE} weight="regular" />;
-
-  if (name === 'database') {
-    return (
-      <>
-        <Database {...PH_SIZE} weight="regular" />
-        <svg className="s-ph-overlay" viewBox="0 0 256 256" aria-hidden>
-          <circle className="s-ph-drop s-ph-drop-1" cx="96"  cy="28" r="8" />
-          <circle className="s-ph-drop s-ph-drop-2" cx="128" cy="28" r="8" />
-          <circle className="s-ph-drop s-ph-drop-3" cx="160" cy="28" r="8" />
-        </svg>
-      </>
-    );
-  }
-
-  if (name === 'cursor') {
-    return (
-      <>
-        <Cursor {...PH_SIZE} weight="regular" />
-        <svg className="s-ph-overlay" viewBox="0 0 256 256" aria-hidden>
-          <circle
-            className="s-ph-ripple"
-            cx="72" cy="72"
-            r="22"
-            fill="none"
-            strokeWidth="10"
-          />
-        </svg>
-      </>
-    );
-  }
-
-  if (name === 'checklist') {
-    return (
-      <>
-        <ListChecks {...PH_SIZE} weight="regular" />
-        <svg className="s-ph-overlay" viewBox="0 0 256 256" aria-hidden>
-          <circle className="s-ph-pulse s-ph-pulse-1" cx="44" cy="72"  r="14" />
-          <circle className="s-ph-pulse s-ph-pulse-2" cx="44" cy="128" r="14" />
-          <circle className="s-ph-pulse s-ph-pulse-3" cx="44" cy="184" r="14" />
-        </svg>
-      </>
-    );
-  }
-
-  /* trend */
-  return (
-    <>
-      <TrendUp {...PH_SIZE} weight="regular" />
-      <svg className="s-ph-overlay" viewBox="0 0 256 256" aria-hidden>
-        <circle className="s-ph-sparkle" cx="208" cy="80" r="12" />
-      </svg>
-    </>
-  );
+  if (name === 'whatsapp')  return <WhatsappLogo  size="100%" weight="fill" />;
+  if (name === 'database')  return <SolarDatabase  {...SL_SIZE} />;
+  if (name === 'cursor')    return <SolarCursor    {...SL_SIZE} />;
+  if (name === 'calendar')  return <SolarCalendar  {...SL_SIZE} />;
+  if (name === 'tag')       return <SolarTag       {...SL_SIZE} />;
+  if (name === 'checklist') return <SolarChecklist {...SL_SIZE} />;
+  return <SolarGraphUp {...SL_SIZE} />;
 }
 
 /* ────────── Step data ────────── */
