@@ -38,15 +38,20 @@ html:has(.s-page) body {
 }
 
 /* ── Scroll-snap container ───────────────────────────────────────── */
-/* `proximity` (not mandatory) so hero + sobre can scroll continuously;
-   snap still engages on the downstream aligned sections (grid,
-   diagnóstico, proceso, footer) once the user is close to them. */
+/* Default is `y proximity` so hero + sobre can scroll continuously.
+   When the page JS detects we're entering the "3 formas" grid, it
+   adds `.s-snap-firm` to upgrade to `y mandatory` for the rest of
+   the page — giving grid / diagnóstico / proceso / footer firm,
+   decisive snapping between each beat. */
 .s-snap-container {
   height:                100%;
   overflow-y:            scroll;
   overflow-x:            clip;
   scroll-snap-type:      y proximity;
   overscroll-behavior-y: contain;
+}
+.s-snap-container.s-snap-firm {
+  scroll-snap-type:      y mandatory;
 }
 
 .s-snap-section {
@@ -989,12 +994,7 @@ html:has(.s-page) body {
  * inside the tall section. */
 .s-sobre {
   position:          relative;
-  /* 180svh · 100svh of sticky-pinned stage + 80svh of extra scroll
-     driving the 3-phase choreography (rise → settle → flip).  The
-     flip completes at progress 0.90 so the section releases straight
-     into the next "3 formas" section — the rotation itself is the
-     transition. */
-  height:            180svh;
+  height:            220svh;             /* override .s-snap-section 100svh */
   background:        var(--s-bg);
   scroll-snap-stop:  normal;             /* allow scroll past without forced stop */
   overflow:          visible;            /* sticky child needs visible parent */
