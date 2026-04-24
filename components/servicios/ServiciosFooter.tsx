@@ -7,7 +7,7 @@ interface Props { wa: string; }
 
 const LINKS_L = [
   { label: 'Inicio',       href: '/' },
-  { label: 'Sobre mí',     href: '/#about' },
+  { label: 'Sobre mí',     href: '#sobre' },
   { label: 'Servicios',    href: '/servicios' },
   { label: '@agonzx',      href: 'https://instagram.com/agonzx' },
   { label: 'LinkedIn',     href: 'https://www.linkedin.com/in/antoniogonzalezvaldepenas' },
@@ -213,6 +213,20 @@ export default function ServiciosFooter({ wa }: Props) {
                 href={l.href}
                 target={l.href.startsWith('http') ? '_blank' : undefined}
                 rel={l.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                onClick={(e) => {
+                  /* In-page anchors need to scroll the snap container,
+                   * not the window — the native anchor jump targets the
+                   * window which doesn't scroll on /servicios. */
+                  if (l.href.startsWith('#')) {
+                    const target = document.querySelector(`[data-servicios-section="${l.href.slice(1)}"]`);
+                    const scroller = document.querySelector('.s-snap-container') as HTMLElement | null;
+                    if (target && scroller) {
+                      e.preventDefault();
+                      const r = target.getBoundingClientRect();
+                      scroller.scrollTo({ top: scroller.scrollTop + r.top, behavior: 'smooth' });
+                    }
+                  }
+                }}
                 style={{
                   fontFamily:    'Martian Mono, monospace',
                   fontSize:      '0.65rem',
@@ -220,6 +234,7 @@ export default function ServiciosFooter({ wa }: Props) {
                   textDecoration:'none',
                   letterSpacing: '0.03em',
                   transition:    'color 0.15s ease',
+                  cursor:        'pointer',
                 }}
                 onMouseEnter={e => (e.currentTarget.style.color = 'var(--s-ink-2)')}
                 onMouseLeave={e => (e.currentTarget.style.color = 'var(--s-ink-3)')}

@@ -9,6 +9,7 @@ import ServiciosHero        from '@/components/servicios/ServiciosHero';
 import ServiciosGrid        from '@/components/servicios/ServiciosGrid';
 import ServiciosDiagnostico from '@/components/servicios/ServiciosDiagnostico';
 import ServiciosProceso     from '@/components/servicios/ServiciosProceso';
+import ServiciosSobre       from '@/components/servicios/ServiciosSobre';
 import ServiciosFooter      from '@/components/servicios/ServiciosFooter';
 
 const WA = 'https://wa.me/34711514735';
@@ -24,10 +25,11 @@ export default function Servicios() {
       {/* Scroll-snap main */}
       <main className="s-snap-container" aria-label="Contenido de servicios">
         <ServiciosHero        wa={WA} />   {/* sec 1 — hero            */}
-        <ServiciosGrid />                    {/* sec 2 — 3 servicios     */}
-        <ServiciosDiagnostico wa={WA} />     {/* sec 3 — diagnóstico     */}
-        <ServiciosProceso />                 {/* sec 4 — proceso         */}
-        <ServiciosFooter      wa={WA} />   {/* sec 5 — CTA + footer    */}
+        <ServiciosSobre />                   {/* sec 2 — sobre Antonio   */}
+        <ServiciosGrid />                    {/* sec 3 — 3 servicios     */}
+        <ServiciosDiagnostico wa={WA} />     {/* sec 4 — diagnóstico     */}
+        <ServiciosProceso />                 {/* sec 5 — proceso         */}
+        <ServiciosFooter      wa={WA} />   {/* sec 6 — CTA + footer    */}
       </main>
     </div>
   );

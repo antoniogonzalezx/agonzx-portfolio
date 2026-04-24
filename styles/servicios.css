@@ -970,6 +970,249 @@ html:has(.s-page) body {
   }
 }
 
+/* ── ServiciosSobre · "Detrás de agonzx" ─────────────────────────
+ * Snap-scroll + parallax. Section is 220svh; the inner stage is
+ * sticky (pinned to viewport) while extra height drives the scroll
+ * choreography. snap-stop: normal so the snap doesn't trap the user
+ * inside the tall section. */
+.s-sobre {
+  position:          relative;
+  height:            220svh;             /* override .s-snap-section 100svh */
+  background:        var(--s-bg);
+  scroll-snap-stop:  normal;             /* allow scroll past without forced stop */
+  overflow:          visible;            /* sticky child needs visible parent */
+}
+.s-sobre-stage {
+  position:        sticky;
+  top:             0;
+  height:          100svh;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  padding:         clamp(1.25rem, 3vw, 2.5rem) clamp(1.5rem, 5vw, 5rem);
+  overflow:        hidden;               /* photo translateY can dip past edges */
+}
+.s-sobre-text {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  text-align:      center;
+  gap:             clamp(1rem, 1.6vw, 1.4rem);
+  width:           100%;
+  max-width:       720px;
+  position:        relative;
+  z-index:         2;
+  will-change:     transform;
+}
+.s-sobre-title {
+  font-family:    'Nohemi', sans-serif;
+  font-weight:     600;
+  font-size:      clamp(1.85rem, 4vw, 3rem);
+  letter-spacing: -0.04em;
+  line-height:     1;
+  color:          var(--s-ink);
+  margin:          0;
+}
+.s-sobre-name {
+  color:       var(--s-ink-3);
+  font-weight: 400;
+}
+
+/* Logos · SVGs are pre-recoloured to ink-2 (#4E5C84) so we render them
+ * as plain <Image> — preserves cutouts (e.g. UT's U inside square)
+ * which mask-image would flatten into a solid silhouette. */
+/* Logos · letterforms aligned via per-logo translateY tweaks. UT
+ * extends DOWN (tail), XING extends UP (icon), so we offset each in
+ * opposite directions to keep their letter baselines on the same line. */
+.s-sobre-logos {
+  display:         flex;
+  align-items:     center;          /* baseline alignment via translateY */
+  justify-content: center;
+  gap:             clamp(2rem, 4vw, 3rem);
+  flex-wrap:       wrap;
+}
+.s-sobre-logo {
+  width:       auto !important;
+  object-fit:  contain;
+  opacity:      0.75;
+}
+/* Both logos: same overall height; per-logo translateY pulls the
+ * letter baseline of each onto the shared centerline. */
+.s-sobre-logo--ut {
+  height:    clamp(34px, 3.2vw, 44px);
+  transform: translateY(clamp(4px, 0.4vw, 6px));   /* push down — tail below */
+}
+.s-sobre-logo--xing {
+  height:    clamp(34px, 3.2vw, 44px);
+  transform: translateY(clamp(-4px, -0.4vw, -2px)); /* nudge up — icon above */
+}
+
+.s-sobre-body {
+  max-width:      520px;
+  font-family:   'Safiro', sans-serif;
+  font-size:     clamp(0.9rem, 1vw, 1rem);
+  line-height:    1.55;
+  color:         var(--s-ink-2);
+  letter-spacing:-0.005em;
+}
+.s-sobre-body p          { margin: 0 0 0.55rem 0; }
+.s-sobre-body p:last-child { margin: 0; }
+.s-sobre-body strong     { color: var(--s-ink);    font-weight: 600; }
+.s-sobre-body em         { color: var(--s-accent); font-weight: 600; font-style: normal; }
+
+/* Profile card · physical credit-card proportions (ISO 7810 ~1.586:1).
+ *  - figure: bottom-anchored, scroll-driven Y inline transform
+ *  - .s-sobre-card: 3D rotation parent (preserve-3d)
+ *  - faces: depth via layered shadows + inset bevel + edge gradient */
+.s-sobre-photo {
+  position:     absolute;
+  left:          50%;
+  bottom:       clamp(-1rem, -1vh, 0rem);
+  margin:        0;
+  width:        clamp(340px, 36vw, 480px);
+  aspect-ratio: 1.586 / 1;        /* ID-1 credit card */
+  z-index:       3;
+  perspective:   1600px;
+  will-change:   transform;
+  --mx: 50%;
+  --my: 50%;
+  --shine-opacity: 0;
+  --glare-opacity: 0;
+  /* Drop shadow on figure renders around the rotated card silhouette. */
+  filter: drop-shadow(0 18px 36px rgba(11, 15, 20, 0.22))
+          drop-shadow(0  4px 10px rgba(11, 15, 20, 0.15));
+}
+.s-sobre-card {
+  position:        relative;
+  width:           100%;
+  height:          100%;
+  transform-style: preserve-3d;
+  cursor:          grab;
+  touch-action:    pan-y;
+  transition:      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change:     transform;
+}
+.s-sobre-card:active { cursor: grabbing; }
+
+.s-sobre-card-face {
+  position:                    absolute;
+  inset:                       0;
+  border-radius:               clamp(14px, 1.4vw, 20px);
+  overflow:                    hidden;
+  background:                  var(--s-surface);
+  backface-visibility:         hidden;
+  -webkit-backface-visibility: hidden;
+  /* Physical-card depth: subtle inner highlight (top edge), inner
+     shadow (bottom edge), and crisp 1px ring. */
+  box-shadow:
+    inset 0  1px 0 rgba(255, 255, 255, 0.30),
+    inset 0 -1px 0 rgba(11, 15, 20, 0.10),
+    inset 0  0 0 1px rgba(255, 255, 255, 0.10);
+}
+.s-sobre-card-front img {
+  width:           100%;
+  height:          100%;
+  object-fit:      cover;
+  object-position: center 28%;
+  display:         block;
+  pointer-events:  none;
+  -webkit-user-drag: none;
+  user-select:     none;
+}
+
+/* Holographic foil — diagonal rainbow strip; opacity driven by JS. */
+.s-sobre-card-shine {
+  position:        absolute;
+  inset:           0;
+  pointer-events:  none;
+  background: linear-gradient(
+    115deg,
+    transparent 28%,
+    rgba(255, 255, 255, 0.45) 38%,
+    rgba(180, 180, 255, 0.35) 48%,
+    rgba(255, 200, 220, 0.35) 52%,
+    rgba(255, 255, 255, 0.45) 62%,
+    transparent 72%
+  );
+  background-size:     220% 220%;
+  background-position: calc(var(--mx) * 0.6) calc(var(--my) * 0.6);
+  mix-blend-mode:      overlay;
+  opacity:             var(--shine-opacity);
+  transition:          opacity 0.35s var(--s-ease),
+                       background-position 0.05s linear;
+}
+/* Cursor-tracked light bloom */
+.s-sobre-card-glare {
+  position:        absolute;
+  inset:           0;
+  pointer-events:  none;
+  background: radial-gradient(
+    340px circle at var(--mx) var(--my),
+    rgba(255, 255, 255, 0.40),
+    transparent 55%
+  );
+  mix-blend-mode:  soft-light;
+  opacity:         var(--glare-opacity);
+  transition:      opacity 0.35s var(--s-ease);
+}
+/* Brand watermark on front face (lower-right corner) */
+.s-sobre-card-mark {
+  position:       absolute;
+  bottom:         clamp(8px, 1.2vw, 14px);
+  right:          clamp(10px, 1.4vw, 16px);
+  width:          clamp(54px, 6vw, 78px);
+  pointer-events: none;
+  opacity:         0.55;
+  mix-blend-mode: overlay;
+}
+
+.s-sobre-card-back {
+  transform:       rotateY(180deg);
+  background:
+    radial-gradient(circle at 25% 20%, rgba(79,79,255,0.14), transparent 55%),
+    radial-gradient(circle at 80% 80%, rgba(79,79,255,0.10), transparent 55%),
+    linear-gradient(135deg, #1a2747 0%, #23335C 55%, #2c3f6f 100%);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+}
+.s-sobre-card-back-wordmark {
+  width:           100%;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  padding:         clamp(1rem, 2vw, 2rem);
+}
+
+@media (max-width: 768px) {
+  .s-sobre        { height: auto; padding: clamp(2rem, 6vw, 3.5rem) 0; }
+  .s-sobre-stage  {
+    position:    static;
+    height:      auto;
+    overflow:    visible;
+    gap:         clamp(1.25rem, 4vw, 2rem);
+  }
+  .s-sobre-photo  {
+    position:    relative;
+    bottom:      auto;
+    left:        auto;
+    transform:   none;
+    width:       clamp(260px, 80vw, 420px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .s-sobre-photo-tilt { transform: none !important; }
+}
+
+@media (max-width: 768px) {
+  .s-sobre-logos { gap: 1.5rem; }
+  .s-sobre-photo {
+    width:      clamp(170px, 56vw, 220px);
+    margin-top: 0;
+  }
+}
+
 /* ── Unified H2 (reference: ServiciosGrid) ───────────────────── */
 .s-h2 {
   font-family:   'Nohemi', sans-serif;
