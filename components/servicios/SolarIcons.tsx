@@ -60,11 +60,13 @@ export function SolarBuildings({ size }: IconProps) {
   );
 }
 
-export function SolarChefHat({ size }: IconProps) {
+export function SolarWineGlass({ size }: IconProps) {
   return (
     <svg {...base(size)} aria-hidden>
-      <path fill="currentColor" d="M18.999 18H5.002c.01 1.397.082 2.912.584 3.414C6.172 22 7.115 22 9 22h6c1.886 0 2.829 0 3.415-.586c.502-.502.573-2.017.584-3.414" />
-      <path fill="currentColor" opacity=".5" d="M7 5a5 5 0 0 0-2 9.584V18h14v-3.416a5.001 5.001 0 0 0-2.737-9.53a4.502 4.502 0 0 0-8.526 0A5 5 0 0 0 7 5" />
+      <path fill="currentColor" opacity=".5" d="M19.3 3H4.7C3.2 3 2.439 4.794 3.485 5.864l7.801 7.976a1 1 0 0 0 1.43 0l7.801-7.976C21.562 4.794 20.8 3 19.3 3" />
+      <path fill="currentColor" fillRule="evenodd" clipRule="evenodd" d="M7.006 21a.75.75 0 0 1 .75-.75h8.488a.75.75 0 0 1 0 1.5H7.756a.75.75 0 0 1-.75-.75" />
+      <path fill="currentColor" d="M11.285 13.84a1 1 0 0 0 1.43 0L16.471 10H7.53z" />
+      <path fill="currentColor" opacity=".5" d="M11.285 13.84a1 1 0 0 0 1.43 0l.035-.035v6.445h-1.5v-6.446z" />
     </svg>
   );
 }

@@ -10,7 +10,7 @@ import {
   SolarShop,
   SolarFolder,
   SolarBuildings,
-  SolarChefHat,
+  SolarWineGlass,
   type SolarIcon,
 } from './SolarIcons';
 
@@ -154,7 +154,7 @@ const INDUSTRIES: Industry[] = [
     short: 'Hostelería',
     blurb: 'Restaurantes, cafés y bares.',
     kickerTarget: 'tu negocio de hostelería',
-    Icon:   SolarChefHat,
+    Icon:   SolarWineGlass,
     pains: [
       'Las reservas llegan por teléfono, Instagram y Google.',
       'Los pedidos a proveedor se piden por WhatsApp.',
