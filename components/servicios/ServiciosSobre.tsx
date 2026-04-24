@@ -215,6 +215,8 @@ export default function ServiciosSobre() {
                 height={454}
                 priority={false}
               />
+              {/* Holographic {x} foil pattern — iridescent tiled glyphs */}
+              <div className="s-sobre-card-holo" aria-hidden />
               {/* Holographic foil — diagonal rainbow shimmer */}
               <div className="s-sobre-card-shine" />
               {/* Cursor-tracked light bloom */}
@@ -226,9 +228,14 @@ export default function ServiciosSobre() {
             </div>
             <div className="s-sobre-card-face s-sobre-card-back" aria-hidden>
               <div className="s-sobre-card-back-wordmark">
-                <Wordmark main="#FAFBFD" accent="#4F4FFF" width="68%" />
+                <Wordmark main="#FAFBFD" accent="#b8c1d9" width="68%" />
               </div>
             </div>
+            {/* Metallic side edges — give the card real z-thickness */}
+            <div className="s-sobre-card-edge s-sobre-card-edge--top"    aria-hidden />
+            <div className="s-sobre-card-edge s-sobre-card-edge--bottom" aria-hidden />
+            <div className="s-sobre-card-edge s-sobre-card-edge--left"   aria-hidden />
+            <div className="s-sobre-card-edge s-sobre-card-edge--right"  aria-hidden />
           </div>
         </figure>
       </div>

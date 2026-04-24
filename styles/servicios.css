@@ -38,11 +38,14 @@ html:has(.s-page) body {
 }
 
 /* ── Scroll-snap container ───────────────────────────────────────── */
+/* `proximity` (not mandatory) so hero + sobre can scroll continuously;
+   snap still engages on the downstream aligned sections (grid,
+   diagnóstico, proceso, footer) once the user is close to them. */
 .s-snap-container {
   height:                100%;
   overflow-y:            scroll;
   overflow-x:            clip;
-  scroll-snap-type:      y mandatory;
+  scroll-snap-type:      y proximity;
   overscroll-behavior-y: contain;
 }
 
@@ -52,6 +55,15 @@ html:has(.s-page) body {
   scroll-snap-stop:  always;
   position:          relative;
   overflow:          hidden;
+}
+
+/* Continuous scroll through hero + sobre.  Snapping engages from
+   the "3 formas" (servicios) section onward so the intro reads as
+   one fluid stretch — the dead zone between hero and sobre is gone. */
+.s-page [data-servicios-section="hero"],
+.s-page [data-servicios-section="sobre"] {
+  scroll-snap-align: none;
+  scroll-snap-stop:  normal;
 }
 
 /* ── Scrollbar ───────────────────────────────────────────────────── */
@@ -1083,6 +1095,8 @@ html:has(.s-page) body {
           drop-shadow(0  4px 10px rgba(11, 15, 20, 0.15));
 }
 .s-sobre-card {
+  --card-depth:     14px;
+  --card-half-d:    7px;
   position:        relative;
   width:           100%;
   height:          100%;
@@ -1108,6 +1122,11 @@ html:has(.s-page) body {
     inset 0  1px 0 rgba(255, 255, 255, 0.30),
     inset 0 -1px 0 rgba(11, 15, 20, 0.10),
     inset 0  0 0 1px rgba(255, 255, 255, 0.10);
+}
+/* Front face pushed forward by half the card depth so the card has
+   real z-thickness (front at +d/2, back at -d/2, edges span between). */
+.s-sobre-card-front {
+  transform: translateZ(var(--card-half-d));
 }
 .s-sobre-card-front img {
   width:           100%;
@@ -1166,12 +1185,32 @@ html:has(.s-page) body {
   mix-blend-mode: overlay;
 }
 
+/* Back face — polished dark-chrome finish.  Brushed-metal diagonal
+   highlights + radial iridescent hints so it reads as real metal
+   instead of a flat navy plate. */
 .s-sobre-card-back {
-  transform:       rotateY(180deg);
+  transform:       rotateY(180deg) translateZ(var(--card-half-d));
   background:
-    radial-gradient(circle at 25% 20%, rgba(79,79,255,0.14), transparent 55%),
-    radial-gradient(circle at 80% 80%, rgba(79,79,255,0.10), transparent 55%),
-    linear-gradient(135deg, #1a2747 0%, #23335C 55%, #2c3f6f 100%);
+    /* iridescent hints */
+    radial-gradient(ellipse at 20% 18%, rgba(140, 200, 255, 0.18), transparent 45%),
+    radial-gradient(ellipse at 82% 85%, rgba(255, 180, 210, 0.12), transparent 50%),
+    /* brushed-metal streaks — alternating highlights */
+    repeating-linear-gradient(
+      105deg,
+      rgba(255, 255, 255, 0.035) 0 2px,
+      rgba(0, 0, 0, 0.0)         2px 5px
+    ),
+    /* base dark chrome */
+    linear-gradient(
+      135deg,
+      #3a4563 0%,
+      #5b6783 18%,
+      #8490ad 32%,
+      #4a5573 48%,
+      #8490ad 66%,
+      #5b6783 82%,
+      #2e3750 100%
+    );
   display:         flex;
   align-items:     center;
   justify-content: center;
@@ -1182,6 +1221,117 @@ html:has(.s-page) body {
   align-items:     center;
   justify-content: center;
   padding:         clamp(1rem, 2vw, 2rem);
+  filter: drop-shadow(0 1px 0 rgba(255,255,255,0.15))
+          drop-shadow(0 -1px 0 rgba(0,0,0,0.25));
+}
+
+/* ── Card edges (4) ─────────────────────────────────────────────
+ * Thin metallic strips that connect the front face (at +d/2) to the
+ * back face (at -d/2) on each side.  Each edge sits flush with one
+ * side of the card and is rotated 90° around its attached edge so
+ * it stands perpendicular to the face planes.
+ *
+ * Using transform-origin + translateZ(+d/2) + rotateX/Y(±90) the
+ * strip ends up spanning z = +d/2 → -d/2, connecting both faces.
+ * backface-visibility: visible so the strip shows whether the card
+ * is facing the viewer or flipped.
+ * ──────────────────────────────────────────────────────────────── */
+.s-sobre-card-edge {
+  position:                    absolute;
+  pointer-events:              none;
+  backface-visibility:         visible;
+  -webkit-backface-visibility: visible;
+  /* shared metallic fill — used by top/bottom; left/right override.
+     Darker mid-tone so the edges read as 3D thickness against both the
+     light page/portrait and the darker back face. */
+  background: linear-gradient(
+    180deg,
+    #8a93a6 0%,
+    #3d4559 30%,
+    #1f2534 55%,
+    #3d4559 80%,
+    #8a93a6 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.28),
+    inset 0 -1px 0 rgba(0,0,0,0.45);
+}
+.s-sobre-card-edge--top {
+  top:              0;
+  left:             0;
+  right:            0;
+  height:           var(--card-depth);
+  transform-origin: center top;
+  transform:        translateZ(var(--card-half-d)) rotateX(-90deg);
+}
+.s-sobre-card-edge--bottom {
+  bottom:           0;
+  left:             0;
+  right:            0;
+  height:           var(--card-depth);
+  transform-origin: center bottom;
+  transform:        translateZ(var(--card-half-d)) rotateX(90deg);
+}
+.s-sobre-card-edge--left,
+.s-sobre-card-edge--right {
+  /* vertical orientation — gradient goes across the thin dimension */
+  background: linear-gradient(
+    90deg,
+    #8a93a6 0%,
+    #3d4559 30%,
+    #1f2534 55%,
+    #3d4559 80%,
+    #8a93a6 100%
+  );
+  box-shadow:
+    inset 1px 0 0 rgba(255,255,255,0.28),
+    inset -1px 0 0 rgba(0,0,0,0.45);
+}
+.s-sobre-card-edge--left {
+  top:              0;
+  bottom:           0;
+  left:             0;
+  width:            var(--card-depth);
+  transform-origin: left center;
+  transform:        translateZ(var(--card-half-d)) rotateY(90deg);
+}
+.s-sobre-card-edge--right {
+  top:              0;
+  bottom:           0;
+  right:            0;
+  width:            var(--card-depth);
+  transform-origin: right center;
+  transform:        translateZ(var(--card-half-d)) rotateY(-90deg);
+}
+
+/* ── Holographic {x} foil ──────────────────────────────────────────
+ * Tiled {x} glyph pattern filled with an iridescent conic gradient
+ * that orbits the cursor.  Mask punches out only the {x} shapes so
+ * the portrait still reads through the card.  This is the "real ID
+ * hologram" feel — subtle at rest, shifting with cursor movement. */
+.s-sobre-card-holo {
+  position:        absolute;
+  inset:           0;
+  pointer-events:  none;
+  background: conic-gradient(
+    from 90deg at var(--mx) var(--my),
+    #ff9bd0,
+    #9bd0ff,
+    #9bffcf,
+    #ffe29b,
+    #d79bff,
+    #ff9bd0
+  );
+  -webkit-mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Ctext x='48' y='58' text-anchor='middle' font-family='-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif' font-size='20' font-weight='800' fill='black'%3E%7Bx%7D%3C/text%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Ctext x='48' y='58' text-anchor='middle' font-family='-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif' font-size='20' font-weight='800' fill='black'%3E%7Bx%7D%3C/text%3E%3C/svg%3E");
+  -webkit-mask-repeat: repeat;
+          mask-repeat: repeat;
+  -webkit-mask-size:   96px 96px;
+          mask-size:   96px 96px;
+  mix-blend-mode: screen;
+  opacity:        calc(0.35 + var(--shine-opacity, 0) * 0.45);
+  transform:      rotate(-6deg) scale(1.15);
+  transition:     opacity 0.35s var(--s-ease);
 }
 
 @media (max-width: 768px) {
