@@ -132,6 +132,16 @@ export default function ServiciosSobre() {
 
   const cardTransform = `rotateY(${scrollRot + userRotation}deg) rotateX(${tilt}deg)`;
 
+  /* Holograms visible only when front is facing the viewer.  Normalise
+     the absolute rotation to [0, 360) and treat anything within ±40°
+     of 0° as "front-facing".  Combined with the hover boost this gives
+     the effect the user asked for: holograms disappear while the card
+     is flipping or showing its back. */
+  const totalRot    = scrollRot + userRotation;
+  const normRot     = ((totalRot % 360) + 360) % 360;
+  const frontFacing = normRot <= 40 || normRot >= 320;
+  const frontOpacity = frontFacing ? 0.55 : 0;
+
   return (
     <section
       ref={sectionRef}
@@ -199,7 +209,10 @@ export default function ServiciosSobre() {
         >
           <div
             className="s-sobre-card"
-            style={{ transform: cardTransform }}
+            style={{
+              transform: cardTransform,
+              ['--front-opacity' as string]: frontOpacity,
+            }}
             onPointerDown={onCardPointerDown}
             onPointerMove={onCardPointerMove}
             onPointerUp={onCardPointerUp}
@@ -207,6 +220,23 @@ export default function ServiciosSobre() {
             onPointerLeave={onCardLeave}
             onClick={onCardClick}
           >
+            {/* Depth slabs — N copies of the card silhouette stacked along
+                the Z axis between front (+d/2) and back (−d/2) faces.  Each
+                slab inherits the face border-radius so the 3D thickness
+                follows the card's rounded-corner curvature, not a straight
+                box.  Hidden from screen readers. */}
+            {Array.from({ length: 14 }, (_, i) => {
+              const t = (i + 0.5) / 14;          // 0.035 → 0.965
+              const z = (t - 0.5) * 14;          // −6.5 → +6.5 px (matches --card-depth = 14px)
+              return (
+                <div
+                  key={i}
+                  className="s-sobre-card-slab"
+                  style={{ transform: `translateZ(${z}px)` }}
+                  aria-hidden
+                />
+              );
+            })}
             <div className="s-sobre-card-face s-sobre-card-front">
               <Image
                 src="/profile.jpg"
@@ -228,14 +258,9 @@ export default function ServiciosSobre() {
             </div>
             <div className="s-sobre-card-face s-sobre-card-back" aria-hidden>
               <div className="s-sobre-card-back-wordmark">
-                <Wordmark main="#FAFBFD" accent="#b8c1d9" width="68%" />
+                <Wordmark main="#FAFBFD" accent="#4F4FFF" width="68%" />
               </div>
             </div>
-            {/* Metallic side edges — give the card real z-thickness */}
-            <div className="s-sobre-card-edge s-sobre-card-edge--top"    aria-hidden />
-            <div className="s-sobre-card-edge s-sobre-card-edge--bottom" aria-hidden />
-            <div className="s-sobre-card-edge s-sobre-card-edge--left"   aria-hidden />
-            <div className="s-sobre-card-edge s-sobre-card-edge--right"  aria-hidden />
           </div>
         </figure>
       </div>

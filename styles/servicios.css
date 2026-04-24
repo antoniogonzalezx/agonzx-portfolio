@@ -1100,6 +1100,9 @@ html:has(.s-page) body {
   position:        relative;
   width:           100%;
   height:          100%;
+  /* Card-level border-radius shared by faces and depth slabs via
+     `border-radius: inherit`.  Keeps the 3D extrusion rounded. */
+  border-radius:    clamp(14px, 1.4vw, 20px);
   transform-style: preserve-3d;
   cursor:          grab;
   touch-action:    pan-y;
@@ -1185,32 +1188,23 @@ html:has(.s-page) body {
   mix-blend-mode: overlay;
 }
 
-/* Back face — polished dark-chrome finish.  Brushed-metal diagonal
-   highlights + radial iridescent hints so it reads as real metal
-   instead of a flat navy plate. */
+/* Back face — brand navy with electric-blue iridescent hints.  Uses
+   the /servicios palette (`--s-ink` + `--s-accent`) plus a faint
+   brushed-metal texture so it still reads as a physical card. */
 .s-sobre-card-back {
   transform:       rotateY(180deg) translateZ(var(--card-half-d));
   background:
-    /* iridescent hints */
-    radial-gradient(ellipse at 20% 18%, rgba(140, 200, 255, 0.18), transparent 45%),
-    radial-gradient(ellipse at 82% 85%, rgba(255, 180, 210, 0.12), transparent 50%),
-    /* brushed-metal streaks — alternating highlights */
+    /* electric-blue iridescent bloom */
+    radial-gradient(ellipse at 22% 18%, rgba(79, 79, 255, 0.28), transparent 55%),
+    radial-gradient(ellipse at 78% 82%, rgba(180, 190, 255, 0.14), transparent 55%),
+    /* brushed-metal streaks */
     repeating-linear-gradient(
       105deg,
-      rgba(255, 255, 255, 0.035) 0 2px,
-      rgba(0, 0, 0, 0.0)         2px 5px
+      rgba(255, 255, 255, 0.03) 0 2px,
+      rgba(0, 0, 0, 0.0)        2px 5px
     ),
-    /* base dark chrome */
-    linear-gradient(
-      135deg,
-      #3a4563 0%,
-      #5b6783 18%,
-      #8490ad 32%,
-      #4a5573 48%,
-      #8490ad 66%,
-      #5b6783 82%,
-      #2e3750 100%
-    );
+    /* brand-navy base */
+    linear-gradient(135deg, #23335C 0%, #2B3A66 55%, #3A4A7E 100%);
   display:         flex;
   align-items:     center;
   justify-content: center;
@@ -1221,94 +1215,18 @@ html:has(.s-page) body {
   align-items:     center;
   justify-content: center;
   padding:         clamp(1rem, 2vw, 2rem);
-  filter: drop-shadow(0 1px 0 rgba(255,255,255,0.15))
+  filter: drop-shadow(0 1px 0 rgba(255,255,255,0.10))
           drop-shadow(0 -1px 0 rgba(0,0,0,0.25));
-}
-
-/* ── Card edges (4) ─────────────────────────────────────────────
- * Thin metallic strips that connect the front face (at +d/2) to the
- * back face (at -d/2) on each side.  Each edge sits flush with one
- * side of the card and is rotated 90° around its attached edge so
- * it stands perpendicular to the face planes.
- *
- * Using transform-origin + translateZ(+d/2) + rotateX/Y(±90) the
- * strip ends up spanning z = +d/2 → -d/2, connecting both faces.
- * backface-visibility: visible so the strip shows whether the card
- * is facing the viewer or flipped.
- * ──────────────────────────────────────────────────────────────── */
-.s-sobre-card-edge {
-  position:                    absolute;
-  pointer-events:              none;
-  backface-visibility:         visible;
-  -webkit-backface-visibility: visible;
-  /* shared metallic fill — used by top/bottom; left/right override.
-     Darker mid-tone so the edges read as 3D thickness against both the
-     light page/portrait and the darker back face. */
-  background: linear-gradient(
-    180deg,
-    #8a93a6 0%,
-    #3d4559 30%,
-    #1f2534 55%,
-    #3d4559 80%,
-    #8a93a6 100%
-  );
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.28),
-    inset 0 -1px 0 rgba(0,0,0,0.45);
-}
-.s-sobre-card-edge--top {
-  top:              0;
-  left:             0;
-  right:            0;
-  height:           var(--card-depth);
-  transform-origin: center top;
-  transform:        translateZ(var(--card-half-d)) rotateX(-90deg);
-}
-.s-sobre-card-edge--bottom {
-  bottom:           0;
-  left:             0;
-  right:            0;
-  height:           var(--card-depth);
-  transform-origin: center bottom;
-  transform:        translateZ(var(--card-half-d)) rotateX(90deg);
-}
-.s-sobre-card-edge--left,
-.s-sobre-card-edge--right {
-  /* vertical orientation — gradient goes across the thin dimension */
-  background: linear-gradient(
-    90deg,
-    #8a93a6 0%,
-    #3d4559 30%,
-    #1f2534 55%,
-    #3d4559 80%,
-    #8a93a6 100%
-  );
-  box-shadow:
-    inset 1px 0 0 rgba(255,255,255,0.28),
-    inset -1px 0 0 rgba(0,0,0,0.45);
-}
-.s-sobre-card-edge--left {
-  top:              0;
-  bottom:           0;
-  left:             0;
-  width:            var(--card-depth);
-  transform-origin: left center;
-  transform:        translateZ(var(--card-half-d)) rotateY(90deg);
-}
-.s-sobre-card-edge--right {
-  top:              0;
-  bottom:           0;
-  right:            0;
-  width:            var(--card-depth);
-  transform-origin: right center;
-  transform:        translateZ(var(--card-half-d)) rotateY(-90deg);
 }
 
 /* ── Holographic {x} foil ──────────────────────────────────────────
  * Tiled {x} glyph pattern filled with an iridescent conic gradient
  * that orbits the cursor.  Mask punches out only the {x} shapes so
- * the portrait still reads through the card.  This is the "real ID
- * hologram" feel — subtle at rest, shifting with cursor movement. */
+ * the portrait still reads through the card.
+ * Visible only when the front face is facing the viewer (driven by
+ * `--front-opacity` set from React) OR while the user is hovering
+ * the card (driven by `--shine-opacity`).  Disappears cleanly
+ * during the flip and while the back is showing. */
 .s-sobre-card-holo {
   position:        absolute;
   inset:           0;
@@ -1329,9 +1247,36 @@ html:has(.s-page) body {
   -webkit-mask-size:   96px 96px;
           mask-size:   96px 96px;
   mix-blend-mode: screen;
-  opacity:        calc(0.35 + var(--shine-opacity, 0) * 0.45);
+  opacity:        max(var(--front-opacity, 0), var(--shine-opacity, 0));
   transform:      rotate(-6deg) scale(1.15);
   transition:     opacity 0.35s var(--s-ease);
+}
+
+/* ── Depth slabs ───────────────────────────────────────────────────
+ * Instead of 4 straight edge strips, stack N filled rounded-rectangle
+ * copies of the card silhouette along the Z axis between the two
+ * faces.  Each slab inherits the card's border-radius, so when the
+ * card rotates the stacked slabs reveal a real 3D thickness that
+ * follows the curved corners — the card reads as an extruded solid
+ * instead of a flat surface with awkward rectangular edges.
+ *
+ * Slabs are full opaque rectangles.  When the card is facing the
+ * viewer they align exactly behind the front face and are invisible;
+ * at an angle, the offset between slabs projects as a thick rounded
+ * edge.  pointer-events: none so they never intercept drag input. */
+.s-sobre-card-slab {
+  position:        absolute;
+  inset:           0;
+  border-radius:   inherit;
+  pointer-events:  none;
+  /* Dark brand navy slightly darker than back face so edges read as
+     a shadowed extrusion (like the thickness of a real card). */
+  background: linear-gradient(
+    135deg,
+    #1A2644 0%,
+    #23335C 45%,
+    #2A3B6D 100%
+  );
 }
 
 @media (max-width: 768px) {
