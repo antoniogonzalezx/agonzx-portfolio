@@ -132,15 +132,16 @@ export default function ServiciosSobre() {
 
   const cardTransform = `rotateY(${scrollRot + userRotation}deg) rotateX(${tilt}deg)`;
 
-  /* Holograms visible only when front is facing the viewer.  Normalise
-     the absolute rotation to [0, 360) and treat anything within ±40°
-     of 0° as "front-facing".  Combined with the hover boost this gives
-     the effect the user asked for: holograms disappear while the card
-     is flipping or showing its back. */
-  const totalRot    = scrollRot + userRotation;
-  const normRot     = ((totalRot % 360) + 360) % 360;
-  const frontFacing = normRot <= 40 || normRot >= 320;
-  const frontOpacity = frontFacing ? 0.55 : 0;
+  /* Hologram visibility · DNI-style reveal.
+     At rest, perpendicular view (rotation = 0°) → holograms invisible.
+     As the card rotates away from 0° the iridescent grainy {x}s fade
+     in, peaking just before the front face goes backface-hidden (~90°).
+     Hover adds the same boost the shine uses, so both effects share
+     the "reveal on interaction" language. */
+  const totalRot   = scrollRot + userRotation;
+  const normRot    = ((totalRot % 360) + 360) % 360;
+  const rotDist    = Math.min(normRot, 360 - normRot);   /* 0..180, 0 = front-straight */
+  const rotOpacity = Math.min(1, rotDist / 55);          /* ramps 0→1 across 0°..55° */
 
   return (
     <section
@@ -211,7 +212,7 @@ export default function ServiciosSobre() {
             className="s-sobre-card"
             style={{
               transform: cardTransform,
-              ['--front-opacity' as string]: frontOpacity,
+              ['--rot-opacity' as string]: rotOpacity,
             }}
             onPointerDown={onCardPointerDown}
             onPointerMove={onCardPointerMove}
@@ -222,12 +223,13 @@ export default function ServiciosSobre() {
           >
             {/* Depth slabs — N copies of the card silhouette stacked along
                 the Z axis between front (+d/2) and back (−d/2) faces.  Each
-                slab inherits the face border-radius so the 3D thickness
-                follows the card's rounded-corner curvature, not a straight
-                box.  Hidden from screen readers. */}
-            {Array.from({ length: 14 }, (_, i) => {
-              const t = (i + 0.5) / 14;          // 0.035 → 0.965
-              const z = (t - 0.5) * 14;          // −6.5 → +6.5 px (matches --card-depth = 14px)
+                slab inherits the card border-radius so the 3D thickness
+                follows the rounded-corner curvature.  Card-depth is now a
+                realistic 5px (ID-card thin) so 10 slabs give a perfectly
+                smooth extrusion without striping. */}
+            {Array.from({ length: 10 }, (_, i) => {
+              const t = (i + 0.5) / 10;
+              const z = (t - 0.5) * 5;           // −2.25 → +2.25 px
               return (
                 <div
                   key={i}
@@ -260,6 +262,9 @@ export default function ServiciosSobre() {
               <div className="s-sobre-card-back-wordmark">
                 <Wordmark main="#FAFBFD" accent="#4F4FFF" width="68%" />
               </div>
+              {/* Cursor-tracked shine — same mechanic as the front face,
+                  so both sides reveal a moving highlight on hover. */}
+              <div className="s-sobre-card-back-shine" />
             </div>
           </div>
         </figure>

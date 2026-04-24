@@ -1095,8 +1095,8 @@ html:has(.s-page) body {
           drop-shadow(0  4px 10px rgba(11, 15, 20, 0.15));
 }
 .s-sobre-card {
-  --card-depth:     14px;
-  --card-half-d:    7px;
+  --card-depth:     5px;
+  --card-half-d:    2.5px;
   position:        relative;
   width:           100%;
   height:          100%;
@@ -1188,23 +1188,14 @@ html:has(.s-page) body {
   mix-blend-mode: overlay;
 }
 
-/* Back face — brand navy with electric-blue iridescent hints.  Uses
-   the /servicios palette (`--s-ink` + `--s-accent`) plus a faint
-   brushed-metal texture so it still reads as a physical card. */
+/* Back face — flat brand navy + subtle electric-blue bloom.  No
+   brushed-metal texture — the shine effect on hover provides the
+   interactive highlight, matching the front. */
 .s-sobre-card-back {
   transform:       rotateY(180deg) translateZ(var(--card-half-d));
   background:
-    /* electric-blue iridescent bloom */
-    radial-gradient(ellipse at 22% 18%, rgba(79, 79, 255, 0.28), transparent 55%),
-    radial-gradient(ellipse at 78% 82%, rgba(180, 190, 255, 0.14), transparent 55%),
-    /* brushed-metal streaks */
-    repeating-linear-gradient(
-      105deg,
-      rgba(255, 255, 255, 0.03) 0 2px,
-      rgba(0, 0, 0, 0.0)        2px 5px
-    ),
-    /* brand-navy base */
-    linear-gradient(135deg, #23335C 0%, #2B3A66 55%, #3A4A7E 100%);
+    radial-gradient(ellipse at 25% 22%, rgba(79, 79, 255, 0.26), transparent 58%),
+    #23335C;
   display:         flex;
   align-items:     center;
   justify-content: center;
@@ -1215,40 +1206,78 @@ html:has(.s-page) body {
   align-items:     center;
   justify-content: center;
   padding:         clamp(1rem, 2vw, 2rem);
-  filter: drop-shadow(0 1px 0 rgba(255,255,255,0.10))
-          drop-shadow(0 -1px 0 rgba(0,0,0,0.25));
+  position:        relative;
+  z-index:         1;
 }
 
-/* ── Holographic {x} foil ──────────────────────────────────────────
- * Tiled {x} glyph pattern filled with an iridescent conic gradient
- * that orbits the cursor.  Mask punches out only the {x} shapes so
- * the portrait still reads through the card.
- * Visible only when the front face is facing the viewer (driven by
- * `--front-opacity` set from React) OR while the user is hovering
- * the card (driven by `--shine-opacity`).  Disappears cleanly
- * during the flip and while the back is showing. */
+/* Back-face shine · cursor-tracked iridescent sweep.  Mirrors
+   `.s-sobre-card-shine` on the front face, using the same --mx/--my
+   and --shine-opacity vars that JS already updates on pointer move. */
+.s-sobre-card-back-shine {
+  position:        absolute;
+  inset:           0;
+  pointer-events:  none;
+  background: linear-gradient(
+    115deg,
+    transparent 28%,
+    rgba(255, 255, 255, 0.18) 38%,
+    rgba(120, 140, 255, 0.32) 48%,
+    rgba(200, 210, 255, 0.20) 52%,
+    rgba(255, 255, 255, 0.18) 62%,
+    transparent 72%
+  );
+  background-size:     220% 220%;
+  background-position: calc(var(--mx) * 0.6) calc(var(--my) * 0.6);
+  /* `screen` lightens the dark navy base, so the sweep actually
+     reads.  `overlay` would darken and make the shine invisible. */
+  mix-blend-mode:      screen;
+  opacity:             var(--shine-opacity, 0);
+  transition:          opacity 0.35s var(--s-ease),
+                       background-position 0.05s linear;
+}
+
+/* ── Holographic {x} foil — DNI-style ─────────────────────────────
+ * Fewer and bigger {x} glyphs than a regular pattern, filled with an
+ * iridescent conic gradient that orbits the cursor.  A fractal-noise
+ * SVG layered on top in `overlay` blend mode breaks the smooth colour
+ * into a grainy stipple — the hallmark of a real DNI hologram.
+ *
+ * Visibility · hidden by default (straight-on perpendicular view).
+ *   - Grows with rotation: `--rot-opacity` ramps 0→1 across 0°..55°.
+ *   - Hover boost: `--shine-opacity` forces visibility while hovering.
+ * Both use the same `max(...)` pattern as the shine highlight. */
 .s-sobre-card-holo {
   position:        absolute;
   inset:           0;
   pointer-events:  none;
-  background: conic-gradient(
-    from 90deg at var(--mx) var(--my),
-    #ff9bd0,
-    #9bd0ff,
-    #9bffcf,
-    #ffe29b,
-    #d79bff,
-    #ff9bd0
-  );
-  -webkit-mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Ctext x='48' y='58' text-anchor='middle' font-family='-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif' font-size='20' font-weight='800' fill='black'%3E%7Bx%7D%3C/text%3E%3C/svg%3E");
-          mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Ctext x='48' y='58' text-anchor='middle' font-family='-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif' font-size='20' font-weight='800' fill='black'%3E%7Bx%7D%3C/text%3E%3C/svg%3E");
+  /* Grain texture (first layer) blended over the iridescent gradient
+     (second layer) — produces a stippled, silk-screened hologram. */
+  background-image:
+    url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    conic-gradient(
+      from 90deg at var(--mx) var(--my),
+      #ff9bd0,
+      #9bd0ff,
+      #9bffcf,
+      #ffe29b,
+      #d79bff,
+      #ff9bd0
+    );
+  background-size:        180px 180px, 100% 100%;
+  background-repeat:      repeat, no-repeat;
+  background-blend-mode:  overlay, normal;
+  /* Larger tile + larger glyph → fewer {x}s on the card, closer to
+     the sparse hologram of a real DNI.  Mask cuts out the card so
+     only the {x} shapes show the grainy iridescent fill. */
+  -webkit-mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Ctext x='110' y='132' text-anchor='middle' font-family='-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif' font-size='64' font-weight='800' fill='black'%3E%7Bx%7D%3C/text%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Ctext x='110' y='132' text-anchor='middle' font-family='-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif' font-size='64' font-weight='800' fill='black'%3E%7Bx%7D%3C/text%3E%3C/svg%3E");
   -webkit-mask-repeat: repeat;
           mask-repeat: repeat;
-  -webkit-mask-size:   96px 96px;
-          mask-size:   96px 96px;
+  -webkit-mask-size:   220px 220px;
+          mask-size:   220px 220px;
   mix-blend-mode: screen;
-  opacity:        max(var(--front-opacity, 0), var(--shine-opacity, 0));
-  transform:      rotate(-6deg) scale(1.15);
+  opacity:        max(var(--rot-opacity, 0), var(--shine-opacity, 0));
+  transform:      rotate(-8deg) scale(1.2);
   transition:     opacity 0.35s var(--s-ease);
 }
 
@@ -1269,13 +1298,13 @@ html:has(.s-page) body {
   inset:           0;
   border-radius:   inherit;
   pointer-events:  none;
-  /* Dark brand navy slightly darker than back face so edges read as
-     a shadowed extrusion (like the thickness of a real card). */
+  /* White/light-grey edge — like a real ID card.  Tiny gradient so
+     the extrusion reads as a physical plastic, not a flat fill. */
   background: linear-gradient(
     135deg,
-    #1A2644 0%,
-    #23335C 45%,
-    #2A3B6D 100%
+    #F3F5F8 0%,
+    #DDE1E7 50%,
+    #EDF0F4 100%
   );
 }
 
