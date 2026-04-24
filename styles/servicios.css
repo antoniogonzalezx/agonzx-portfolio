@@ -2258,29 +2258,41 @@ html:has(.s-page) body {
                   margin 0.22s var(--s-ease);
   will-change:    transform, width, height, background;
 }
+/* `mix-blend-mode: difference` + white fill keeps the cursor visible
+   against ANY background — including buttons that happen to share the
+   brand ink or accent colour.  The browser inverts the pixel colour
+   underneath on the fly, so: white on white → black, white on navy →
+   light, white on accent → yellow.  Always contrasts, never hides. */
 .s-cursor-dot {
   width:           6px;
   height:          6px;
   border-radius:   9999px;
-  background:      var(--s-ink);
-  mix-blend-mode:  multiply;
+  background:      #FFFFFF;
+  mix-blend-mode:  difference;
 }
 .s-cursor-ring {
   width:           28px;
   height:          28px;
   border-radius:   9999px;
-  border:          1px solid var(--s-ink-3);
+  border:          1px solid #FFFFFF;
   background:      transparent;
+  mix-blend-mode:  difference;
 }
+/* Hover: size change signals the state (accent fill dropped because
+   difference blend handles contrast for us). */
 .s-cursor-ring.is-hover {
   width:           44px;
   height:          44px;
   margin:         -8px 0 0 -8px;
-  background:      rgba(79, 79, 255, 0.14);
-  border-color:    var(--s-accent);
+  background:      rgba(255, 255, 255, 0.18);
+  border-color:    #FFFFFF;
 }
 .s-cursor-dot.is-hover {
-  background:      var(--s-accent);
+  transform-origin: center;
+  /* slight scale pulse via transition handled by the 0.22s transform
+     already on the shared rule; we bump via a translate-less scale by
+     keeping the background white so difference stays in play. */
+  background:      #FFFFFF;
 }
 
 html.s-cursor-on,
