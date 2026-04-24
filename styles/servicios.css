@@ -989,7 +989,12 @@ html:has(.s-page) body {
  * inside the tall section. */
 .s-sobre {
   position:          relative;
-  height:            220svh;             /* override .s-snap-section 100svh */
+  /* 180svh · 100svh of sticky-pinned stage + 80svh of extra scroll
+     driving the 3-phase choreography (rise → settle → flip).  The
+     flip completes at progress 0.90 so the section releases straight
+     into the next "3 formas" section — the rotation itself is the
+     transition. */
+  height:            180svh;
   background:        var(--s-bg);
   scroll-snap-stop:  normal;             /* allow scroll past without forced stop */
   overflow:          visible;            /* sticky child needs visible parent */

@@ -106,29 +106,31 @@ export default function ServiciosSobre() {
     if (!drag.current.moved) setUserRotation(prev => prev + 180);
   };
 
-  /* ── Choreography ── */
+  /* ── Choreography (3 phases, flip = section transition) ──
+   *  0.00 → 0.35: card rises from below into centred overlay position,
+   *               text stays put (no lift — background stays continuous).
+   *  0.35 → 0.55: card centred pinned over the text; text fades behind
+   *               until fully invisible at 0.55.
+   *  0.55 → 1.00: card flips 180°.  The flip ends exactly when the
+   *               sticky stage releases — the back face appearing IS
+   *               the cue that "3 formas" is about to scroll into view.
+   * After progress reaches 1 the sticky unpins and the next section
+   * slides in from below; proximity snap engages at the grid boundary. */
+  const photoY     = lerp(progress, [0, 0.35], [260, 0]);
+  const photoScale = lerp(progress, [0, 0.35, 0.55, 1], [0.94, 1.0, 1.02, 1.02]);
 
-  /* Text opacity: full at start, gentle dim once card overlaps */
-  const titleOpacity = lerp(progress, [0, 0.30, 0.85], [1, 1, 0.55]);
-  const logosOpacity = lerp(progress, [0, 0.30, 0.85], [1, 1, 0.45]);
-  const bioOpacity   = lerp(progress, [0, 0.30, 0.85], [1, 1, 0.40]);
+  /* Text fades out just before the flip starts, so by the time the
+     card rotates the background behind it is empty — nothing competes
+     with the rotation.  Fully invisible at 0.55. */
+  const titleOpacity = lerp(progress, [0, 0.25, 0.55], [1, 1, 0]);
+  const logosOpacity = lerp(progress, [0, 0.25, 0.55], [1, 1, 0]);
+  const bioOpacity   = lerp(progress, [0, 0.25, 0.55], [1, 1, 0]);
+  const textLift     = 0;
 
-  /* ── Choreography (4 phases) ──
-   *  0.00 → 0.30: card rises from "20% peeking" to overlap-text-position
-   *               (text stays still — only the card moves up)
-   *  0.30 → 0.55: card AND text move together upward (locked overlap)
-   *  0.55 → 0.70: stays centered, auto-flips 180° (back face shows)
-   *  0.70 → 1.00: card (back showing) + text exit upward together
-   * Implemented as: solo-rise (up to 0.30) + shared-lift (after 0.30).  */
-  const soloRise   = lerp(progress, [0, 0.30], [260, -120]);  // image-only translateY
-  const sharedLift = lerp(progress, [0.30, 1.0], [0, -640]);  // applied to BOTH image + text
-
-  const photoY     = soloRise + sharedLift;
-  const photoScale = lerp(progress, [0, 0.30, 0.70, 1], [0.94, 1.0, 1.04, 1.0]);
-  const textLift   = sharedLift;
-
-  /* Auto-flip happens AFTER the card is fully over the text (0.55+) */
-  const scrollRot    = lerp(progress, [0.55, 0.70], [0, 180]);
+  /* Flip spans the entire tail of the section — it lands at progress 1
+     (sticky release), so completing the 180° IS the handoff to the
+     next section. */
+  const scrollRot    = lerp(progress, [0.55, 1.0], [0, 180]);
 
   const cardTransform = `rotateY(${scrollRot + userRotation}deg) rotateX(${tilt}deg)`;
 
