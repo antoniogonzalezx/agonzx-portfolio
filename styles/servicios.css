@@ -1237,23 +1237,33 @@ html:has(.s-page) body {
 }
 
 /* ── Holographic {x} foil — DNI-style ─────────────────────────────
- * Fewer and bigger {x} glyphs than a regular pattern, filled with an
- * iridescent conic gradient that orbits the cursor.  A fractal-noise
- * SVG layered on top in `overlay` blend mode breaks the smooth colour
- * into a grainy stipple — the hallmark of a real DNI hologram.
+ * Checkerboard pattern of {x} glyphs, filled with an iridescent conic
+ * gradient + heavy fractal-noise grain layered on top via `overlay`
+ * blend.  The feColorMatrix alpha row is stretched (linear slope ≈ 4,
+ * intercept ≈ -1.5) to push mid-greys to the 0/1 extremes — that's
+ * the "crisp silkscreen" trick used by CSS-Tricks' grainy-gradients
+ * and the ReactBits ProfileCard hologram.
  *
- * Visibility · hidden by default (straight-on perpendicular view).
- *   - Grows with rotation: `--rot-opacity` ramps 0→1 across 0°..55°.
- *   - Hover boost: `--shine-opacity` forces visibility while hovering.
- * Both use the same `max(...)` pattern as the shine highlight. */
+ * Tile: 260×260 with TWO glyphs in diagonal offset positions — tiled
+ * across the card this reads as the user's checkerboard/brick layout:
+ *       {x}      .       {x}
+ *         .     {x}        .
+ *       {x}      .       {x}
+ *
+ * Visibility · hidden by default at perpendicular view.
+ *   - `--rot-opacity` ramps 0→1 across 0°..55° of rotation.
+ *   - `--shine-opacity` adds hover boost.
+ * Scaled by 0.55 so the holograms stay translucent, like real DNI
+ * foil that you mostly see through. */
 .s-sobre-card-holo {
   position:        absolute;
   inset:           0;
   pointer-events:  none;
-  /* Grain texture (first layer) blended over the iridescent gradient
-     (second layer) — produces a stippled, silk-screened hologram. */
   background-image:
-    url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    /* High-contrast white noise — blended `overlay` onto the
+       iridescent fill gives the stippled DNI-hologram grain. */
+    url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 5 -2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    /* Iridescent cursor-tracked conic gradient */
     conic-gradient(
       from 90deg at var(--mx) var(--my),
       #ff9bd0,
@@ -1263,21 +1273,22 @@ html:has(.s-page) body {
       #d79bff,
       #ff9bd0
     );
-  background-size:        180px 180px, 100% 100%;
+  background-size:        130px 130px, 100% 100%;
   background-repeat:      repeat, no-repeat;
   background-blend-mode:  overlay, normal;
-  /* Larger tile + larger glyph → fewer {x}s on the card, closer to
-     the sparse hologram of a real DNI.  Mask cuts out the card so
-     only the {x} shapes show the grainy iridescent fill. */
-  -webkit-mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Ctext x='110' y='132' text-anchor='middle' font-family='-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif' font-size='64' font-weight='800' fill='black'%3E%7Bx%7D%3C/text%3E%3C/svg%3E");
-          mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Ctext x='110' y='132' text-anchor='middle' font-family='-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif' font-size='64' font-weight='800' fill='black'%3E%7Bx%7D%3C/text%3E%3C/svg%3E");
+  /* Two-glyph diagonal-offset tile = checkerboard {x} pattern */
+  -webkit-mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260'%3E%3Cg font-family='-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif' font-size='50' font-weight='800' text-anchor='middle' fill='black'%3E%3Ctext x='65' y='88'%3E%7Bx%7D%3C/text%3E%3Ctext x='195' y='218'%3E%7Bx%7D%3C/text%3E%3C/g%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260'%3E%3Cg font-family='-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif' font-size='50' font-weight='800' text-anchor='middle' fill='black'%3E%3Ctext x='65' y='88'%3E%7Bx%7D%3C/text%3E%3Ctext x='195' y='218'%3E%7Bx%7D%3C/text%3E%3C/g%3E%3C/svg%3E");
   -webkit-mask-repeat: repeat;
           mask-repeat: repeat;
-  -webkit-mask-size:   220px 220px;
-          mask-size:   220px 220px;
+  -webkit-mask-size:   260px 260px;
+          mask-size:   260px 260px;
   mix-blend-mode: screen;
-  opacity:        max(var(--rot-opacity, 0), var(--shine-opacity, 0));
-  transform:      rotate(-8deg) scale(1.2);
+  /* Cap max at 0.55 — keep the holos translucent even at peak,
+     matching a real ID's see-through foil, and scale up a hair
+     with hover for a clear "reveal" moment. */
+  opacity:        calc(max(var(--rot-opacity, 0), var(--shine-opacity, 0)) * 0.55);
+  transform:      rotate(-8deg) scale(1.25);
   transition:     opacity 0.35s var(--s-ease);
 }
 
