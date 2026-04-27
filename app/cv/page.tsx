@@ -241,7 +241,7 @@ export default function CVPage() {
         {/* ── Body ── */}
         <div style={{ padding: 'clamp(1.6rem, 3.5vw, 2.6rem) clamp(1.8rem, 4vw, 3rem)' }}>
           {/* Summary */}
-          <SectionHeading>About</SectionHeading>
+          <SectionHeading>Summary</SectionHeading>
           <p
             style={{
               fontSize:    '0.95rem',
@@ -349,6 +349,75 @@ export default function CVPage() {
               )}
             </div>
           ))}
+
+          <hr style={hrStyle} />
+
+          {/* Selected work — side projects, founder work, signature builds.
+              Lives between Experience and Skills so a reviewer scanning
+              top-down sees the apps you ship on your own before the
+              tech checklist. */}
+          <SectionHeading>Selected work</SectionHeading>
+          <div style={{ marginBottom: 'clamp(1.3rem, 2.5vw, 2rem)' }}>
+            {CV.selectedWork.map((w) => (
+              <div key={w.name} style={{ marginBottom: '0.7rem' }}>
+                <div
+                  style={{
+                    display:    'flex',
+                    alignItems: 'baseline',
+                    gap:        '1rem',
+                    flexWrap:   'wrap',
+                    marginBottom:'0.18rem',
+                  }}
+                >
+                  <h3
+                    style={{
+                      fontFamily:    'Nohemi, sans-serif',
+                      fontWeight:    600,
+                      fontSize:      '1.05rem',
+                      letterSpacing: '-0.02em',
+                      color:         '#23335C',
+                      margin:         0,
+                    }}
+                  >
+                    {w.name}
+                  </h3>
+                  <a
+                    href={`https://${w.link}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      fontFamily:    'Safiro, sans-serif',
+                      fontSize:      '0.8rem',
+                      color:         '#4F4FFF',
+                      textDecoration:'none',
+                      flexShrink:    0,
+                    }}
+                  >
+                    {w.link}
+                  </a>
+                </div>
+                <p
+                  style={{
+                    fontSize: '0.85rem',
+                    color:    '#4E5C84',
+                    margin:   '0 0 0.3rem',
+                  }}
+                >
+                  <span style={{ color: '#8590AB' }}>{w.role}</span> — {w.desc}
+                </p>
+                <p
+                  style={{
+                    margin:    0,
+                    fontSize: '0.78rem',
+                    color:     '#4F4FFF',
+                    fontFamily:'Safiro, sans-serif',
+                  }}
+                >
+                  {w.tech.join('   ·   ')}
+                </p>
+              </div>
+            ))}
+          </div>
 
           <hr style={hrStyle} />
 

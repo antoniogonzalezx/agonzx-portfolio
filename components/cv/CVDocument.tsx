@@ -243,6 +243,40 @@ const styles = StyleSheet.create({
     fontWeight: 500,
   },
 
+  /* ── Selected work ── */
+  selectedWorkItem: {
+    marginBottom: 7,
+  },
+  selectedWorkHeader: {
+    flexDirection: 'row',
+    justifyContent:'space-between',
+    alignItems:    'baseline',
+    marginBottom:  2,
+  },
+  selectedWorkName: {
+    fontFamily:    'Nohemi',
+    fontWeight:    700,
+    fontSize:      11,
+    color:         C.ink,
+    letterSpacing: -0.2,
+  },
+  selectedWorkLink: {
+    fontSize: 8.6,
+    color:    C.accent,
+  },
+  selectedWorkDesc: {
+    fontSize:    9,
+    color:       C.ink2,
+    marginBottom:3,
+  },
+  selectedWorkRole: {
+    color: C.ink3,
+  },
+  selectedWorkTech: {
+    fontSize: 8.4,
+    color:    C.accent,
+  },
+
   /* ── Skills ── */
   skillRow: {
     flexDirection: 'row',
@@ -348,7 +382,7 @@ export default function CVDocument() {
         </View>
 
         {/* ── Body — content directly on Page so padding applies per page ── */}
-        <Text style={styles.sectionTitle}>About</Text>
+        <Text style={styles.sectionTitle}>Summary</Text>
           <Text style={styles.summary}>{CV.summary}</Text>
 
           <View style={styles.divider} />
@@ -375,6 +409,29 @@ export default function CVDocument() {
           ))}
 
           <View style={styles.divider} />
+
+        {/* Selected work — side projects + founder work + signature builds.
+         * Sits between Experience and Skills so the reader sees the apps
+         * shipped solo before the technology checklist.                  */}
+        <Text style={styles.sectionTitle}>Selected work</Text>
+        <View>
+          {CV.selectedWork.map((w) => (
+            <View key={w.name} style={styles.selectedWorkItem} wrap={false}>
+              <View style={styles.selectedWorkHeader}>
+                <Text style={styles.selectedWorkName}>{w.name}</Text>
+                <Link src={`https://${w.link}`} style={{ ...styles.selectedWorkLink, textDecoration: 'none' }}>
+                  {w.link}
+                </Link>
+              </View>
+              <Text style={styles.selectedWorkDesc}>
+                <Text style={styles.selectedWorkRole}>{w.role}</Text> — {w.desc}
+              </Text>
+              <Text style={styles.selectedWorkTech}>{w.tech.join('   ·   ')}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.divider} />
 
         <Text style={styles.sectionTitle}>Skills</Text>
         <View>
