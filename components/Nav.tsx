@@ -2,10 +2,37 @@
 import { useState, useEffect } from 'react';
 import { NAV_LINKS } from './data';
 
-export default function Nav() {
-  const [open, setOpen] = useState(false);
+/* ─────────────────────────────────────────────────────────────────
+ * Main portfolio nav.
+ *
+ * Hidden while the hero is in view; reveals when the hero exits.
+ * The right-most item is the `{x}lab` mark, linking to /lab — no
+ * "Lab" word, just the mark, so it reads as a sub-brand gesture.
+ *
+ * The mobile floating menu button (+) follows the same visibility
+ * gate so the hero stays clean on phones too.
+ * ───────────────────────────────────────────────────────────────── */
 
-  // Auto-close on desktop resize
+export default function Nav() {
+  const [open,    setOpen]    = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  // Reveal the nav once we leave the hero
+  useEffect(() => {
+    const heroEl = document.querySelector('[data-home-section="hero"]');
+    if (!heroEl) {
+      setVisible(true);
+      return;
+    }
+    const obs = new IntersectionObserver(
+      ([e]) => setVisible(!e.isIntersecting),
+      { threshold: 0.5 },
+    );
+    obs.observe(heroEl);
+    return () => obs.disconnect();
+  }, []);
+
+  // Auto-close mobile menu on desktop resize
   useEffect(() => {
     const onResize = () => { if (window.innerWidth > 700) setOpen(false); };
     window.addEventListener('resize', onResize);
@@ -15,35 +42,98 @@ export default function Nav() {
   const close = () => setOpen(false);
 
   const navStyle: React.CSSProperties = {
-    position: 'fixed', top: '1rem', left: '50%', transform: 'translateX(-50%)',
-    zIndex: 1000, padding: '0.7rem 1.8rem',
-    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-    width: 'min(90vw, 800px)',
-    background: 'rgba(255,255,255,0.04)',
-    backdropFilter: 'blur(32px) saturate(200%)',
+    position:             'fixed',
+    top:                  '1rem',
+    left:                 '50%',
+    transform:            visible ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(-120%)',
+    zIndex:                1000,
+    padding:              '0.7rem 1.8rem',
+    display:              'flex',
+    justifyContent:       'space-between',
+    alignItems:           'center',
+    width:                'min(90vw, 800px)',
+    background:           'rgba(255,255,255,0.04)',
+    backdropFilter:       'blur(32px) saturate(200%)',
     WebkitBackdropFilter: 'blur(32px) saturate(200%)',
-    border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: 100,
-    boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
+    border:               '1px solid rgba(255,255,255,0.08)',
+    borderRadius:          100,
+    boxShadow:            '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
+    opacity:               visible ? 1 : 0,
+    pointerEvents:         visible ? 'auto' : 'none',
+    transition:           'transform 0.5s var(--ease), opacity 0.4s var(--ease)',
+  };
+
+  const mobileBtnStyle: React.CSSProperties = {
+    position:             'fixed',
+    top:                  '1rem',
+    right:                '1rem',
+    zIndex:                1001,
+    width:                '2.66rem',
+    height:               '2.66rem',
+    padding:               0,
+    borderRadius:         '50%',
+    border:               '1px solid rgba(255,255,255,0.08)',
+    background:           'rgba(255,255,255,0.04)',
+    backdropFilter:       'blur(32px) saturate(200%)',
+    WebkitBackdropFilter: 'blur(32px) saturate(200%)',
+    boxShadow:            '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
+    cursor:               'pointer',
+    alignItems:           'center',
+    justifyContent:       'center',
+    opacity:               visible ? 1 : 0,
+    transform:             visible ? 'scale(1)' : 'scale(0.8)',
+    pointerEvents:         visible ? 'auto' : 'none',
+    transition:           'transform 0.4s var(--ease), opacity 0.4s var(--ease)',
   };
 
   return (
     <>
       <nav className="main-nav" style={navStyle}>
-        <a href="#" onClick={close} data-magnetic style={{ fontFamily: 'Nohemi,sans-serif', fontSize: '1.05rem', fontWeight: 600, display: 'flex' }}>
+        <a
+          href="#"
+          onClick={close}
+          data-magnetic
+          aria-label="agonzx — top of page"
+          style={{ fontFamily: 'Nohemi,sans-serif', fontSize: '1.05rem', fontWeight: 600, display: 'flex' }}
+        >
           <span style={{ color: 'var(--white)' }}>agonz</span>
           <span style={{ color: 'var(--accent)' }}>{'{x}'}</span>
         </a>
 
         {/* Desktop links */}
-        <div className="nav-links-desktop">
+        <div className="nav-links-desktop" style={{ alignItems: 'center' }}>
           {NAV_LINKS.map(l => (
             <a key={l} href={'#' + l.toLowerCase()} style={{ fontFamily: 'Nohemi,sans-serif', fontSize: '0.78rem', fontWeight: 500, color: 'var(--t2)', transition: 'color 0.3s' }}>
               {l}
             </a>
           ))}
-          <a href="/servicios" style={{ fontFamily: 'Nohemi,sans-serif', fontSize: '0.78rem', fontWeight: 500, color: 'var(--t2)', transition: 'color 0.3s' }}>
-            Services
+          <a
+            href="/cv"
+            aria-label="View CV"
+            style={{
+              fontFamily:     'Nohemi, sans-serif',
+              fontSize:       '0.78rem',
+              fontWeight:     500,
+              color:          'var(--t2)',
+              transition:     'color 0.3s',
+              textDecoration: 'none',
+            }}
+          >
+            CV
+          </a>
+          <a
+            href="/lab"
+            aria-label="Visit axlab — automation studio"
+            style={{
+              fontFamily:     'Nohemi,sans-serif',
+              fontSize:       '0.78rem',
+              fontWeight:     500,
+              color:          'var(--t2)',
+              transition:     'color 0.3s',
+              textDecoration: 'none',
+            }}
+          >
+            Lab
           </a>
         </div>
 
@@ -54,24 +144,7 @@ export default function Nav() {
         className="nav-menu-btn"
         onClick={() => setOpen(v => !v)}
         aria-label={open ? 'Close menu' : 'Open menu'}
-        style={{
-          position: 'fixed',
-          top: '1rem',
-          right: '1rem',
-          zIndex: 1001,
-          width: '2.66rem',
-          height: '2.66rem',
-          padding: 0,
-          borderRadius: '50%',
-          border: '1px solid rgba(255,255,255,0.08)',
-          background: 'rgba(255,255,255,0.04)',
-          backdropFilter: 'blur(32px) saturate(200%)',
-          WebkitBackdropFilter: 'blur(32px) saturate(200%)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
-          cursor: 'pointer',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
+        style={mobileBtnStyle}
       >
         <span style={{
           color: 'var(--accent)',
@@ -104,13 +177,17 @@ export default function Nav() {
             </a>
           ))}
           <a
-            href="/servicios"
+            href="/lab"
             className="mobile-nav-link"
-            style={{ transitionDelay: open ? `${NAV_LINKS.length * 0.055}s` : '0s' }}
+            style={{
+              transitionDelay: open ? `${NAV_LINKS.length * 0.055}s` : '0s',
+              alignItems:      'center',
+              gap:             '0.7rem',
+            }}
             onClick={close}
           >
             <span className="link-idx">0{NAV_LINKS.length + 1}</span>
-            Services
+            Lab
           </a>
         </div>
       </div>

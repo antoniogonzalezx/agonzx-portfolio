@@ -1,478 +1,286 @@
 'use client';
-import { useRef, useCallback, useEffect, useReducer, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { STACK_ITEMS } from './data';
-import type { StackItem } from './data';
 
-// Lobehub Mono icons (no @lobehub/ui needed)
+/* ─────────────────────────────────────────────────────────────────
+ * Stack — infinite horizontal logo marquee.
+ *
+ * Two rows scrolling in opposite directions at slightly different
+ * speeds. The track is the logo set duplicated (× 2) so the loop
+ * resets seamlessly at -50% translateX. Hover pauses both rows.
+ *
+ * Edge-fade gradients on left/right hide the seams of the loop.
+ * Single accent colour on hover underline. No card chrome — like
+ * the original spec, simpler and calmer than a bento.
+ * ───────────────────────────────────────────────────────────────── */
+
 const GithubCopilotMono = dynamic(() => import('@lobehub/icons/es/GithubCopilot/components/Mono'), { ssr: false });
 const CursorMono        = dynamic(() => import('@lobehub/icons/es/Cursor/components/Mono'),        { ssr: false });
 const CodexMono         = dynamic(() => import('@lobehub/icons/es/Codex/components/Mono'),         { ssr: false });
-const CodexText         = dynamic(() => import('@lobehub/icons/es/Codex/components/Text'),         { ssr: false });
 
-const lobeComponents: Record<string, { Mono?: any; Text?: any }> = {
-  GithubCopilot: { Mono: GithubCopilotMono },
-  Cursor:        { Mono: CursorMono },
-  CodexCombine:  { Mono: CodexMono, Text: CodexText },
-};
+type LogoKind = 'wiki-img' | 'wiki-gray' | 'lobehub';
 
-const COLS        = 12;
-const ROWS        = 5;
-const MOBILE_COLS = 4;
-const MOBILE_ROWS = 6;
-const GAP         = 6; // px
-
-// Shadow tokens
-const SHADOW_BASE       = '0 2px 6px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.08)';
-const SHADOW_HOVER      = '0 8px 24px rgba(0,0,0,0.45), 0 3px 8px rgba(0,0,0,0.3),  inset 0 1px 0 rgba(255,255,255,0.13)';
-const SHADOW_HERO       = '0 4px 20px rgba(13,188,170,0.25), 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.12)';
-const SHADOW_HERO_HOVER = '0 10px 36px rgba(13,188,170,0.4), 0 4px 14px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.16)';
-
-function getSpan(gridStr: string): number {
-  const m = gridStr.match(/span\s+(\d+)/);
-  return m ? parseInt(m[1]) : 1;
+interface Logo {
+  label:    string;
+  kind:     LogoKind;
+  src?:     string;
+  lobeName?:'GithubCopilot' | 'Cursor' | 'Codex';
+  noFilter?:boolean;
+  width?:   number; // visual width budget so wordmark logos read at the right size
 }
 
-// ── BentoCard ────────────────────────────────────────────────────────────────
+const ROW_A: Logo[] = [
+  // Swift opens the row; SwiftUI lives in row B so the bird and the
+  // hexagonal "S" don't sit side by side.
+  { label:'Swift',     kind:'wiki-img',  src:'/logos/swift-bird.svg',                                                                    width: 32 },
+  { label:'Xcode',     kind:'wiki-img',  src:'/logos/xcode-svgrepo-com.svg',                                                              width: 32 },
+  { label:'Apple',     kind:'wiki-img',  src:'/logos/apple-black-logo-svgrepo-com.svg',                                                  width: 28 },
+  { label:'App Store', kind:'wiki-img',  src:'/logos/appstore-white.svg',     noFilter:true,                                              width: 90 },
+  { label:'Cursor',    kind:'wiki-img',  src:'/logos/cursor-lockup.svg',     noFilter:true,                                               width: 88 },
+  { label:'Claude',    kind:'wiki-gray', src:'https://upload.wikimedia.org/wikipedia/commons/b/b0/Claude_AI_symbol.svg',                  width: 32 },
+  { label:'Codex',     kind:'lobehub',   lobeName:'Codex',                                                                                width: 32 },
+  { label:'Copilot',   kind:'lobehub',   lobeName:'GithubCopilot',                                                                         width: 32 },
+  // Kotlin uses the white-invert filter so the wordmark text doesn't
+  // come out black against navy. (wiki-gray was leaving the "Kotlin"
+  // label dark on the dark bg.)
+  { label:'Kotlin',    kind:'wiki-img',  src:'https://upload.wikimedia.org/wikipedia/commons/7/76/Kotlin_logo_%282021-present%29.svg',   width: 96 },
+];
 
-function BentoCard({ item, unit, isMobile }: { item: StackItem; unit: number; isMobile: boolean }) {
-  const cardRef  = useRef<HTMLDivElement>(null);
-  const shineRef = useRef<HTMLDivElement>(null);
-  const [showInfo, setShowInfo] = useState(false);
+const ROW_B: Logo[] = [
+  { label:'OpenAI',    kind:'wiki-img',  src:'https://upload.wikimedia.org/wikipedia/commons/4/4d/OpenAI_Logo.svg',               width: 32 },
+  { label:'Firebase',  kind:'wiki-gray', src:'https://upload.wikimedia.org/wikipedia/commons/0/0b/New_Firebase_logo.svg',         width: 32 },
+  { label:'SwiftUI',   kind:'wiki-img',  src:'/logos/swiftui.svg',                                                                width: 32 },
+  { label:'GraphQL',   kind:'wiki-gray', src:'https://upload.wikimedia.org/wikipedia/commons/1/17/GraphQL_Logo.svg',              width: 32 },
+  { label:'Datadog',   kind:'wiki-img',  src:'/logos/datadog-wordmark.svg',                                                       width: 96 },
+  { label:'Git',       kind:'wiki-img',  src:'https://upload.wikimedia.org/wikipedia/commons/e/e0/Git-logo.svg',                  width: 64 },
+  { label:'GitHub',    kind:'wiki-img',  src:'https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg',      width: 32 },
+  { label:'Jira',      kind:'wiki-gray', src:'https://upload.wikimedia.org/wikipedia/commons/8/8a/Jira_Logo.svg',                 width: 32 },
+  { label:'Figma',     kind:'wiki-gray', src:'https://upload.wikimedia.org/wikipedia/commons/3/33/Figma-logo.svg',                width: 24 },
+  { label:'Notion',    kind:'wiki-img',  src:'/logos/notion-white.svg',     noFilter:true,                                        width: 80 },
+];
 
-  const gridCol  = isMobile && item.mobileGridCol ? item.mobileGridCol : item.gridCol;
-  const gridRow  = isMobile && item.mobileGridRow ? item.mobileGridRow : item.gridRow;
+const SIZE = 48; // logo height in px — all logos render at this exact height; width follows natural aspect ratio
 
-  const colSpan  = getSpan(gridCol);
-  const rowSpan  = getSpan(gridRow);
-  const isBig    = colSpan >= 2 && rowSpan >= 2;
-  const isTall   = colSpan === 1 && rowSpan >= 2;
-  const isWide   = colSpan >= 2 && rowSpan === 1;
-  const isHero   = item.isHero === true;
-  const iconDark = item.iconDark === true;
-  const noFilter = item.noFilter === true;
-  const scale    = item.iconScale ?? 1.0;
+function LogoChip({ logo }: { logo: Logo }) {
+  const [hovered, setHovered] = useState(false);
 
-  // Physical cell dimensions (px)
-  const cellW = unit * colSpan + GAP * (colSpan - 1);
-  const cellH = unit * rowSpan + GAP * (rowSpan - 1);
-  const pad   = isHero ? 20 : 10;
-
-  // Icon size
-  const availH = cellH - pad * 2;
-  const availW = cellW - pad * 2;
-  const rawSize = Math.max(14, Math.round(
-    isHero  ? Math.min(availH * 0.52, availW * 0.52) :
-    isBig   ? Math.min(availH * 0.48, availW * 0.48) :
-    isTall  ? Math.min(availH * 0.44, availW * 0.80) :
-    isWide  ? Math.min(availH * 0.50, availW * 0.30) :
-              Math.min(availH * 0.48, availW * 0.48)
-  ));
-  const iconSize = Math.round(rawSize * scale);
-
-  // Label font size
-  const labelFontSize = unit === 0 ? 11 : Math.max(10, Math.min(30, Math.round(
-    isHero  ? cellH * 0.075 :
-    isBig   ? cellH * 0.08  :
-    isTall  ? cellH * 0.07  :
-    isWide  ? cellH * 0.22  :
-              cellH * 0.18
-  )));
-
-  // Popup font sizes
-  const popupLabel = Math.max(8, Math.min(14, Math.round(cellH * 0.13)));
-  const popupInfo  = Math.max(7, Math.min(10, Math.round(cellH * 0.10)));
-
-  // ── 3-D tilt + hover shadow ────────────────────────────────────────────
-  const handleMouseEnter = useCallback(() => {
-    const card = cardRef.current;
-    if (!card) return;
-    card.style.transition = 'box-shadow 0.25s ease';
-    card.style.boxShadow  = isHero ? SHADOW_HERO_HOVER : SHADOW_HOVER;
-    setShowInfo(true);
-  }, [isHero]);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const card  = cardRef.current;
-    const shine = shineRef.current;
-    if (!card) return;
-    const r  = card.getBoundingClientRect();
-    const x  = e.clientX - r.left;
-    const y  = e.clientY - r.top;
-    const rx = ((y - r.height / 2) / (r.height / 2)) * -5;
-    const ry = ((x - r.width  / 2) / (r.width  / 2)) *  5;
-    card.style.transition = 'box-shadow 0.25s ease';
-    card.style.transform  = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) scale3d(1.025,1.025,1.025)`;
-    if (shine) {
-      shine.style.background = `radial-gradient(circle at ${(x / r.width) * 100}% ${(y / r.height) * 100}%, rgba(255,255,255,0.1) 0%, transparent 65%)`;
-      shine.style.opacity = '1';
+  const rendered = (() => {
+    if (logo.kind === 'lobehub' && logo.lobeName) {
+      const Icon =
+        logo.lobeName === 'GithubCopilot' ? GithubCopilotMono :
+        logo.lobeName === 'Cursor'        ? CursorMono :
+                                             CodexMono;
+      return (
+        <span
+          style={{
+            display:    'inline-flex',
+            alignItems: 'center',
+            color:      hovered ? 'var(--white)' : 'rgba(255,255,255,0.42)',
+            transition: 'color 0.3s var(--ease)',
+          }}
+        >
+          <Icon size={SIZE} />
+        </span>
+      );
     }
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    const card  = cardRef.current;
-    const shine = shineRef.current;
-    if (card) {
-      card.style.transition = 'transform 0.5s cubic-bezier(0.16,1,0.3,1), box-shadow 0.4s ease';
-      card.style.transform  = '';
-      card.style.boxShadow  = isHero ? SHADOW_HERO : SHADOW_BASE;
-    }
-    if (shine) shine.style.opacity = '0';
-    setShowInfo(false);
-  }, [isHero]);
-
-  // Mobile: click to toggle popup
-  const handleClick = useCallback(() => {
-    if (isMobile) setShowInfo(v => !v);
-  }, [isMobile]);
-
-  // Close popup when switching between mobile/desktop
-  useEffect(() => { setShowInfo(false); }, [isMobile]);
-
-  // ── Icon ───────────────────────────────────────────────────────────────
-  const renderIcon = () => {
-    if ((item.type === 'wiki-img' || item.type === 'wiki-gray') && item.src) {
-      let cls: string;
-      if (noFilter) {
-        cls = 'bento-icon';
-      } else if (iconDark) {
-        cls = `bento-icon ${item.type === 'wiki-gray' ? 'icon-dark-gray' : 'icon-dark'}`;
-      } else {
-        cls = `bento-icon ${item.type === 'wiki-gray' ? 'icon-gray' : 'icon-white'}${isHero ? ' icon-hero' : ''}`;
-      }
+    if (logo.noFilter) {
       return (
         <img
-          src={item.src}
-          alt={item.label}
-          className={cls}
+          src={logo.src}
+          alt={logo.label}
           style={{
-            maxHeight: iconSize,
-            maxWidth: Math.min(availW * 0.92, iconSize * 5),
-            height: 'auto',
-            width: 'auto',
-            objectFit: 'contain',
-            flexShrink: 0,
-            display: 'block',
+            height:     SIZE,
+            width:      'auto',
+            opacity:     hovered ? 1 : 0.55,
+            transition: 'opacity 0.3s var(--ease)',
+            display:    'block',
+            objectFit:  'contain',
           }}
         />
       );
     }
-    if (item.type === 'lobehub' && item.lobeName) {
-      const entry = lobeComponents[item.lobeName];
-      const LIcon = entry?.Mono;
-      const LText = entry?.Text;
-      if (!LIcon) return null;
+    const filter = logo.kind === 'wiki-gray'
+      ? `grayscale(1) brightness(${hovered ? '2.6' : '1.85'})`
+      : `brightness(0) invert(1)`;
+    return (
+      <img
+        src={logo.src}
+        alt={logo.label}
+        style={{
+          height:     SIZE,
+          width:      'auto',
+          objectFit:  'contain',
+          opacity:    hovered ? 1 : 0.55,
+          filter,
+          transition: 'opacity 0.3s var(--ease), filter 0.3s var(--ease)',
+          display:    'block',
+        }}
+      />
+    );
+  })();
 
-      if (LText) {
-        return (
-          <div
-            className={`bento-icon ${iconDark ? 'icon-lobe-dark' : 'icon-lobe'}`}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: Math.round(iconSize * 0.3) }}
-          >
-            <LIcon size={iconSize} />
-            <LText size={Math.round(iconSize * 0.65)} />
-          </div>
-        );
-      }
-
-      return (
-        <div className={`bento-icon ${iconDark ? 'icon-lobe-dark' : 'icon-lobe'}`} style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-          <LIcon size={iconSize} />
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const icon      = renderIcon();
-  const hasIcon   = icon !== null;
-  const showLabel = item.showLabel !== false;
-
-  const labelEl = showLabel ? (
+  return (
     <span
-      className={`bento-label${iconDark ? ' label-dark' : ''}`}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      title={logo.label}
       style={{
-        fontFamily: 'Nohemi,sans-serif',
-        fontSize: labelFontSize,
-        fontWeight: 600,
-        textTransform: 'uppercase' as const,
-        letterSpacing: labelFontSize > 16 ? '0.06em' : '0.1em',
-        textAlign: 'center' as const,
-        lineHeight: 1.2,
+        flex:       '0 0 auto',
+        display:    'inline-flex',
+        alignItems: 'center',
+        padding:    '0 clamp(1.5rem, 3vw, 2.5rem)',
       }}
     >
-      {item.label}
+      {rendered}
     </span>
-  ) : null;
+  );
+}
 
-  // ── Layout ─────────────────────────────────────────────────────────────
-  const gap = isBig || isTall ? '0.65rem' : '0.45rem';
-  let inner: React.ReactNode;
-
-  if (isBig || isTall) {
-    inner = (
-      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap, height:'100%', width:'100%' }}>
-        {icon}{labelEl}
-      </div>
-    );
-  } else if (isWide && hasIcon && showLabel) {
-    inner = (
-      <div style={{ display:'flex', flexDirection:'row', alignItems:'center', justifyContent:'flex-start', gap, height:'100%', width:'100%', padding:'0 0.3rem' }}>
-        {icon}{labelEl}
-      </div>
-    );
-  } else if (isWide && hasIcon) {
-    inner = (
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100%', width:'100%' }}>
-        {icon}
-      </div>
-    );
-  } else if (isWide) {
-    inner = (
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100%', width:'100%' }}>
-        {labelEl}
-      </div>
-    );
-  } else if (hasIcon && showLabel) {
-    inner = (
-      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap, height:'100%', width:'100%' }}>
-        {icon}{labelEl}
-      </div>
-    );
-  } else if (hasIcon) {
-    inner = (
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100%', width:'100%' }}>
-        {icon}
-      </div>
-    );
-  } else {
-    inner = (
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100%', width:'100%', textAlign:'center', padding:'0 0.3rem' }}>
-        {labelEl}
-      </div>
-    );
-  }
+function MarqueeRow({ logos, durationS, reverse }: { logos: Logo[]; durationS: number; reverse?: boolean }) {
+  // The track contains the same logo array twice, so the animation can
+  // translate to -50% and loop seamlessly. We hard-code the keyframes
+  // inline (template literal) so each row gets a unique animation name
+  // when reversed.
+  const animName = reverse ? 'stkMarqRev' : 'stkMarq';
 
   return (
     <div
-      ref={cardRef}
-      className={`bento-cell${isHero ? ' bento-hero' : ''}`}
+      className="stk-marq-track"
       style={{
-        gridColumn: gridCol,
-        gridRow:    gridRow,
-        background: item.bg ?? '#075e55',
-        borderRadius: 14,
-        padding: `${pad}px`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        cursor: 'pointer',
-        position: 'relative',
-        transformStyle: 'preserve-3d',
-        willChange: 'transform',
-        boxShadow: isHero ? SHADOW_HERO : SHADOW_BASE,
-        transition: 'box-shadow 0.4s ease',
-        overflow: 'hidden',
-        minWidth: 0,
-        minHeight: 0,
+        display:        'flex',
+        flexShrink:      0,
+        alignItems:     'center',
+        width:          'max-content',
+        animation:      `${animName} ${durationS}s linear infinite`,
+        willChange:     'transform',
       }}
-      onMouseEnter={handleMouseEnter}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
     >
-      {/* Cursor-follow shine */}
-      <div ref={shineRef} style={{ position:'absolute', inset:0, borderRadius:'inherit', pointerEvents:'none', opacity:0, transition:'opacity 0.3s', zIndex:2 }} />
-
-      {/* Content */}
-      <div style={{ position:'relative', zIndex:3, width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center' }}>
-        {inner}
-      </div>
-
-      {/* Info popup overlay — desktop: shows on hover; mobile: click to toggle */}
-      <div style={{
-        position: 'absolute', inset: 0, borderRadius: 'inherit',
-        background: 'rgba(11,15,20,0.90)',
-        backdropFilter: 'blur(10px)',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        padding: '0.4rem',
-        zIndex: 20,
-        opacity: showInfo ? 1 : 0,
-        pointerEvents: 'none',
-        transition: 'opacity 0.18s ease',
-      }}>
-        <span style={{
-          fontFamily: 'Nohemi,sans-serif',
-          fontSize: popupLabel,
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-          color: 'var(--accent)',
-          textAlign: 'center',
-          lineHeight: 1.2,
-          display: 'block',
-        }}>
-          {item.label}
-        </span>
-        {item.info && cellH > 52 && (
-          <span style={{
-            fontFamily: 'Safiro,sans-serif',
-            fontSize: popupInfo,
-            color: 'var(--t2)',
-            textAlign: 'center',
-            lineHeight: 1.3,
-            display: 'block',
-            marginTop: '0.25rem',
-            padding: '0 0.1rem',
-          }}>
-            {item.info}
-          </span>
-        )}
-      </div>
+      {/* Render the set THREE times. The keyframes translate by exactly
+          one set-width (-33.333%), so on loop reset the visible viewport
+          shows the second set in place of the first — pixel-perfect
+          seamless, no rounding glitch on the wrap. */}
+      {[...logos, ...logos, ...logos].map((logo, i) => (
+        <LogoChip logo={logo} key={`${logo.label}-${i}`} />
+      ))}
     </div>
   );
 }
 
-// ── Stack section ────────────────────────────────────────────────────────────
-
 export default function Stack() {
-  const wrapperRef  = useRef<HTMLDivElement>(null);
-  const gridRef     = useRef<HTMLDivElement>(null);
-  const sectionRef  = useRef<HTMLElement>(null);
-  const unitRef     = useRef(0);
-  const isMobileRef = useRef(false);
-  const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
-  const [isMobile, setIsMobile] = useState(false);
-  const [stackTitleVisible, setStackTitleVisible] = useState(false);
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth <= 700);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
-
-  // Show fixed title as soon as the Stack section approaches the nav bar
-  useEffect(() => {
-    if (!isMobile) return;
-    const section = sectionRef.current;
-    if (!section) return;
-    let rafId: number;
-    const update = () => {
-      const rect = section.getBoundingClientRect();
-      setStackTitleVisible(rect.top <= 72 && rect.bottom > 0);
-    };
-    const onScroll = () => { cancelAnimationFrame(rafId); rafId = requestAnimationFrame(update); };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    update();
-    return () => { window.removeEventListener('scroll', onScroll); cancelAnimationFrame(rafId); };
-  }, [isMobile]);
-
-  useEffect(() => {
-    const update = () => {
-      const wrapper = wrapperRef.current;
-      const grid    = gridRef.current;
-      if (!wrapper || !grid) return;
-
-      const w       = wrapper.clientWidth;
-      const h       = wrapper.clientHeight;
-      const mobile  = w < 700;
-      const cols    = mobile ? MOBILE_COLS : COLS;
-      const rows    = mobile ? MOBILE_ROWS : ROWS;
-      const unitW   = (w - (cols - 1) * GAP) / cols;
-      const unitH   = (h - (rows - 1) * GAP) / rows;
-      const unit    = Math.min(unitW, unitH);
-
-      if (Math.abs(unit - unitRef.current) < 0.5 && mobile === isMobileRef.current) return;
-      unitRef.current    = unit;
-      isMobileRef.current = mobile;
-
-      grid.style.gridTemplateColumns = `repeat(${cols}, ${unit}px)`;
-      grid.style.gridAutoRows        = `${unit}px`;
-      grid.style.width               = `${cols * unit + (cols - 1) * GAP}px`;
-
-      forceUpdate();
-    };
-
-    update();
-    const ro = new ResizeObserver(update);
-    if (wrapperRef.current) ro.observe(wrapperRef.current);
-    return () => ro.disconnect();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const sectionRef = useRef<HTMLElement>(null);
 
   return (
-    <>
-      {/* Fixed mobile title — same sticky-header pattern as Experience/Projects */}
-      {isMobile && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100%',
-          zIndex: 500, pointerEvents: 'none',
-          opacity: stackTitleVisible ? 1 : 0,
-          transition: 'opacity 0.3s ease',
-          paddingTop: '4.5rem', paddingLeft: '2.5rem', paddingRight: '3rem', paddingBottom: '1.2rem',
-          background: 'linear-gradient(to bottom, var(--bg2) 65%, transparent)',
-          fontFamily: 'Nohemi,sans-serif',
-          fontSize: 'clamp(1.8rem, 5vw, 2.2rem)',
-          fontWeight: 600, textTransform: 'uppercase', letterSpacing: '-0.01em',
-          color: 'var(--white)',
-        }}>
-          Tech Stack
-        </div>
-      )}
-
     <section
       id="stack"
       ref={sectionRef}
-      className="snap-section stack-section"
-      suppressHydrationWarning
+      data-home-section="stack"
+      className="snap-section"
       style={{
-        background: 'var(--bg2)',
-        display: 'flex',
+        background:    'var(--bg)',
+        position:      'relative',
+        overflow:      'hidden',
+        padding:       'clamp(3rem,5vh,4.5rem) 0',
+        display:       'flex',
         flexDirection: 'column',
-        padding: '8rem 2rem 1rem',
-        height: '100dvh',
-        overflow: 'hidden',
-        position: 'relative',
+        justifyContent:'center',
       }}
     >
-      {/* Desktop title — hidden on mobile via CSS (fixed title takes over) */}
-      <div className="stack-section-title" style={{
-        position: 'absolute',
-        top: '4.5rem',
-        left: '2rem',
-        fontFamily: 'Nohemi,sans-serif',
-        fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)',
-        fontWeight: 600,
-        textTransform: 'uppercase',
-        letterSpacing: '-0.01em',
-        color: 'var(--white)',
-        zIndex: 2,
-        pointerEvents: 'none',
-      }}>
-        Tech Stack
+      {/* Header — kept inside container padding */}
+      <div
+        style={{
+          position:     'relative',
+          zIndex:        1,
+          maxWidth:     1200,
+          margin:       '0 auto clamp(2rem, 4vw, 3rem)',
+          width:        '100%',
+          padding:      '0 clamp(1.5rem,4vw,3.5rem)',
+        }}
+      >
+        <header>
+          <h2
+            style={{
+              fontFamily:    'Nohemi, sans-serif',
+              fontSize:      'clamp(2rem, 5vw, 3.6rem)',
+              fontWeight:    600,
+              letterSpacing: '-0.035em',
+              lineHeight:     0.95,
+              color:         'var(--white)',
+              margin:         0,
+            }}
+          >
+            What I use.
+          </h2>
+        </header>
       </div>
 
+      {/* Marquee container — full bleed with edge fades */}
       <div
-        ref={wrapperRef}
-        style={{ flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        style={{
+          position:     'relative',
+          width:        '100%',
+          maxWidth:     '100vw',
+          overflow:     'hidden',
+          padding:      '1.5rem 0',
+        }}
       >
+        {/* Edge fade gradients */}
         <div
-          ref={gridRef}
-          className="bento-grid"
-          suppressHydrationWarning
+          aria-hidden
           style={{
-            display: 'grid',
-            gridTemplateColumns: `repeat(${COLS}, 1fr)`,
-            gap: `${GAP}px`,
+            position:      'absolute',
+            top:            0,
+            bottom:         0,
+            left:           0,
+            width:         'clamp(60px, 10vw, 140px)',
+            background:    'linear-gradient(to right, var(--bg), transparent)',
+            zIndex:         2,
+            pointerEvents: 'none',
+          }}
+        />
+        <div
+          aria-hidden
+          style={{
+            position:      'absolute',
+            top:            0,
+            bottom:         0,
+            right:          0,
+            width:         'clamp(60px, 10vw, 140px)',
+            background:    'linear-gradient(to left, var(--bg), transparent)',
+            zIndex:         2,
+            pointerEvents: 'none',
+          }}
+        />
+
+        <div
+          className="stk-marq-rows"
+          style={{
+            display:       'flex',
+            flexDirection: 'column',
+            gap:           '2.5rem',
           }}
         >
-          {STACK_ITEMS.filter(item => !(isMobileRef.current && item.mobileHidden)).map((item, i) => (
-            <BentoCard key={i} item={item} unit={unitRef.current} isMobile={isMobileRef.current} />
-          ))}
+          <MarqueeRow logos={ROW_A} durationS={56} />
+          <MarqueeRow logos={ROW_B} durationS={64} reverse />
         </div>
       </div>
+
+      <style suppressHydrationWarning>{`
+        @keyframes stkMarq {
+          from { transform: translate3d(0, 0, 0); }
+          to   { transform: translate3d(-33.3333%, 0, 0); }
+        }
+        @keyframes stkMarqRev {
+          from { transform: translate3d(-33.3333%, 0, 0); }
+          to   { transform: translate3d(0, 0, 0); }
+        }
+        /* Pause both rows on section hover */
+        section[data-home-section="stack"]:hover .stk-marq-track {
+          animation-play-state: paused;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .stk-marq-track { animation: none !important; }
+        }
+      `}</style>
     </section>
-    </>
   );
 }

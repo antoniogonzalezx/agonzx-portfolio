@@ -6,7 +6,6 @@ import { useEffect } from 'react';
 
 import FloatingPill         from '@/components/servicios/FloatingPill';
 import ServiciosCursor      from '@/components/servicios/ServiciosCursor';
-import ServiciosNav         from '@/components/servicios/ServiciosNav';
 import ServiciosHero        from '@/components/servicios/ServiciosHero';
 import ServiciosGrid        from '@/components/servicios/ServiciosGrid';
 import ServiciosDiagnostico from '@/components/servicios/ServiciosDiagnostico';
@@ -60,9 +59,11 @@ export default function Servicios() {
 
   return (
     <div className="s-page">
-      {/* Fixed overlays — outside snap container */}
+      {/* Fixed overlays — outside snap container.
+          The navbar was dropped: the FloatingPill carries the brand
+          mark and the primary CTA (WhatsApp), the footer carries the
+          link nav. No top chrome competing with the hero wordmark. */}
       <ServiciosCursor />
-      <ServiciosNav  wa={WA} />
       <FloatingPill />
 
       {/* Scroll-snap main */}

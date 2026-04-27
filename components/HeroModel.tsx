@@ -63,8 +63,8 @@ function BracesModel({ dragRef, velocityRef }: BracesModelProps) {
         >
           {'{x}'}
           <meshStandardMaterial
-            color="#3DF2E0"
-            emissive="#3DF2E0"
+            color="#6B6BFF"
+            emissive="#6B6BFF"
             emissiveIntensity={0.12}
             metalness={0.2}
             roughness={0.3}
@@ -130,7 +130,7 @@ export default function HeroModel() {
       >
         <ambientLight intensity={0.8} />
         <directionalLight position={[4, 6, 5]} intensity={2.0} color="#ffffff" />
-        <pointLight position={[-4, 2, 3]} intensity={1.5} color="#3DF2E0" />
+        <pointLight position={[-4, 2, 3]} intensity={1.5} color="#6B6BFF" />
         <pointLight position={[3, -2, 2]} intensity={1.0} color="#ffffff" />
         <Suspense fallback={null}>
           <BracesModel dragRef={dragRef} velocityRef={velocityRef} />

@@ -3,7 +3,9 @@
 import { useRef, useEffect } from 'react';
 import gsap from 'gsap';
 import SectionBlob from './SectionBlob';
-import Wordmark from './Wordmark';
+/* Hero now renders the axlab wordmark inline (a + {x} brace
+ * monogram + lab) instead of the agonzx path-data SVG. axlab is the
+ * studio brand; the personal portfolio at /, the studio brand here. */
 
 interface Props { wa: string; }
 
@@ -185,13 +187,34 @@ export default function ServiciosHero({ wa }: Props) {
         }}
       />
 
-      {/* ── Wordmark (full-bleed, flush to the top of the viewport) ── */}
+      {/* ── axlab monumental wordmark (full-bleed) ── */}
       <div
         ref={logoRef}
         className="s-hero-logo"
-        style={{ width:'100%', lineHeight:0, position:'relative', zIndex:1, padding:'8px 0' }}
+        style={{
+          width:        '100%',
+          lineHeight:    0.85,
+          position:     'relative',
+          zIndex:        1,
+          padding:      'clamp(0.8rem, 2vw, 1.4rem) clamp(1rem, 3vw, 2rem)',
+          textAlign:    'left',
+        }}
       >
-        <Wordmark main="#23335C" accent="#4F4FFF" width="100%" />
+        <span
+          style={{
+            display:       'inline-block',
+            fontFamily:    'Nohemi, sans-serif',
+            fontWeight:    600,
+            fontSize:      'clamp(6rem, 24vw, 22rem)',
+            letterSpacing: '-0.05em',
+            lineHeight:     0.85,
+            color:         '#23335C',
+            userSelect:    'none',
+            whiteSpace:    'nowrap',
+          }}
+        >
+          a<span style={{ color: '#4F4FFF' }}>{'{'}<span style={{ position:'relative', top:'-0.046em' }}>x</span>{'}'}</span>lab
+        </span>
       </div>
 
       {/* ── Body: headline + CTAs ── */}

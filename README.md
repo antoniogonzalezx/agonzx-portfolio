@@ -32,11 +32,12 @@ Open [http://localhost:3000](http://localhost:3000)
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `--bg` | `#0B0F14` | Primary background |
-| `--accent` | `#3DF2E0` | Primary accent (cyan/turquoise) |
-| `--white` | `#E8ECF0` | Text primary |
-| `--text-2` | `#8A95A8` | Text secondary |
-| `--text-3` | `#4A556A` | Text muted |
+| `--bg` | `#0B0F1A` | Primary background (navy mirror of /lab editorial) |
+| `--accent` | `#6B6BFF` | Primary accent (electric blue, shared with /lab) |
+| `--accent-glow` | `#4FFFE0` | Reserved cinematographic teal — atmosphere/cursor only |
+| `--white` | `#E8ECF7` | Text primary |
+| `--text-2` | `#A8B3D1` | Text secondary |
+| `--text-3` | `#6B7599` | Text muted |
 
 ## ReactBits Integration Guide
 
@@ -50,7 +51,7 @@ import Grainient from '@/reactbits/Backgrounds/Grainient/Grainient';
 // Replace <GrainientPlaceholder /> with:
 <Grainient
   speed={0.5}
-  colors={['#0B0F14', '#0E1219', '#1A2230', '#3DF2E0']}
+  colors={['#0B0F1A', '#11182A', '#1A2340', '#6B6BFF']}
   noiseIntensity={1.2}
   style={{ position: 'absolute', inset: 0, zIndex: 0 }}
 />
@@ -80,7 +81,7 @@ import SpotlightCard from '@/reactbits/Components/SpotlightCard/SpotlightCard';
 <ScrollStack>
   {EXPERIENCE.map((exp, i) => (
     <ScrollStackItem key={i}>
-      <SpotlightCard spotlightColor="rgba(61, 242, 224, 0.1)">
+      <SpotlightCard spotlightColor="rgba(107, 107, 255, 0.12)">
         <ExpCard {...exp} />
       </SpotlightCard>
     </ScrollStackItem>
@@ -94,7 +95,7 @@ import SpotlightCard from '@/reactbits/Components/SpotlightCard/SpotlightCard';
 import SpotlightCard from '@/reactbits/Components/SpotlightCard/SpotlightCard';
 
 // Wrap each project card:
-<SpotlightCard spotlightColor="rgba(61, 242, 224, 0.1)">
+<SpotlightCard spotlightColor="rgba(107, 107, 255, 0.12)">
   ...existing card content...
 </SpotlightCard>
 ```

@@ -41,17 +41,17 @@ export default function FluidCursor() {
         if (isView) {
           targetSize         = 80;
           targetLabelOpacity = 1;
-          ringRef.current.style.borderColor = 'rgba(61,242,224,0.55)';
-          ringRef.current.style.background  = 'rgba(61,242,224,0.07)';
+          ringRef.current.style.borderColor = 'rgba(107,107,255,0.55)';
+          ringRef.current.style.background  = 'rgba(107,107,255,0.10)';
         } else if (isHover) {
           targetSize         = 54;
           targetLabelOpacity = 0;
-          ringRef.current.style.borderColor = 'rgba(61,242,224,0.4)';
+          ringRef.current.style.borderColor = 'rgba(107,107,255,0.4)';
           ringRef.current.style.background  = 'transparent';
         } else {
           targetSize         = 40;
           targetLabelOpacity = 0;
-          ringRef.current.style.borderColor = 'rgba(61,242,224,0.22)';
+          ringRef.current.style.borderColor = 'rgba(107,107,255,0.22)';
           ringRef.current.style.background  = 'transparent';
         }
       }
@@ -137,7 +137,7 @@ export default function FluidCursor() {
         style={{
           position: 'fixed', top: 0, left: 0,
           width: 40, height: 40, borderRadius: '50%',
-          border: '1px solid rgba(61,242,224,0.22)',
+          border: '1px solid rgba(107,107,255,0.22)',
           pointerEvents: 'none', zIndex: 10000,
           willChange: 'transform',
           display: 'flex', alignItems: 'center', justifyContent: 'center',

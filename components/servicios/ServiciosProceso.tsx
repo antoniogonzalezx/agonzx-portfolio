@@ -218,7 +218,7 @@ const WhatsAppThread = memo(function WhatsAppThread({
       <div className="s-proc-wa-header">
         <Avatar />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
-          <span className="s-proc-wa-name">Antonio · agonzx</span>
+          <span className="s-proc-wa-name">Antonio · axlab</span>
           <span className="s-proc-wa-status">en línea</span>
         </div>
       </div>
@@ -497,7 +497,7 @@ export default function ServiciosProceso() {
                   </span>
                   <span className="s-proc-window-url">
                     <span className="s-proc-window-url-mark">{'{x}'}</span>
-                    agonzx.app
+                    axlab.es
                   </span>
                 </div>
 

@@ -27,8 +27,7 @@ export function ExperienceTimeline() {
           fontFamily: 'Nohemi,sans-serif',
           fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)',
           fontWeight: 600,
-          textTransform: 'uppercase',
-          letterSpacing: '-0.01em',
+          letterSpacing: '-0.025em',
           color: 'var(--white)',
           pointerEvents: 'none',
           opacity: visible ? 1 : 0,
@@ -72,7 +71,7 @@ export function ExperienceTimeline() {
                 height: isCur ? 9 : 5,
                 borderRadius: '50%',
                 background: isCur ? 'var(--accent)' : isPast ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.18)',
-                boxShadow: isCur ? '0 0 10px rgba(61,242,224,0.7), 0 0 20px rgba(61,242,224,0.35)' : 'none',
+                boxShadow: isCur ? '0 0 10px rgba(107,107,255,0.7), 0 0 20px rgba(107,107,255,0.35)' : 'none',
                 transition: 'all 0.5s var(--ease)',
               }} />
               {j < EXPERIENCE.length - 1 && <div style={{ height: 14 }} />}
@@ -110,7 +109,7 @@ export function ExperienceTimeline() {
                 height: isCur ? 22 : 8,
                 borderRadius: 4,
                 background: isCur ? 'var(--accent)' : isPast ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.18)',
-                boxShadow: isCur ? '0 0 8px rgba(61,242,224,0.5)' : 'none',
+                boxShadow: isCur ? '0 0 8px rgba(107,107,255,0.5)' : 'none',
                 transition: 'height 0.4s var(--ease), background 0.4s var(--ease), box-shadow 0.4s var(--ease)',
               }}
             />
@@ -195,7 +194,7 @@ export default function Experience() {
           background: 'linear-gradient(to bottom, var(--bg2) 65%, transparent)',
           fontFamily: 'Nohemi,sans-serif',
           fontSize: 'clamp(1.8rem, 5vw, 2.2rem)',
-          fontWeight: 600, textTransform: 'uppercase', letterSpacing: '-0.01em',
+          fontWeight: 600, letterSpacing: '-0.025em',
           color: 'var(--white)',
         }}>
           Experience
@@ -269,7 +268,7 @@ export default function Experience() {
             {!isMobile && (
               <div style={{
                 position: 'absolute', left: 0, top: '22%', width: '100%', height: 1,
-                background: 'linear-gradient(to right, transparent, rgba(61,242,224,0.05) 20%, rgba(61,242,224,0.05) 80%, transparent)',
+                background: 'linear-gradient(to right, transparent, rgba(107,107,255,0.06) 20%, rgba(107,107,255,0.06) 80%, transparent)',
                 pointerEvents: 'none', zIndex: 0,
               }} />
             )}
@@ -292,11 +291,13 @@ export default function Experience() {
             }}>
               {/* Context */}
               <p style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: isMobile ? '0.68rem' : '0.62rem',
-                fontWeight: 400,
-                color: 'var(--t3)', letterSpacing: '0.06em', textTransform: 'uppercase',
+                fontFamily: 'Safiro,sans-serif',
+                fontSize: isMobile ? '0.92rem' : '0.95rem',
+                fontWeight: 500,
+                color: 'var(--t2)',
+                letterSpacing: '-0.005em',
                 marginBottom: isMobile ? '1.2rem' : '1.5rem',
+                maxWidth: 540,
                 opacity: isVis ? 1 : 0, transform: isVis ? 'translateY(0)' : 'translateY(12px)',
                 transition: 'all 0.7s 0.05s var(--ease)',
               }}>
@@ -328,8 +329,8 @@ export default function Experience() {
               <h2 style={{
                 fontFamily: 'Nohemi,sans-serif',
                 fontSize: isMobile ? 'clamp(2rem, 7vw, 2.8rem)' : 'clamp(1.6rem, 4vw, 2.8rem)',
-                fontWeight: 800,
-                color: 'var(--accent)', textTransform: 'uppercase', lineHeight: 1.1,
+                fontWeight: 600,
+                color: 'var(--accent)', letterSpacing: '-0.03em', lineHeight: 1.05,
                 marginBottom: '0.4rem',
                 opacity: isVis ? 1 : 0, transform: isVis ? 'translateY(0)' : 'translateY(24px)',
                 transition: 'all 0.7s 0.15s var(--ease)',
@@ -345,18 +346,18 @@ export default function Experience() {
                 transition: 'all 0.7s 0.2s var(--ease)',
               }}>
                 <span style={{
-                  fontFamily: 'var(--font-mono)', fontSize: isMobile ? '0.75rem' : '0.72rem', fontWeight: 400,
-                  color: 'var(--t3)', letterSpacing: '0.04em',
+                  fontFamily: 'Safiro,sans-serif', fontSize: isMobile ? '0.86rem' : '0.85rem', fontWeight: 500,
+                  color: 'var(--t3)',
                 }}>
                   {exp.date}
                 </span>
                 {exp.badge && (
                   <span style={{
-                    fontFamily: 'var(--font-mono)', fontSize: '0.5rem', fontWeight: 500,
-                    letterSpacing: '0.06em', textTransform: 'uppercase',
-                    padding: '0.15rem 0.6rem',
+                    fontFamily: 'Nohemi,sans-serif', fontSize: '0.62rem', fontWeight: 500,
+                    letterSpacing: '-0.005em',
+                    padding: '0.22rem 0.7rem',
                     background: 'var(--accent-s)', color: 'var(--accent)',
-                    border: '1px solid rgba(61,242,224,0.2)', borderRadius: 20,
+                    border: '1px solid rgba(107,107,255,0.22)', borderRadius: 20,
                   }}>
                     {exp.badge}
                   </span>

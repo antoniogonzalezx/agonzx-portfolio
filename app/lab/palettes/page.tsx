@@ -496,7 +496,7 @@ export default function PalettesPreview() {
             margin:        0,
           }}
         >
-          Paletas /servicios — variaciones sobre C
+          Paletas /lab — variaciones sobre C
         </h1>
         <p
           style={{
@@ -527,7 +527,7 @@ export default function PalettesPreview() {
       {/* ── Footer link ── */}
       <footer style={{ maxWidth: 1400, margin: '32px auto 0' }}>
         <a
-          href="/servicios"
+          href="/lab"
           style={{
             fontFamily:   'Safiro, sans-serif',
             fontSize:      13,
@@ -536,7 +536,7 @@ export default function PalettesPreview() {
             textUnderlineOffset: 3,
           }}
         >
-          ← volver a /servicios
+          ← volver a /lab
         </a>
       </footer>
     </main>

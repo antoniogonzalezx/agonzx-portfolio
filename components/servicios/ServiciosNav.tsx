@@ -19,7 +19,7 @@ function Wordmark() {
         whiteSpace:    'nowrap',
       }}
     >
-      agonz<span style={{ color: '#4F4FFF' }}>{'{'}<span style={{ position: 'relative', top: '-0.046em' }}>x</span>{'}'}</span>
+      a<span style={{ color: '#4F4FFF' }}>{'{'}<span style={{ position: 'relative', top: '-0.046em' }}>x</span>{'}'}</span>lab
     </span>
   );
 }

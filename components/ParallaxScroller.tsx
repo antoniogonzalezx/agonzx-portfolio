@@ -241,7 +241,7 @@ export default function ParallaxScroller({ children }: { children: ReactNode }) 
               cursor: 'pointer',
               padding: 0,
               transition: 'height 0.4s var(--ease), background 0.4s var(--ease)',
-              boxShadow: activeIdx === i ? '0 0 8px rgba(61,242,224,0.5)' : 'none',
+              boxShadow: activeIdx === i ? '0 0 8px rgba(107,107,255,0.5)' : 'none',
             }}
           />
         ))}

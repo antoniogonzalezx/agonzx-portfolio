@@ -6,9 +6,9 @@ import SectionBlob from './SectionBlob';
 interface Props { wa: string; }
 
 const LINKS_L = [
-  { label: 'Inicio',       href: '/' },
   { label: 'Sobre mí',     href: '#sobre' },
-  { label: 'Servicios',    href: '/servicios' },
+  { label: 'Portfolio',    href: '/' },
+  { label: 'Privacidad',   href: '/privacidad' },
   { label: '@agonzx',      href: 'https://instagram.com/agonzx' },
   { label: 'LinkedIn',     href: 'https://www.linkedin.com/in/antoniogonzalezvaldepenas' },
   { label: 'GitHub',       href: 'https://github.com/antoniogonzalezx' },
@@ -40,7 +40,7 @@ export default function ServiciosFooter({ wa }: Props) {
 
   const copyEmail = async () => {
     try {
-      await navigator.clipboard.writeText('contacto@agonzx.dev');
+      await navigator.clipboard.writeText('contacto@axlab.es');
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {/* noop */}
@@ -135,7 +135,7 @@ export default function ServiciosFooter({ wa }: Props) {
               padding:      '0 6px',
             }}
           >
-            agonz<span style={{ color:'var(--s-accent)' }}>{'{'}<span style={{ position:'relative', top:'-0.046em' }}>x</span>{'}'}</span>
+            a<span style={{ color:'var(--s-accent)' }}>{'{'}<span style={{ position:'relative', top:'-0.046em' }}>x</span>{'}'}</span>lab
           </span>
           <span
             className="s-footer-wa-pill"
@@ -162,28 +162,30 @@ export default function ServiciosFooter({ wa }: Props) {
             onClick={copyEmail}
             title="Copiar email"
             style={{
-              fontFamily:    'Martian Mono, monospace',
-              fontSize:      '0.72rem',
-              color:         copied ? 'var(--s-accent)' : 'var(--s-ink-3)',
+              fontFamily:    'Safiro, sans-serif',
+              fontSize:      '0.85rem',
+              fontWeight:    500,
+              color:         copied ? 'var(--s-accent)' : 'var(--s-ink-2)',
               background:    'none',
               border:        'none',
               cursor:        'pointer',
               padding:        0,
               transition:    'color 0.2s ease',
-              letterSpacing: '0.02em',
+              letterSpacing: '-0.005em',
             }}
           >
-            {copied ? 'Copiado ✓' : 'contacto@agonzx.dev'}
+            {copied ? 'Copiado ✓' : 'contacto@axlab.es'}
           </button>
-          <span style={{ color:'var(--s-line)', fontFamily:'Martian Mono, monospace', fontSize:'0.72rem' }}>·</span>
+          <span style={{ color:'var(--s-ink-3)', fontFamily:'Safiro, sans-serif', fontSize:'0.85rem' }}>·</span>
           <a
             href="tel:+34711514735"
             style={{
-              fontFamily:   'Martian Mono, monospace',
-              fontSize:     '0.72rem',
-              color:        'var(--s-ink-3)',
+              fontFamily:    'Safiro, sans-serif',
+              fontSize:      '0.85rem',
+              fontWeight:    500,
+              color:         'var(--s-ink-2)',
               textDecoration:'none',
-              letterSpacing:'0.02em',
+              letterSpacing: '-0.005em',
             }}
           >
             +34 711 514 735
@@ -228,15 +230,16 @@ export default function ServiciosFooter({ wa }: Props) {
                   }
                 }}
                 style={{
-                  fontFamily:    'Martian Mono, monospace',
-                  fontSize:      '0.65rem',
+                  fontFamily:    'Nohemi, sans-serif',
+                  fontSize:      '0.78rem',
+                  fontWeight:    500,
                   color:         'var(--s-ink-3)',
                   textDecoration:'none',
-                  letterSpacing: '0.03em',
+                  letterSpacing: '-0.01em',
                   transition:    'color 0.15s ease',
                   cursor:        'pointer',
                 }}
-                onMouseEnter={e => (e.currentTarget.style.color = 'var(--s-ink-2)')}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--s-ink)')}
                 onMouseLeave={e => (e.currentTarget.style.color = 'var(--s-ink-3)')}
               >
                 {l.label}
@@ -245,19 +248,21 @@ export default function ServiciosFooter({ wa }: Props) {
           </nav>
           <span
             style={{
-              fontFamily:   'Martian Mono, monospace',
-              fontSize:     '0.65rem',
-              color:        'var(--s-ink-3)',
-              letterSpacing:'0.03em',
+              fontFamily:    'Nohemi, sans-serif',
+              fontSize:      '0.78rem',
+              fontWeight:    500,
+              color:         'var(--s-ink-3)',
+              letterSpacing: '-0.01em',
             }}
           >
             Antonio González · 2026
           </span>
         </div>
 
-        {/* Monumental wordmark — dark background like main portfolio */}
+        {/* Monumental wordmark — axlab on the navy band */}
         <div
           style={{
+            position:    'relative',
             background:  '#23335C',
             overflow:    'hidden',
             padding:     '0.2rem clamp(1.5rem,5vw,5rem) 0',
@@ -271,7 +276,7 @@ export default function ServiciosFooter({ wa }: Props) {
                 display:       'inline-block',
                 fontFamily:    'Nohemi, sans-serif',
                 fontWeight:    600,
-                fontSize:      '18vw',
+                fontSize:      '24vw',
                 letterSpacing: '-0.04em',
                 lineHeight:    0.8,
                 color:         '#FAFBFD',
@@ -279,7 +284,7 @@ export default function ServiciosFooter({ wa }: Props) {
                 whiteSpace:    'nowrap',
               }}
             >
-              agonz<span style={{ color:'var(--s-accent)' }}>{'{'}<span style={{ position:'relative', top:'-0.046em' }}>x</span>{'}'}</span>
+              a<span style={{ color:'var(--s-accent)' }}>{'{'}<span style={{ position:'relative', top:'-0.046em' }}>x</span>{'}'}</span>lab
             </span>
           </div>
         </div>

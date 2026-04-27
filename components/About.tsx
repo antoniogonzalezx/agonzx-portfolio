@@ -21,11 +21,10 @@ const PhotoCard = ({ size = 'desktop' }: { size?: 'desktop' | 'mobile' }) => (
   >
     <img src="/profile.jpg" alt="Antonio González" style={{ width:'100%', height:'100%', objectFit:'cover', display:'block', filter:'brightness(0.75)' }} />
     {/* Name at top */}
-    <div style={{ position:'absolute', top:0, left:0, right:0, padding:'1.5rem', background:'linear-gradient(rgba(11,15,20,0.7), transparent)' }}>
-      <h3 style={{ fontFamily:'Nohemi,sans-serif', fontSize:'1.3rem', fontWeight:800, textTransform:'uppercase' }}>
-        Antonio <span style={{ color:'var(--accent)' }}>González</span>
+    <div style={{ position:'absolute', top:0, left:0, right:0, padding:'1.5rem', background:'linear-gradient(rgba(11,15,26,0.7), transparent)' }}>
+      <h3 style={{ fontFamily:'Nohemi,sans-serif', fontSize:'1.3rem', fontWeight:600, letterSpacing:'-0.02em', color:'var(--white)' }}>
+        Antonio González
       </h3>
-      <p style={{ fontFamily:'Nohemi,sans-serif', fontSize:'0.7rem', fontWeight:500, color:'var(--t2)', letterSpacing:'0.08em', textTransform:'uppercase', marginTop:'0.15rem' }}>iOS Engineer</p>
     </div>
     {/* Instagram pill */}
     <div style={{ position:'absolute', bottom:'0.8rem', left:'0.8rem', right:'0.8rem' }}>
@@ -44,14 +43,41 @@ const PhotoCard = ({ size = 'desktop' }: { size?: 'desktop' | 'mobile' }) => (
 );
 
 const AboutText = () => (
-  <div className="about-text" style={{ fontSize:'1rem', lineHeight:1.8, color:'var(--t2)' }}>
-    <h3 style={{ fontFamily:'Nohemi,sans-serif', fontSize:'clamp(1.6rem,3.5vw,2.5rem)', fontWeight:800, textTransform:'uppercase', lineHeight:1.15, marginBottom:'2rem', color:'var(--white)' }}>
-      Hey, I'm Antonio —<br />I like to <span style={{ color:'var(--accent)' }}>build things.</span>
+  <div className="about-text" style={{ fontSize:'1rem', lineHeight:1.7, color:'var(--t2)' }}>
+    <h3
+      style={{
+        fontFamily:    'Nohemi,sans-serif',
+        fontSize:      'clamp(2rem, 4.6vw, 3.4rem)',
+        fontWeight:    600,
+        letterSpacing: '-0.035em',
+        lineHeight:    1.02,
+        marginBottom:  '1.6rem',
+        color:         'var(--white)',
+      }}
+    >
+      Who is behind agonz<span style={{ color:'var(--accent)' }}>{'{'}<span style={{ position:'relative', top:'-0.046em' }}>x</span>{'}'}</span>?
     </h3>
-    <p style={{ marginBottom:'1.3rem' }}>iOS engineer with a thing for clean architecture, Swift concurrency, and products that actually make sense. I don't just write code — I care about what I'm building and why.</p>
-    <p style={{ marginBottom:'1.3rem' }}>At XING I owned the job application flow end-to-end — the core revenue driver of a 20M+ user jobs marketplace, serving both candidates and recruiters. Close collaboration with product and design wasn't just part of the job, it was how I liked to work: shaping decisions, running A/B tests, and pushing <strong style={{ color:'var(--white)', fontWeight:600 }}>120%</strong> improvement in apply rates while taking test coverage above <strong style={{ color:'var(--white)', fontWeight:600 }}>90%</strong>.</p>
-    <p style={{ marginBottom:'1.3rem' }}>Now at UserTesting I own the B2C iOS experience — building the tests participants run on their devices, setting up the component infrastructure, and taking the product from decisions to App Store. Same mindset: engineer who thinks like a PM.</p>
-    <p>On the side I've gone deep on <strong style={{ color:'var(--accent)', fontWeight:600 }}>agentic programming</strong> — building workflows with Claude Code and OpenAI Codex that have fundamentally changed how I ship. Tooling that automates the boring parts so the interesting parts get more attention.</p>
+
+    <p style={{ marginBottom:'1.1rem' }}>
+      I&apos;m Antonio. iOS engineer at <strong style={{ color:'var(--white)', fontWeight:500 }}>UserTesting</strong>, on the
+      Participant Experience team — the apps people open to actually run a test.
+    </p>
+    <p style={{ marginBottom:'1.1rem' }}>
+      Three and a half years at <strong style={{ color:'var(--white)', fontWeight:500 }}>XING</strong> before that, owning
+      the job-application flow end to end. Apply rates ended <strong style={{ color:'var(--white)', fontWeight:500 }}>~120%</strong>{' '}
+      higher than where I started; test coverage stayed above <strong style={{ color:'var(--white)', fontWeight:500 }}>90%</strong>.
+    </p>
+    <p style={{ marginBottom:'1.1rem' }}>
+      Started shipping iOS in 2020 at <strong style={{ color:'var(--white)', fontWeight:500 }}>NexPlayer</strong> — code I
+      wrote ended up inside Sky, HBO and Vodafone&apos;s video SDKs. A consulting
+      detour through Hiberus (XING, 20 Minutos, Banca March) before XING took
+      me on direct.
+    </p>
+    <p>
+      Lately, agentic workflows with Claude Code and Codex — they&apos;ve changed
+      how fast I ship. The lab is where that ends up turning into something
+      useful for someone else.
+    </p>
   </div>
 );
 

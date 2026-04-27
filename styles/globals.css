@@ -9,10 +9,17 @@
 @font-face { font-family: 'Martian Grotesk'; src: url('/fonts/MartianGrotesk-StdBl.woff2') format('woff2'); font-weight: 900; font-style: normal; font-display: swap; }
 
 :root {
-  --bg:#0B0F14; --bg2:#0E1219; --card:#111820; --elev:#1A2230;
-  --accent:#3DF2E0; --accent-g:rgba(61,242,224,0.2); --accent-s:rgba(61,242,224,0.06);
-  --white:#E8ECF0; --t2:#8A95A8; --t3:#4A556A;
-  --brd:rgba(255,255,255,0.06); --ease:cubic-bezier(0.16,1,0.3,1);
+  /* Dark mirror of /lab's editorial palette — same family, inverted mode.
+     Backgrounds sit in the navy ink family so the whole brand reads as one. */
+  --bg:#0B0F1A; --bg2:#11182A; --card:#121A2E; --elev:#1A2340;
+  /* Electric blue accent shared with /lab (#4F4FFF), brightened a hair for
+     AA contrast on dark surfaces. */
+  --accent:#6B6BFF; --accent-g:rgba(107,107,255,0.22); --accent-s:rgba(107,107,255,0.08);
+  /* Reserved cinematographic glow — heir of the previous cyan accent.
+     Use sparingly (cursor, hero atmosphere), never as the primary CTA color. */
+  --accent-glow:#4FFFE0;
+  --white:#E8ECF7; --t2:#A8B3D1; --t3:#6B7599;
+  --brd:rgba(255,255,255,0.08); --ease:cubic-bezier(0.16,1,0.3,1);
   --font-mono: 'Martian Mono', monospace;
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -34,7 +41,7 @@ a{color:inherit;text-decoration:none}
 .nav-menu-btn      { display: none; }
 .mobile-nav-overlay {
   position: fixed; inset: 0; z-index: 999;
-  background: rgba(11,15,20,0.88);
+  background: rgba(11,15,26,0.88);
   backdrop-filter: blur(40px) saturate(180%);
   -webkit-backdrop-filter: blur(40px) saturate(180%);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -141,7 +148,7 @@ a{color:inherit;text-decoration:none}
 
 /* ── Projects ───────────────────────────────────────────────────────────── */
 .proj-card { border:1px solid transparent!important; background:rgba(255,255,255,0.02)!important; border-radius:16px!important; box-shadow:0 4px 20px rgba(0,0,0,0.25)!important; transition:all 0.4s cubic-bezier(0.16,1,0.3,1)!important }
-.proj-card:hover { border-color:var(--accent)!important; transform:translateY(-4px)!important; box-shadow:0 12px 40px rgba(0,0,0,0.35),0 0 20px rgba(61,242,224,0.06)!important; background:rgba(61,242,224,0.02)!important }
+.proj-card:hover { border-color:var(--accent)!important; transform:translateY(-4px)!important; box-shadow:0 12px 40px rgba(0,0,0,0.35),0 0 20px rgba(107,107,255,0.10)!important; background:rgba(107,107,255,0.03)!important }
 
 
 /* ── Contact mobile ─────────────────────────────────────────────────────── */
@@ -152,8 +159,8 @@ a{color:inherit;text-decoration:none}
 /* ── Bento grid ─────────────────────────────────────────────────────────── */
 .icon-dark      { filter: brightness(0); opacity: 0.82; }
 .icon-dark-gray { filter: grayscale(1) brightness(0.18); opacity: 0.78; }
-.icon-lobe-dark { color: rgba(11,15,20,0.8); }
-.label-dark     { color: rgba(11,15,20,0.65) !important; }
+.icon-lobe-dark { color: rgba(11,15,26,0.8); }
+.label-dark     { color: rgba(11,15,26,0.65) !important; }
 .icon-white     { filter: brightness(0) invert(1); opacity: 0.92; }
 .icon-gray      { filter: grayscale(1) brightness(2.0); opacity: 0.88; }
 .icon-lobe      { color: rgba(255,255,255,0.88); }
@@ -163,12 +170,12 @@ a{color:inherit;text-decoration:none}
 .bento-hero .icon-gray   { filter: grayscale(1) brightness(2.2) drop-shadow(0 0 16px rgba(255,255,255,0.18)); opacity: 1; }
 .bento-cell:hover .icon-white     { filter: brightness(0) invert(1) drop-shadow(0 0 10px rgba(255,255,255,0.55)); opacity: 1; }
 .bento-cell:hover .icon-gray      { filter: grayscale(1) brightness(2.2) drop-shadow(0 0 10px rgba(255,255,255,0.32)); opacity: 1; }
-.bento-cell:hover .icon-dark      { filter: brightness(0) drop-shadow(0 0 8px rgba(11,15,20,0.4)); opacity: 1; }
-.bento-cell:hover .icon-dark-gray { filter: grayscale(1) brightness(0.12) drop-shadow(0 0 6px rgba(11,15,20,0.3)); opacity: 1; }
+.bento-cell:hover .icon-dark      { filter: brightness(0) drop-shadow(0 0 8px rgba(11,15,26,0.4)); opacity: 1; }
+.bento-cell:hover .icon-dark-gray { filter: grayscale(1) brightness(0.12) drop-shadow(0 0 6px rgba(11,15,26,0.3)); opacity: 1; }
 .bento-cell:hover .icon-lobe      { filter: drop-shadow(0 0 10px rgba(255,255,255,0.45)); color: #fff; }
-.bento-cell:hover .icon-lobe-dark { filter: drop-shadow(0 0 8px rgba(11,15,20,0.35)); color: rgba(11,15,20,0.95); }
+.bento-cell:hover .icon-lobe-dark { filter: drop-shadow(0 0 8px rgba(11,15,26,0.35)); color: rgba(11,15,26,0.95); }
 .bento-cell:hover .bento-label    { color: rgba(255,255,255,0.9); }
-.bento-cell:hover .label-dark     { color: rgba(11,15,20,0.9) !important; }
+.bento-cell:hover .label-dark     { color: rgba(11,15,26,0.9) !important; }
 .bento-hero:hover .icon-white     { filter: brightness(0) invert(1) drop-shadow(0 0 26px rgba(255,255,255,0.7)); }
 .bento-hero:hover .icon-gray      { filter: grayscale(1) brightness(2.3) drop-shadow(0 0 26px rgba(255,255,255,0.48)); }
 /* Bento grid columns/rows are managed entirely by ResizeObserver in Stack.tsx */
