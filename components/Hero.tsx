@@ -258,7 +258,7 @@ export default function Hero() {
         <Wordmark main="var(--white)" accent="var(--accent)" width="100%" />
       </div>
 
-      {/* ── Body: tagline + paragraph + CTAs ── */}
+      {/* ── Body: headline + CTAs ── (mirrors /lab/axlab — title only) */}
       <div
         style={{
           flex:            1,
@@ -291,97 +291,50 @@ export default function Hero() {
           </span>
         </h1>
 
-        <div
-          ref={bodyRef}
-          style={{
-            display:        'flex',
-            flexDirection:  'column',
-            gap:            'clamp(1rem, 2vw, 1.5rem)',
-            maxWidth:        560,
-          }}
-        >
-          <p
+        <div ref={bodyRef} className="hero-ctas" style={{ display:'flex', gap:'0.75rem', flexWrap:'wrap', paddingTop:'0.5rem' }}>
+          <a
+            href="#contact"
+            className="hero-cta-primary"
             style={{
-              fontFamily:   'Safiro, sans-serif',
-              fontSize:     'clamp(0.95rem, 1.15vw, 1.1rem)',
-              fontWeight:   500,
-              color:        'var(--t2)',
-              lineHeight:    1.55,
-              letterSpacing: '-0.005em',
-              margin:        0,
-              textWrap:      'pretty',
+              display:       'inline-block',
+              fontFamily:    'Safiro, sans-serif',
+              fontSize:      '1rem',
+              fontWeight:    500,
+              letterSpacing: '-0.01em',
+              color:         '#FFFFFF',
+              background:    'var(--accent)',
+              padding:       '14px 28px',
+              borderRadius:  9999,
+              textDecoration:'none',
+              transition:    'transform 0.25s var(--ease), box-shadow 0.25s var(--ease)',
+              boxShadow:     '0 8px 24px rgba(107,107,255,0.20)',
+              textAlign:     'center',
             }}
           >
-            At UserTesting on the Participant Experience for B2C. Three and
-            a half years at XING before that, shipping a jobs marketplace to
-            twenty million people.
-          </p>
-
-          <div style={{ display:'flex', gap:'0.75rem', flexWrap:'wrap', paddingTop:'0.25rem' }}>
-            <a
-              href="#contact"
-              className="hero-cta-primary"
-              style={{
-                display:       'inline-block',
-                fontFamily:    'Safiro, sans-serif',
-                fontSize:      '1rem',
-                fontWeight:    500,
-                letterSpacing: '-0.01em',
-                color:         '#FFFFFF',
-                background:    'var(--accent)',
-                padding:       '14px 28px',
-                borderRadius:  9999,
-                textDecoration:'none',
-                transition:    'transform 0.25s var(--ease), box-shadow 0.25s var(--ease)',
-                boxShadow:     '0 8px 24px rgba(107,107,255,0.20)',
-              }}
-            >
-              Get in touch →
-            </a>
-            <a
-              href="#projects"
-              className="hero-cta-ghost"
-              style={{
-                display:        'inline-block',
-                fontFamily:     'Safiro, sans-serif',
-                fontSize:       '1rem',
-                fontWeight:     500,
-                letterSpacing:  '-0.01em',
-                color:          'var(--white)',
-                background:     'rgba(255,255,255,0.04)',
-                backdropFilter: 'blur(12px)',
-                border:         '1px solid rgba(255,255,255,0.10)',
-                padding:        '14px 28px',
-                borderRadius:   9999,
-                textDecoration: 'none',
-                transition:     'border-color 0.25s var(--ease), background 0.25s var(--ease)',
-              }}
-            >
-              See work
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* Scroll indicator */}
-      <div
-        style={{
-          position:       'absolute',
-          bottom:         '2rem',
-          left:           0,
-          right:          0,
-          margin:         '0 auto',
-          width:          'fit-content',
-          zIndex:          10,
-          animation:      'fadeUp 1s 0.9s both var(--ease)',
-          display:        'flex',
-          flexDirection:  'column',
-          alignItems:     'center',
-          gap:            '0.5rem',
-        }}
-      >
-        <div className="scroll-mouse">
-          <div className="scroll-mouse-dot" />
+            Get in touch →
+          </a>
+          <a
+            href="#projects"
+            className="hero-cta-ghost"
+            style={{
+              display:        'inline-block',
+              fontFamily:     'Safiro, sans-serif',
+              fontSize:       '1rem',
+              fontWeight:     500,
+              letterSpacing:  '-0.01em',
+              color:          'var(--white)',
+              background:     'rgba(255,255,255,0.04)',
+              backdropFilter: 'blur(12px)',
+              border:         '1px solid rgba(255,255,255,0.10)',
+              padding:        '14px 28px',
+              borderRadius:   9999,
+              textDecoration: 'none',
+              transition:     'border-color 0.25s var(--ease), background 0.25s var(--ease)',
+              textAlign:      'center',
+            }}
+          >
+            See work
+          </a>
         </div>
       </div>
 
@@ -389,27 +342,10 @@ export default function Hero() {
         .hero-cta-primary:hover { transform: translateY(-1px); box-shadow: 0 14px 34px rgba(107,107,255,0.32); }
         .hero-cta-ghost:hover   { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.20); }
 
-        .scroll-mouse{
-          width:28px;height:46px;border-radius:14px;
-          border:2px solid var(--accent);
-          box-shadow:0 0 10px rgba(107,107,255,0.30), inset 0 0 8px rgba(107,107,255,0.08);
-          position:relative;overflow:hidden;
-          opacity:0.85;
-        }
-        .scroll-mouse:hover{opacity:1;box-shadow:0 0 16px rgba(107,107,255,0.50), inset 0 0 10px rgba(107,107,255,0.12);}
-        .scroll-mouse-dot{
-          position:absolute;top:7px;left:50%;
-          transform:translateX(-50%);
-          width:4px;height:8px;border-radius:2px;
-          background:var(--accent);
-          box-shadow:0 0 6px var(--accent);
-          animation:scrollDot 2s ease-in-out infinite;
-        }
-        @keyframes scrollDot{
-          0%{transform:translateX(-50%) translateY(0);opacity:1}
-          60%{transform:translateX(-50%) translateY(18px);opacity:0}
-          61%{transform:translateX(-50%) translateY(0);opacity:0}
-          100%{transform:translateX(-50%) translateY(0);opacity:1}
+        /* Mobile: full-bleed CTAs — same pattern as axlab hero so both
+           home pages share a single mobile composition language. */
+        @media (max-width: 700px) {
+          .hero-ctas a { flex: 1 1 100%; }
         }
       `}</style>
     </section>
