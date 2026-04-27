@@ -1,45 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1584" height="396" viewBox="0 0 1584 396" preserveAspectRatio="xMidYMid meet">
   <!--
-    LinkedIn page banner — axlab studio.
-    Mirror of /lab: paper-light ground (#FAFBFD), ink-2 text, indigo
-    {x} accent.  Same brace glyph as the agonzx banner so the two
-    brands read as a family at a glance.
+    LinkedIn page banner — axlab studio · minimalist composition.
+    Paper-light ground, single line "Software a medida" centred-left,
+    a{x}lab wordmark in the top-right corner.  Indigo `{x}` reads as
+    one shape — braces and x share the same fill.
   -->
-  <defs>
-    <radialGradient id="labGlow1" cx="22%" cy="55%" r="46%">
-      <stop offset="0%" stop-color="#4F4FFF" stop-opacity="0.10"/>
-      <stop offset="60%" stop-color="#FAFBFD" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="labGlow2" cx="92%" cy="20%" r="44%">
-      <stop offset="0%" stop-color="#4F4FFF" stop-opacity="0.06"/>
-      <stop offset="80%" stop-color="#FAFBFD" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-
   <rect width="1584" height="396" fill="#FAFBFD"/>
-  <rect width="1584" height="396" fill="url(#labGlow1)"/>
-  <rect width="1584" height="396" fill="url(#labGlow2)"/>
 
-  <!-- a{x}lab wordmark (text-built) on the left -->
-  <g font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" letter-spacing="-4">
-    <text x="120" y="240" font-size="172" font-weight="700" fill="#23335C">a<tspan fill="#4F4FFF">{x}</tspan>lab</text>
-  </g>
+  <!-- Wordmark a{x}lab · top-right corner -->
+  <text
+    x="1474"
+    y="80"
+    text-anchor="end"
+    font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    font-size="42"
+    font-weight="700"
+    letter-spacing="-1.6"
+  >
+    <tspan fill="#23335C">a</tspan><tspan fill="#4F4FFF">{x}</tspan><tspan fill="#23335C">lab</tspan>
+  </text>
 
-  <!--
-    Right column · positioning lockup similar to the agonzx banner so
-    the two pages read as siblings.  Tagline lifted from the live
-    /lab metadata: "Software a medida y automatización con IA para
-    PYMES en España".
-  -->
-  <g font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" letter-spacing="-1">
-    <text x="780" y="170" font-size="46" font-weight="600" fill="#23335C">
-      Software a medida y automatización con IA
-    </text>
-    <text x="780" y="222" font-size="46" font-weight="400" fill="#4E5C84">
-      para PYMES en España.
-    </text>
-    <text x="780" y="296" font-size="28" font-weight="500" fill="#4F4FFF" letter-spacing="-0.5">
-      axlab.es · contacto@axlab.es · WhatsApp directo
-    </text>
-  </g>
+  <!-- Center-left headline -->
+  <text
+    x="110"
+    y="232"
+    font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    font-size="78"
+    font-weight="700"
+    fill="#23335C"
+    letter-spacing="-2.4"
+  >
+    Software a medida.
+  </text>
 </svg>
