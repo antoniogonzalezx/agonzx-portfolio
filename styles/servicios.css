@@ -1436,6 +1436,72 @@ html:has(.s-page) body {
   padding: 0 clamp(1.25rem, 5vw, 2rem) clamp(1rem, 4vw, 1.5rem);
 }
 
+/* ── Standalone /diagnostico page ────────────────────────────────
+ * Mobile-first iOS-pattern: sticky header (back · title · spacer)
+ * over a full-bleed wizard.  The page wraps ServiciosDiagnostico in
+ * defaultStarted mode so the user lands directly on step 0 (sector).
+ * ───────────────────────────────────────────────────────────────── */
+.s-diag-page {
+  min-height: 100dvh;
+  height:     auto;
+  overflow:   visible;
+  background: var(--s-bg);
+}
+.s-diag-page-header {
+  position:        sticky;
+  top:             0;
+  z-index:         100;
+  display:         grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items:     center;
+  gap:             1rem;
+  padding:         clamp(0.85rem, 2.5vw, 1.1rem) clamp(1rem, 4vw, 1.5rem);
+  background:           rgba(250, 251, 253, 0.85);
+  backdrop-filter:      blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom:   1px solid rgba(35, 51, 92, 0.08);
+}
+.s-diag-page-back {
+  display:         inline-flex;
+  align-items:     center;
+  gap:             0.4rem;
+  font-family:    'Nohemi', sans-serif;
+  font-size:       0.85rem;
+  font-weight:     500;
+  letter-spacing: -0.01em;
+  color:          var(--s-ink-2);
+  text-decoration:none;
+  justify-self:   start;
+  padding:         0.4rem 0.6rem 0.4rem 0;
+  transition:     color 0.2s ease;
+}
+.s-diag-page-back:hover { color: var(--s-ink); }
+.s-diag-page-title {
+  font-family:    'Nohemi', sans-serif;
+  font-size:      clamp(0.95rem, 2.2vw, 1.05rem);
+  letter-spacing:-0.02em;
+  text-align:     center;
+  white-space:    nowrap;
+}
+.s-diag-page-spacer { justify-self: end; }
+
+/* The wizard inside the page needs section padding (we removed the
+ * snap-section wrapper).  Constrain to 1280 like the rest of /lab. */
+.s-diag-page-main {
+  display:        block;
+  padding:        clamp(1.5rem, 5vw, 3rem) 0;
+}
+.s-diag-page-main > .s-diag {
+  height:         auto;
+  min-height:      auto;
+  padding:         0 clamp(1rem, 5vw, 2rem);
+}
+
+/* On the standalone page the wizard renders defaultStarted=true,
+ * which means we never see the gateway CTA — but if we do (back
+ * navigation, etc.), let the CTA stage breathe vertically. */
+.s-diag-page-main .s-diag-stage-cta { min-height: 60dvh; }
+
 /* ── Footer · breathing room + mobile stack ─────────────────────── */
 @media (max-width: 768px) {
   /* The mobile snap-section default adds vertical padding above and

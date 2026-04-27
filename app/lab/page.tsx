@@ -71,7 +71,7 @@ export default function Servicios() {
         <ServiciosHero        wa={WA} />   {/* sec 1 — hero            */}
         <ServiciosSobre />                   {/* sec 2 — sobre Antonio   */}
         <ServiciosGrid />                    {/* sec 3 — 3 servicios     */}
-        <ServiciosDiagnostico wa={WA} />     {/* sec 4 — diagnóstico     */}
+        <ServiciosDiagnostico wa={WA} mobileGoesToPage />     {/* sec 4 — diagnóstico     */}
         <ServiciosProceso />                 {/* sec 5 — proceso         */}
         <ServiciosFooter      wa={WA} />   {/* sec 6 — CTA + footer    */}
       </main>

@@ -24,7 +24,16 @@ import {
  *   right step 2 · propuesta + CTA WhatsApp
  * ───────────────────────────────────────────────────────────────── */
 
-interface Props { wa: string; }
+interface Props {
+  wa: string;
+  /* When true, render the wizard already at step 0 — skipping the
+   * "¿Cuál es tu sector?" gateway.  Used by the standalone
+   * /diagnostico page where the CTA is the navigation itself. */
+  defaultStarted?: boolean;
+  /* When true, the gateway CTA on mobile navigates to /diagnostico
+   * instead of opening inline.  Desktop keeps the inline path. */
+  mobileGoesToPage?: boolean;
+}
 
 type Industry = {
   id:       string;
@@ -193,11 +202,11 @@ const THINKING_STEPS_MS = [0, 3800, 7600];
 
 /* ──────────────────────── Component ──────────────────────── */
 
-export default function ServiciosDiagnostico({ wa }: Props) {
+export default function ServiciosDiagnostico({ wa, defaultStarted = false, mobileGoesToPage = false }: Props) {
   const sectionRef   = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
 
-  const [started,       setStarted]       = useState(false);
+  const [started,       setStarted]       = useState(defaultStarted);
   const [step,          setStep]          = useState<0 | 1 | 2>(0);
   const [industryId,    setIndustryId]    = useState<string | null>(null);
   const [selectedPains, setSelectedPains] = useState<Set<number>>(new Set());
@@ -298,14 +307,35 @@ export default function ServiciosDiagnostico({ wa }: Props) {
               <p className="s-diag-sub s-diag-sub-cta">
                 Conoce en menos de un minuto cómo puedo ayudarte a ganar tiempo y clientes.
               </p>
-              <button
-                type="button"
-                onClick={beginDiagnostic}
-                className="s-diag-cta-btn"
-              >
-                ¿Cuál es tu sector?
-                <ArrowRight size={20} weight="bold" />
-              </button>
+              {mobileGoesToPage ? (
+                /* On mobile we navigate to /diagnostico — gives the
+                 * wizard a full screen with sticky header + back btn,
+                 * and a shareable URL.  The same anchor renders on
+                 * desktop too but we intercept the click to keep the
+                 * inline experience there. */
+                <a
+                  href="/diagnostico"
+                  className="s-diag-cta-btn"
+                  onClick={(e) => {
+                    if (window.matchMedia('(min-width: 769px)').matches) {
+                      e.preventDefault();
+                      beginDiagnostic();
+                    }
+                  }}
+                >
+                  ¿Cuál es tu sector?
+                  <ArrowRight size={20} weight="bold" />
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={beginDiagnostic}
+                  className="s-diag-cta-btn"
+                >
+                  ¿Cuál es tu sector?
+                  <ArrowRight size={20} weight="bold" />
+                </button>
+              )}
             </div>
           </motion.div>
         ) : (
