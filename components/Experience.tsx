@@ -203,7 +203,6 @@ export default function Experience() {
 
       {EXPERIENCE.map((exp, i) => {
         const isVis = visibleIdx === i;
-        const isDimmed = isMobile && visibleIdx >= 0 && !isVis;
         return (
           <section
             key={i}
@@ -211,15 +210,12 @@ export default function Experience() {
             ref={(el) => { stepRefs.current[i] = el; }}
             className="snap-section exp-section"
             style={{
-              minHeight: '100vh',
+              minHeight: '100dvh',
               background: 'var(--bg2)',
               position: 'relative',
               overflow: 'hidden',
               display: 'flex',
               alignItems: 'center',
-              opacity: isDimmed ? 0.2 : 1,
-              filter: isDimmed ? 'blur(3px)' : 'none',
-              transition: 'opacity 0.5s var(--ease), filter 0.5s var(--ease)',
             }}
           >
             {/* Background company logo — desktop only */}

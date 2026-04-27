@@ -17,19 +17,48 @@ export default function Nav() {
   const [open,    setOpen]    = useState(false);
   const [visible, setVisible] = useState(false);
 
-  // Reveal the nav once we leave the hero
+  // Reveal the nav once we leave the hero.  Two regimes:
+  //   ▸ Desktop: ParallaxScroller fakes scroll via a CSS transform on
+  //     a fixed track, so `window.scrollY` is always 0. We rely on
+  //     IntersectionObserver — it fires on transform changes too and
+  //     gives reliable hero-in/out signals while desktop snap is on.
+  //   ▸ Mobile: native scroll is in play.  Snap + dynamic address bar
+  //     made the IO threshold flicker, so we gate on a viewport-height
+  //     cut-off with hysteresis — rock-stable, no oscillation.
   useEffect(() => {
-    const heroEl = document.querySelector('[data-home-section="hero"]');
+    const heroEl = document.querySelector('[data-home-section="hero"]') as HTMLElement | null;
     if (!heroEl) {
       setVisible(true);
       return;
     }
-    const obs = new IntersectionObserver(
-      ([e]) => setVisible(!e.isIntersecting),
-      { threshold: 0.5 },
-    );
-    obs.observe(heroEl);
-    return () => obs.disconnect();
+    const isMobile = window.matchMedia('(max-width: 700px)').matches;
+
+    if (!isMobile) {
+      const obs = new IntersectionObserver(
+        ([e]) => setVisible(!e.isIntersecting),
+        { threshold: 0.5 },
+      );
+      obs.observe(heroEl);
+      return () => obs.disconnect();
+    }
+
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const showAt = window.innerHeight * 0.6;
+      const hideAt = window.innerHeight * 0.4;
+      const y = window.scrollY;
+      setVisible(prev => (prev ? y > hideAt : y > showAt));
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', update);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, []);
 
   // Auto-close mobile menu on desktop resize

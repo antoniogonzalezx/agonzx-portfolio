@@ -1325,32 +1325,54 @@ html:has(.s-page) body {
 }
 
 @media (max-width: 768px) {
-  .s-sobre        { height: auto; padding: clamp(2rem, 6vw, 3.5rem) 0; }
-  .s-sobre-stage  {
-    position:    static;
-    height:      auto;
-    overflow:    visible;
-    gap:         clamp(1.25rem, 4vw, 2rem);
+  /* Stage drops the sticky pin on mobile — the scroll choreography
+   * was tied to the desktop snap container and made the section feel
+   * "stuck".  Now stage flows naturally as a centered column: photo
+   * full-width up top, then text, then bio.  Order reads top-down
+   * instead of being layered like the desktop pin/overlap. */
+  .s-sobre {
+    height:    auto;
+    padding:   clamp(2.5rem, 8vw, 4rem) 0;
   }
-  .s-sobre-photo  {
-    position:    relative;
-    bottom:      auto;
-    left:        auto;
-    transform:   none;
-    width:       clamp(260px, 80vw, 420px);
+  .s-sobre-stage {
+    position:        static;
+    height:          auto;
+    flex-direction:  column;
+    align-items:     center;
+    justify-content: flex-start;
+    gap:             clamp(1.5rem, 5vw, 2.25rem);
+    overflow:        visible;
+    padding:         0 clamp(1.25rem, 5vw, 2rem);
   }
+  .s-sobre-text {
+    order:           2;       /* card above text */
+    transform:       none !important;
+    width:           100%;
+  }
+  /* Card fills the screen width minus side padding, anchored to the
+   * stage instead of being absolutely positioned. No more cropping
+   * the bio behind it; user lands on the face card, then reads. */
+  .s-sobre-photo {
+    order:        1;
+    position:     relative;
+    bottom:       auto;
+    left:         auto;
+    top:          auto;
+    transform:    none !important;
+    margin:       0 auto;
+    width:        min(420px, 88vw);
+    max-width:    none;
+  }
+  /* Title/logos/body all fully opaque on mobile — the desktop fade
+   * was driven by scroll progress that no longer runs here.        */
+  .s-sobre-title,
+  .s-sobre-logos,
+  .s-sobre-body { opacity: 1 !important; }
+  .s-sobre-logos { gap: 1.5rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .s-sobre-photo-tilt { transform: none !important; }
-}
-
-@media (max-width: 768px) {
-  .s-sobre-logos { gap: 1.5rem; }
-  .s-sobre-photo {
-    width:      clamp(170px, 56vw, 220px);
-    margin-top: 0;
-  }
 }
 
 /* ── Unified H2 (reference: ServiciosGrid) ───────────────────── */

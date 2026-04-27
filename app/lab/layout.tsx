@@ -1,6 +1,15 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import { headers } from 'next/headers';
+
+/* Stable mobile viewport for /lab too — see the agonzx root layout for
+ * the rationale. Theme color is the lab paper-light surface so the iOS
+ * status bar matches the brand instead of going black on standalone.   */
+export const viewport: Viewport = {
+  themeColor:        '#FAFBFD',
+  viewportFit:       'cover',
+  interactiveWidget: 'resizes-content',
+};
 
 /* Detect whether the request hit axlab.es directly (Vercel rewrite) or
  * the legacy agonzx.dev/lab path so canonical / OG URL match the host
