@@ -50,12 +50,16 @@ export default function ServiciosFooter({ wa }: Props) {
     <section
       ref={sectionRef}
       data-servicios-section="footer"
-      className="s-snap-section"
+      className="s-snap-section s-footer-section"
       style={{
         display:       'flex',
         flexDirection: 'column',
         justifyContent:'space-between',
-        background:    'var(--s-bg)',
+        /* Navy bg edge-to-edge — the CTA area carries its own light
+           background as a card, but the section itself lands on navy
+           so the bottom never bleeds the page bg through (the "white
+           bar" we used to see on mobile when the address bar moved). */
+        background:    '#23335C',
         overflow:      'hidden',
         position:      'relative',
       }}
@@ -64,14 +68,16 @@ export default function ServiciosFooter({ wa }: Props) {
 
       {/* ── CTA área ── */}
       <div
+        className="s-footer-cta"
         style={{
           flex:           1,
           display:        'flex',
           flexDirection:  'column',
           alignItems:     'center',
           justifyContent: 'center',
-          gap:            '1.5rem',
-          padding:        'clamp(1.5rem,4vw,4rem) clamp(1.5rem,5vw,5rem) 0',
+          gap:            'clamp(1.75rem, 4vw, 2.5rem)',
+          padding:        'clamp(2.5rem, 7vw, 5rem) clamp(1.5rem, 5vw, 5rem) clamp(2rem, 5vw, 3rem)',
+          background:     'var(--s-bg)',
           position:       'relative',
           zIndex:          1,
           textAlign:      'center',
@@ -113,7 +119,7 @@ export default function ServiciosFooter({ wa }: Props) {
             display:              'flex',
             alignItems:           'center',
             gap:                  10,
-            padding:              '9px 9px 9px 22px',
+            padding:              'clamp(10px, 1.4vw, 12px) clamp(10px, 1.4vw, 12px) clamp(10px, 1.4vw, 12px) clamp(22px, 3vw, 28px)',
             borderRadius:         9999,
             background:           'rgba(255,255,255,0.68)',
             backdropFilter:       'blur(32px) saturate(200%)',
@@ -122,7 +128,7 @@ export default function ServiciosFooter({ wa }: Props) {
             boxShadow:            '0 8px 32px rgba(11,15,20,0.09), inset 0 1px 0 rgba(255,255,255,0.85)',
             textDecoration:       'none',
             cursor:               'pointer',
-            marginTop:            '0.25rem',
+            marginTop:            'clamp(0.5rem, 1.5vw, 1rem)',
           }}
         >
           <span
@@ -157,7 +163,7 @@ export default function ServiciosFooter({ wa }: Props) {
         </a>
 
         {/* Contact details */}
-        <div style={{ display:'flex', gap:'1rem', alignItems:'center', flexWrap:'wrap', justifyContent:'center' }}>
+        <div className="s-footer-contact" style={{ display:'flex', gap:'1rem 1.25rem', alignItems:'center', flexWrap:'wrap', justifyContent:'center', marginTop:'clamp(0.5rem, 1.5vw, 1rem)' }}>
           <button
             onClick={copyEmail}
             title="Copiar email"
@@ -194,21 +200,21 @@ export default function ServiciosFooter({ wa }: Props) {
       </div>
 
       {/* ── Footer ── */}
-      <footer style={{ position:'relative', zIndex:1 }}>
-        {/* Links row */}
+      <footer className="s-footer-bottom" style={{ position:'relative', zIndex:1, background:'var(--s-bg)' }}>
+        {/* Links row — sits on the light surface, gets generous breathing room */}
         <div
+          className="s-footer-links-row"
           style={{
             display:       'flex',
             justifyContent:'space-between',
-            alignItems:    'flex-end',
-            paddingBottom: '0.75rem',
+            alignItems:    'center',
             borderBottom:  '1px solid var(--s-line)',
             flexWrap:      'wrap',
-            gap:           '0.5rem 2rem',
-            padding:       '0 clamp(1.5rem,5vw,5rem) 0.75rem',
+            gap:           '0.75rem 2.5rem',
+            padding:       'clamp(1.25rem, 3vw, 2rem) clamp(1.5rem,5vw,5rem)',
           }}
         >
-          <nav aria-label="Footer" style={{ display:'flex', gap:'1.25rem', flexWrap:'wrap' }}>
+          <nav aria-label="Footer" className="s-footer-nav" style={{ display:'flex', gap:'1.25rem 2rem', flexWrap:'wrap' }}>
             {LINKS_L.map(l => (
               <a
                 key={l.href}
@@ -259,13 +265,17 @@ export default function ServiciosFooter({ wa }: Props) {
           </span>
         </div>
 
-        {/* Monumental wordmark — axlab on the navy band */}
+        {/* Monumental wordmark — axlab on the navy band.
+         * The section already paints navy underneath, so the band's
+         * own bg is redundant but kept so the wordmark crops cleanly
+         * (overflow:hidden) and we can change the fill independently
+         * if we ever want a brand variant. */}
         <div
           style={{
             position:    'relative',
             background:  '#23335C',
             overflow:    'hidden',
-            padding:     '0.2rem clamp(1.5rem,5vw,5rem) 0',
+            padding:     'clamp(0.4rem, 1vw, 0.7rem) clamp(1.5rem,5vw,5rem) 0',
             lineHeight:  0.8,
           }}
         >

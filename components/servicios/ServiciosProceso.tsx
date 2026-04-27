@@ -482,6 +482,13 @@ export default function ServiciosProceso() {
         data-content-visible={contentVisible || undefined}
       >
         <div className="s-proc-inner">
+          <header className="s-proc-header">
+            <h2 className="s-h2 s-proc-title">
+              <span className="s-h2-lead">El proceso.</span>
+              <span className="s-h2-muted">De concepto a producto.</span>
+            </h2>
+          </header>
+
           <div className="s-proc-grid">
             <StepCard step={step} />
 
@@ -520,6 +527,12 @@ export default function ServiciosProceso() {
       ))}
 
       <div className="s-proc-mobile">
+        <header className="s-proc-header s-proc-header-mobile">
+          <h2 className="s-h2 s-proc-title">
+            <span className="s-h2-lead">El proceso.</span>
+            <span className="s-h2-muted">De concepto a producto.</span>
+          </h2>
+        </header>
         {STEPS.map((s) => (
           <article className="s-proc-mobile-card" key={`m-${s.num}`}>
             <div className="s-proc-card-row">

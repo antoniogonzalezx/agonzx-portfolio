@@ -1421,6 +1421,40 @@ html:has(.s-page) body {
   margin:           0 auto;
 }
 
+/* Header above the editorial card · stays put while beats advance.
+ * Rendered both inside the sticky inner (desktop) and inside the
+ * mobile stack so the section reads with a clear "what is this".  */
+.s-proc-header {
+  margin-bottom: 0;
+}
+.s-proc-title {
+  /* tighter line-height than default s-h2 so the two-line title
+     reads as one tight unit, matching ServiciosGrid's title rhythm. */
+  line-height: 0.94;
+}
+.s-proc-header-mobile {
+  padding: 0 clamp(1.25rem, 5vw, 2rem) clamp(1rem, 4vw, 1.5rem);
+}
+
+/* ── Footer · breathing room + mobile stack ─────────────────────── */
+@media (max-width: 768px) {
+  /* The mobile snap-section default adds vertical padding above and
+   * below every block.  On the footer we want zero — it has its own
+   * inner padding and the section bg is navy, so any extra padding
+   * shows as a stray navy strip between Proceso and "¿Hablamos?".  */
+  .s-footer-section { padding: 0 !important; border-top: none !important; }
+
+  /* Links + copyright stack vertically on phones — the side-by-side
+   * row was tight enough to read as cramped.  Stacking puts each
+   * group on its own row and gives the borderBottom a clean line. */
+  .s-footer-links-row {
+    flex-direction: column;
+    align-items:    flex-start !important;
+    gap:            1rem !important;
+  }
+  .s-footer-nav { gap: 1rem 1.75rem !important; }
+}
+
 /* StepCard fades in immediately when section enters viewport — no hard "blank" wait */
 .s-proc-card {
   opacity:    0;
