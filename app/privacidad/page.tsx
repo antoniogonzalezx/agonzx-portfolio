@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 
 export const metadata: Metadata = {
   title:       'Privacidad — axlab',
@@ -43,8 +42,8 @@ export default function PrivacidadPage() {
             marginBottom:   'clamp(2.5rem, 5vw, 3.5rem)',
           }}
         >
-          <Link
-            href="/lab"
+          <a
+            href="https://axlab.es"
             style={{
               fontFamily:     'Nohemi, sans-serif',
               fontSize:       '0.78rem',
@@ -55,7 +54,7 @@ export default function PrivacidadPage() {
             }}
           >
             ← axlab
-          </Link>
+          </a>
           <span
             style={{
               fontFamily:    'Nohemi, sans-serif',

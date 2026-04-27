@@ -122,7 +122,9 @@ export default function Nav() {
             CV
           </a>
           <a
-            href="/lab"
+            href="https://axlab.es"
+            target="_blank"
+            rel="noopener noreferrer"
             aria-label="Visit axlab — automation studio"
             style={{
               fontFamily:     'Nohemi,sans-serif',
@@ -177,7 +179,9 @@ export default function Nav() {
             </a>
           ))}
           <a
-            href="/lab"
+            href="https://axlab.es"
+            target="_blank"
+            rel="noopener noreferrer"
             className="mobile-nav-link"
             style={{
               transitionDelay: open ? `${NAV_LINKS.length * 0.055}s` : '0s',

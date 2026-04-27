@@ -86,7 +86,7 @@ export default function Contact() {
     { label: 'About',    href: '#about'  },
     { label: 'Projects', href: '#projects' },
     { label: 'Stack',    href: '#stack' },
-    { label: 'Lab',      href: '/lab'    },
+    { label: 'Lab',      href: 'https://axlab.es', external: true },
     { label: 'CV',       href: '/cv'     },
     { label: 'Privacy',  href: '/privacy' },
     { label: '@agonzx',  href: SITE.instagram, external: true },

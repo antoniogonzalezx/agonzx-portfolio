@@ -11,6 +11,35 @@ const nextConfig = {
       // Old /servicios path → new /lab home for the studio sub-brand
       { source: '/servicios',          destination: '/lab',          permanent: true },
       { source: '/servicios/:path*',   destination: '/lab/:path*',   permanent: true },
+
+      // Legacy agonzx.dev/lab now belongs at axlab.es. The redirect is
+      // host-scoped to agonzx.dev so it does NOT trigger when axlab.es
+      // serves /lab via the rewrite below (would loop otherwise).
+      {
+        source: '/lab',
+        has: [{ type: 'host', value: 'agonzx.dev' }],
+        destination: 'https://axlab.es',
+        permanent: true,
+      },
+      {
+        source: '/lab/:path*',
+        has: [{ type: 'host', value: 'agonzx.dev' }],
+        destination: 'https://axlab.es/:path*',
+        permanent: true,
+      },
+      // Same redirect for the www. variant of agonzx
+      {
+        source: '/lab',
+        has: [{ type: 'host', value: 'www.agonzx.dev' }],
+        destination: 'https://axlab.es',
+        permanent: true,
+      },
+      {
+        source: '/lab/:path*',
+        has: [{ type: 'host', value: 'www.agonzx.dev' }],
+        destination: 'https://axlab.es/:path*',
+        permanent: true,
+      },
     ];
   },
   async rewrites() {
