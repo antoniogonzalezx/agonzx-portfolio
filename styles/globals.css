@@ -91,11 +91,16 @@ a{color:inherit;text-decoration:none}
 @media(max-width:900px){ .about-grid { grid-template-columns: 1fr !important; } }
 @media(max-width:700px){ .about-grid { gap: 2rem !important; } }
 
-/* ── Experience · desktop "stage per role" + mobile stack ────────────────
- * Two layouts coexist in the DOM (one per breakpoint).  CSS hides
- * the irrelevant variant; ParallaxScroller filters out display:none
- * snap-sections so the step count stays correct on each screen size.
- * ──────────────────────────────────────────────────────────────────────── */
+/* ── Experience · pinned stage desktop + improved card stack mobile ──
+ * Desktop: 4 transparent triggers feed an IntersectionObserver inside
+ *   <Experience>, which dispatches `exp-change` events.  A fixed
+ *   <ExperienceStage> overlay (rendered outside ParallaxScroller in
+ *   page.tsx) listens and cross-fades the active role's content in
+ *   place — same composition as axlab's Proceso pinned stage.
+ * Mobile: a single section with four glass cards.  Eyebrow with date
+ *   + badge, full-width logo block, role title, description, clients
+ *   row at the foot with its own label.
+ * ──────────────────────────────────────────────────────────────────── */
 
 /* Shared text-logo styling (used when an experience has no SVG, e.g. NexPlayer) */
 .exp-text-logo {
@@ -107,117 +112,157 @@ a{color:inherit;text-decoration:none}
   white-space:    nowrap;
 }
 
-/* ── Desktop · stage per role ────────────────────────────────────── */
-.exp-desktop {
-  background:            var(--bg2);
-  display:               grid;
-  grid-template-columns: clamp(180px, 18vw, 260px) 1fr;
-  align-items:           center;
-  padding:               clamp(4rem, 8vw, 6rem) clamp(3rem, 6vw, 5rem);
-  gap:                   clamp(2rem, 5vw, 4rem);
-  position:              relative;
-  overflow:              hidden;
+/* ── Desktop · transparent triggers + fixed pinned stage ────────── */
+.exp-desktop-trigger { background: var(--bg2); }
+
+.exp-stage {
+  position:        fixed;
+  inset:           0;
+  z-index:         5;
+  display:         grid;
+  grid-template-columns: clamp(200px, 20vw, 280px) 1fr;
+  gap:             clamp(2rem, 5vw, 4rem);
+  padding:         clamp(5rem, 9vw, 7rem) clamp(3rem, 6vw, 5rem) clamp(3rem, 5vw, 4rem);
+  align-items:     center;
+  pointer-events:  none;
+  opacity:         0;
+  transition:      opacity 0.45s var(--ease);
+}
+.exp-stage.is-visible { opacity: 1; }
+
+@media (max-width: 700px) {
+  .exp-stage           { display: none !important; }
+  .exp-desktop-trigger { display: none !important; }
 }
 
-.exp-desktop-rail {
-  align-self: center;
-  display:    flex;
-  flex-direction: column;
-  gap:        0.4rem;
+.exp-stage-title {
+  position:       absolute;
+  top:            clamp(2.5rem, 5vw, 3.5rem);
+  left:           clamp(3rem, 6vw, 5rem);
+  font-family:    'Nohemi', sans-serif;
+  font-size:      clamp(1.4rem, 2.4vw, 1.8rem);
+  font-weight:     600;
+  letter-spacing: -0.025em;
+  color:          var(--white);
+  margin:          0;
 }
-.exp-desktop-rail-eyebrow {
-  font-family:     'Nohemi', sans-serif;
-  font-size:        0.66rem;
+
+.exp-stage-rail {
+  align-self:    center;
+  display:        flex;
+  flex-direction: column;
+  gap:            0.4rem;
+}
+.exp-stage-rail-eyebrow {
+  font-family:    'Nohemi', sans-serif;
+  font-size:       0.66rem;
   font-weight:      500;
   letter-spacing:   0.08em;
   text-transform:   uppercase;
   color:           var(--t3);
   margin-bottom:   0.6rem;
 }
-.exp-desktop-rail-steps {
-  list-style:    none;
-  padding:       0;
-  margin:        0;
-  display:       flex;
-  flex-direction:column;
-  gap:           14px;
+.exp-stage-rail-steps {
+  list-style:     none;
+  padding:        0;
+  margin:         0;
+  display:        flex;
+  flex-direction: column;
+  gap:            14px;
 }
-.exp-desktop-rail-step {
-  display:    flex;
-  align-items:center;
-  gap:        14px;
-  font-family:'Safiro', sans-serif;
-  font-size:  0.82rem;
-  color:      var(--t3);
-  transition: color 0.5s var(--ease);
+.exp-stage-rail-steps li {
+  display:     flex;
+  align-items: center;
+  gap:         14px;
+  font-family: 'Safiro', sans-serif;
+  font-size:   0.82rem;
+  color:       var(--t3);
+  transition:  color 0.5s var(--ease);
 }
-.exp-desktop-rail-step-dot {
-  width:        6px;
-  height:       6px;
-  border-radius:50%;
-  background:   rgba(255,255,255,0.18);
-  transition:   all 0.5s var(--ease);
-  flex-shrink:  0;
+.exp-stage-rail-dot {
+  width:         6px;
+  height:        6px;
+  border-radius: 50%;
+  background:    rgba(255,255,255,0.18);
+  transition:    all 0.5s var(--ease);
+  flex-shrink:   0;
 }
-.exp-desktop-rail-step[data-state='active'] {
-  color: var(--white);
-}
-.exp-desktop-rail-step[data-state='active'] .exp-desktop-rail-step-dot {
+.exp-stage-rail-steps li[data-state='active']                     { color: var(--white); }
+.exp-stage-rail-steps li[data-state='active'] .exp-stage-rail-dot {
   width:      10px;
   height:     10px;
   background: var(--accent);
   box-shadow: 0 0 12px rgba(107,107,255,0.7), 0 0 24px rgba(107,107,255,0.35);
 }
-.exp-desktop-rail-step[data-state='past'] .exp-desktop-rail-step-dot {
+.exp-stage-rail-steps li[data-state='past']                       { color: var(--t2); }
+.exp-stage-rail-steps li[data-state='past'] .exp-stage-rail-dot   {
   background: rgba(255,255,255,0.45);
 }
-.exp-desktop-rail-step[data-state='past'] {
-  color: var(--t2);
+
+.exp-stage-content {
+  position:    relative;
+  width:       100%;
+  height:      100%;
+  align-self:  center;
+  min-height:  clamp(320px, 60vh, 520px);
 }
 
-.exp-desktop-stage {
-  display:        flex;
-  flex-direction: column;
-  gap:            clamp(0.9rem, 1.2vw, 1.3rem);
-  max-width:      760px;
+/* Each role lives at the same coordinates; cross-fade via opacity. */
+.exp-stage-role {
+  position:        absolute;
+  inset:           0;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     flex-start;
+  justify-content: center;
+  gap:             clamp(0.9rem, 1.2vw, 1.3rem);
+  max-width:       760px;
+  opacity:         0;
+  transform:       translateY(14px);
+  transition:      opacity 0.45s var(--ease), transform 0.55s var(--ease);
+  pointer-events:  none;
 }
-.exp-desktop-logo {
-  display:     flex;
-  align-items: center;
-  height:      clamp(72px, 9vw, 132px);
+.exp-stage-role[data-active] {
+  opacity:   1;
+  transform: translateY(0);
+}
+
+.exp-stage-logo {
+  display:       flex;
+  align-items:   center;
+  height:        clamp(80px, 9vw, 140px);
   margin-bottom: 0.5rem;
 }
-.exp-desktop-role {
-  font-family:   'Nohemi', sans-serif;
-  font-size:     clamp(2rem, 4vw, 3.4rem);
-  font-weight:    600;
-  color:         var(--accent);
+.exp-stage-role-title {
+  font-family:    'Nohemi', sans-serif;
+  font-size:      clamp(2rem, 4vw, 3.4rem);
+  font-weight:     600;
+  color:          var(--accent);
   letter-spacing:-0.03em;
-  line-height:    1.05;
-  margin:         0;
+  line-height:     1.05;
+  margin:          0;
 }
-.exp-desktop-meta {
-  display:    flex;
-  gap:        0.8rem;
-  align-items:center;
-  font-family:'Safiro', sans-serif;
-  font-size:  0.85rem;
-  font-weight:500;
-  color:      var(--t3);
-  margin-bottom: 0.5rem;
+.exp-stage-meta {
+  display:     flex;
+  gap:         0.8rem;
+  align-items: center;
+  font-family: 'Safiro', sans-serif;
+  font-size:   0.88rem;
+  font-weight: 500;
+  color:       var(--t3);
 }
-.exp-desktop-meta-badge {
-  padding:       0.22rem 0.7rem;
-  background:    var(--accent-s);
-  color:         var(--accent);
-  border:        1px solid rgba(107,107,255,0.22);
-  border-radius: 20px;
+.exp-stage-badge {
+  padding:        0.22rem 0.7rem;
+  background:     var(--accent-s);
+  color:          var(--accent);
+  border:         1px solid rgba(107,107,255,0.22);
+  border-radius:  20px;
   font-family:   'Nohemi', sans-serif;
-  font-size:     0.62rem;
-  font-weight:    500;
+  font-size:      0.62rem;
+  font-weight:     500;
   letter-spacing:-0.005em;
 }
-.exp-desktop-context {
+.exp-stage-context {
   font-family:    'Safiro', sans-serif;
   font-size:      clamp(0.92rem, 1.1vw, 1rem);
   font-weight:     500;
@@ -227,7 +272,7 @@ a{color:inherit;text-decoration:none}
   margin:          0;
   max-width:       540px;
 }
-.exp-desktop-desc {
+.exp-stage-desc {
   font-family: 'Safiro', sans-serif;
   font-size:   clamp(0.95rem, 1.15vw, 1.05rem);
   color:       var(--t2);
@@ -235,16 +280,16 @@ a{color:inherit;text-decoration:none}
   margin:       0;
   max-width:    640px;
 }
-.exp-desktop-clients {
+.exp-stage-clients {
   display:     flex;
   flex-wrap:   wrap;
   align-items: center;
   gap:         1.4rem;
-  margin-top:  0.5rem;
+  margin-top:  0.4rem;
   padding-top: 1.2rem;
   border-top:  1px solid rgba(255,255,255,0.06);
 }
-.exp-desktop-clients-label {
+.exp-stage-clients-label {
   font-family:    'Nohemi', sans-serif;
   font-size:       0.6rem;
   font-weight:      500;
@@ -253,21 +298,20 @@ a{color:inherit;text-decoration:none}
   color:           var(--t3);
   margin-right:    0.3rem;
 }
-.exp-desktop-clients img {
+.exp-stage-clients img {
   width:      auto;
   opacity:    0.7;
   transition: opacity 0.25s var(--ease);
 }
-.exp-desktop-clients img:hover { opacity: 1; }
 
-/* ── Mobile · stacked cards ──────────────────────────────────────── */
+/* ── Mobile · improved card stack ──────────────────────────────── */
 .exp-mobile {
-  background:    var(--bg2);
-  display:       flex;
-  flex-direction:column;
-  gap:           clamp(1.6rem, 5vw, 2.4rem);
-  min-height:    auto !important;
-  padding:       clamp(4.5rem, 12vw, 6rem) 1.25rem clamp(3rem, 8vw, 5rem);
+  background:     var(--bg2);
+  display:        flex;
+  flex-direction: column;
+  gap:            clamp(1.6rem, 5vw, 2.4rem);
+  min-height:     auto !important;
+  padding:        clamp(4.5rem, 12vw, 6rem) 1.25rem clamp(3rem, 8vw, 5rem);
 }
 .exp-mobile-title {
   font-family:    'Nohemi', sans-serif;
@@ -280,82 +324,114 @@ a{color:inherit;text-decoration:none}
 .exp-mobile-stack {
   display:        flex;
   flex-direction: column;
-  gap:            clamp(1rem, 4vw, 1.5rem);
+  gap:            clamp(1rem, 4vw, 1.4rem);
 }
+
+/* Card: subtle gradient hairline on top, faint white wash for depth */
 .exp-mobile-card {
-  background:    rgba(255,255,255,0.025);
-  border:        1px solid rgba(255,255,255,0.06);
-  border-radius: 20px;
-  padding:       clamp(1.4rem, 5vw, 1.8rem);
-  display:       flex;
-  flex-direction:column;
-  gap:           1rem;
+  position:       relative;
+  background:     rgba(255,255,255,0.028);
+  border:         1px solid rgba(255,255,255,0.07);
+  border-radius:  22px;
+  padding:        clamp(1.5rem, 5vw, 1.9rem);
+  display:        flex;
+  flex-direction: column;
+  gap:            1.05rem;
+  overflow:       hidden;
 }
+.exp-mobile-card::before {
+  content:    '';
+  position:   absolute;
+  inset:      0 0 auto 0;
+  height:     1px;
+  background: linear-gradient(90deg, transparent, rgba(107,107,255,0.32), transparent);
+  opacity:    0.55;
+}
+
+.exp-mobile-card-eyebrow {
+  display:     flex;
+  flex-wrap:   wrap;
+  gap:         0.5rem 0.75rem;
+  align-items: center;
+}
+.exp-mobile-card-date {
+  font-family:    'Safiro', sans-serif;
+  font-size:       0.78rem;
+  font-weight:      500;
+  color:           var(--t3);
+  letter-spacing: -0.005em;
+}
+.exp-mobile-card-badge {
+  padding:        0.2rem 0.65rem;
+  background:     var(--accent-s);
+  color:          var(--accent);
+  border:         1px solid rgba(107,107,255,0.22);
+  border-radius:  20px;
+  font-family:    'Nohemi', sans-serif;
+  font-size:       0.58rem;
+  font-weight:      500;
+  letter-spacing: -0.005em;
+}
+
 .exp-mobile-card-logo {
   display:     flex;
   align-items: center;
-  height:      52px;
+  height:      64px;
 }
 .exp-mobile-card-logo img {
   height:    100%;
   width:     auto;
-  max-width: 220px;
+  max-width: 240px;
   object-fit:contain;
 }
-.exp-mobile-card-meta {
-  display:    flex;
-  flex-wrap:  wrap;
-  gap:        0.4rem 0.8rem;
-  align-items:center;
-}
+
 .exp-mobile-card-role {
   font-family:    'Nohemi', sans-serif;
-  font-size:      1.4rem;
+  font-size:      1.55rem;
   font-weight:     600;
   color:          var(--accent);
   letter-spacing:-0.02em;
   line-height:     1.05;
+  margin:          0;
 }
-.exp-mobile-card-date {
-  font-family:'Safiro', sans-serif;
-  font-size:  0.8rem;
-  color:      var(--t3);
-  font-weight:500;
-}
-.exp-mobile-card-badge {
-  padding:       0.2rem 0.65rem;
-  background:    var(--accent-s);
-  color:         var(--accent);
-  border:        1px solid rgba(107,107,255,0.22);
-  border-radius: 20px;
-  font-family:   'Nohemi', sans-serif;
-  font-size:     0.58rem;
-  font-weight:    500;
-  letter-spacing:-0.005em;
-}
+
 .exp-mobile-card-desc {
-  font-family:'Safiro', sans-serif;
-  font-size:  0.95rem;
-  line-height:1.7;
-  color:      var(--t2);
-  margin:      0;
+  font-family: 'Safiro', sans-serif;
+  font-size:   0.95rem;
+  line-height: 1.7;
+  color:       var(--t2);
+  margin:       0;
 }
+
 .exp-mobile-card-clients {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.7rem;
+  padding-top:    0.7rem;
+  margin-top:     0.1rem;
+  border-top:     1px solid rgba(255,255,255,0.06);
+}
+.exp-mobile-card-clients-label {
+  font-family:    'Nohemi', sans-serif;
+  font-size:       0.55rem;
+  font-weight:      500;
+  letter-spacing:   0.1em;
+  text-transform:   uppercase;
+  color:           var(--t3);
+}
+.exp-mobile-card-clients-row {
   display:     flex;
   flex-wrap:   wrap;
   align-items: center;
-  gap:         1rem;
-  padding-top: 0.9rem;
-  border-top:  1px solid rgba(255,255,255,0.06);
+  gap:         1.2rem;
 }
-.exp-mobile-card-clients img {
+.exp-mobile-card-clients-row img {
   width:   auto;
-  opacity: 0.7;
+  opacity: 0.65;
 }
 
 /* ── Hide the variant that doesn't match the breakpoint ────────── */
-@media(min-width:701px){ .exp-mobile  { display: none !important; } }
-@media(max-width:700px){ .exp-desktop { display: none !important; } }
+@media (min-width: 701px) { .exp-mobile { display: none !important; } }
 
 /* ── Projects: hide scrollbar on horizontal scroller ────────────────────── */
 .proj-horiz-scroller::-webkit-scrollbar { display: none; }
