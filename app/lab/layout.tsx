@@ -37,8 +37,14 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName:    'axlab',
       locale:      'es_ES',
       type:        'website',
+      images: [{ url: '/marketing/og-axlab.svg', width: 1200, height: 630, alt: 'axlab — Software a medida para PYMES' }],
     },
-    twitter: { card: 'summary_large_image' },
+    twitter: {
+      card:        'summary_large_image',
+      title:       'axlab · Software a medida y automatización con IA',
+      description: 'Software a medida para PYMES en España. Sin rodeos.',
+      images:      ['/marketing/og-axlab.svg'],
+    },
     other: { 'hreflang': 'es-ES' },
   };
 }

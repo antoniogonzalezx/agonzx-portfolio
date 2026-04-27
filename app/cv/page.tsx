@@ -10,6 +10,32 @@ const PDFDownload = dynamic(
   { ssr: false, loading: () => <DownloadButtonSkeleton /> },
 );
 
+/* Splits a bullet on `**X**` markers and renders the wrapped runs in
+ * Nohemi 600 / ink so metrics like "+120%" or "60% → 95%+" pop out of
+ * the body copy without breaking the bullet's reading flow. Used by
+ * the experience bullets — kept inline so the HTML preview and the
+ * PDF (CVDocument) can each implement it in their own primitive. */
+function renderBold(text: string) {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return (
+        <strong
+          key={i}
+          style={{
+            fontFamily:    'Nohemi, sans-serif',
+            fontWeight:    600,
+            color:         '#23335C',
+            letterSpacing: '-0.01em',
+          }}
+        >
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
+}
+
 function DownloadButtonSkeleton() {
   return (
     <span
@@ -331,7 +357,7 @@ export default function CVPage() {
                     >
                       ·
                     </span>
-                    {b}
+                    {renderBold(b)}
                   </li>
                 ))}
               </ul>

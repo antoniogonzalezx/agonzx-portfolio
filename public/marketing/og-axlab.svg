@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" preserveAspectRatio="xMidYMid meet">
+  <!--
+    Open-Graph share image for axlab.es links.
+    Light surface, axlab wordmark on the left, services tagline on the
+    right.  Composition matches the hero on /lab so social previews
+    feel like an extension of the studio brand.
+  -->
+  <defs>
+    <radialGradient id="ogLabGlow1" cx="22%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4F4FFF" stop-opacity="0.10"/>
+      <stop offset="60%" stop-color="#FAFBFD" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ogLabGlow2" cx="92%" cy="14%" r="42%">
+      <stop offset="0%" stop-color="#4F4FFF" stop-opacity="0.06"/>
+      <stop offset="80%" stop-color="#FAFBFD" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="#FAFBFD"/>
+  <rect width="1200" height="630" fill="url(#ogLabGlow1)"/>
+  <rect width="1200" height="630" fill="url(#ogLabGlow2)"/>
+
+  <g font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" letter-spacing="-5">
+    <text x="80" y="370" font-size="232" font-weight="700" fill="#23335C">a<tspan fill="#4F4FFF">{x}</tspan>lab</text>
+  </g>
+
+  <g font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" letter-spacing="-1">
+    <text x="80" y="446" font-size="38" font-weight="600" fill="#23335C">
+      Software a medida y automatización con IA
+    </text>
+    <text x="80" y="494" font-size="38" font-weight="400" fill="#4E5C84">
+      para PYMES en España.
+    </text>
+    <text x="80" y="554" font-size="26" font-weight="500" fill="#4F4FFF" letter-spacing="-0.4">
+      axlab.es · contacto@axlab.es
+    </text>
+  </g>
+</svg>

@@ -165,9 +165,9 @@ export const CV = {
       date:     'Oct 2022 — Feb 2026',
       location: 'Remote · Hamburg',
       bullets: [
-        'Owned the end-to-end job-application flow — the company\u2019s primary revenue driver, serving 20M monthly active users on candidate and recruiter sides.',
-        'Lifted apply intention rate +120% (primary business KPI) via data-driven A/B testing and UX optimisation.',
-        'Pushed test coverage 60% → 90%+ (Swift Testing, XCUITest, snapshot) and cut build times ~40% with a fully modular SPM codebase.',
+        'Owned the end-to-end job-application flow — the company\u2019s primary revenue driver, serving **20M monthly active users** on candidate and recruiter sides.',
+        'Lifted apply intention rate **+120%** (primary business KPI) via data-driven A/B testing and UX optimisation.',
+        'Pushed test coverage **60% → 95%+** (Swift Testing, XCUITest, snapshot) and cut build times **~40%** with a fully modular SPM codebase.',
         'Architecture in SwiftUI + TCA + Clean Architecture; led migration to Swift 6, async/await and accessibility-first across multiple teams.',
       ],
       tech: ['SwiftUI', 'TCA', 'Clean Architecture', 'GraphQL (Apollo)', 'Combine', 'Swift Testing', 'XCUITest', 'Bitrise'],

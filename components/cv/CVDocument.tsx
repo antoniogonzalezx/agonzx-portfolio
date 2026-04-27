@@ -235,6 +235,12 @@ const styles = StyleSheet.create({
     lineHeight: 1.45,
     color:       C.ink2,
   },
+  bulletBold: {
+    fontFamily:    'Nohemi',
+    fontWeight:    700,
+    color:         C.ink,
+    letterSpacing: -0.1,
+  },
   techRow: {
     marginTop:  5,
     fontSize:   8.4,
@@ -334,6 +340,23 @@ const styles = StyleSheet.create({
   },
 });
 
+/* Splits a bullet on `**X**` markers and emits PDF Text spans, with the
+ * wrapped runs rendered in Nohemi 700 / ink so metrics like "+120%" pop
+ * against the body copy.  Mirrors `renderBold` in app/cv/page.tsx so the
+ * HTML preview and the PDF render identical emphasis from one source. */
+function renderBoldPDF(text: string) {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return (
+        <Text key={i} style={styles.bulletBold}>
+          {part.slice(2, -2)}
+        </Text>
+      );
+    }
+    return <Text key={i}>{part}</Text>;
+  });
+}
+
 export default function CVDocument() {
   return (
     <Document
@@ -399,7 +422,7 @@ export default function CVDocument() {
               {job.bullets.map((b, i) => (
                 <View key={i} style={styles.bullet}>
                   <Text style={styles.bulletDot}>·</Text>
-                  <Text style={styles.bulletText}>{b}</Text>
+                  <Text style={styles.bulletText}>{renderBoldPDF(b)}</Text>
                 </View>
               ))}
               {job.tech?.length > 0 && (
