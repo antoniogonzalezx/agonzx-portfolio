@@ -1,6 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  /* @resvg/resvg-js ships native .node binaries — webpack can't bundle
+   * those, so we tell Next.js to leave the package external on the
+   * server (used by /app/marketing/[asset]/route.ts to rasterise the
+   * marketing SVGs to PNG on demand). */
+  experimental: {
+    serverComponentsExternalPackages: ['@resvg/resvg-js'],
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'awsmp-logos.s3.amazonaws.com' },

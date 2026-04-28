@@ -19,21 +19,28 @@ export const metadata: Metadata = {
   robots:  { index: false, follow: false },
 };
 
+/* For every asset:
+ *  - `preview` is the static SVG (fast in the browser, vector preview)
+ *  - `png`     is the rasterised download served by the /marketing/[asset]
+ *              route handler — clicking the card pushes the PNG straight
+ *              to disk so you can upload to LinkedIn without conversions.
+ *  - `size`    is the SVG's intrinsic dimension; the PNG comes back at
+ *              2× that for retina sharpness (handler config).             */
 const ASSETS = [
   {
     group: 'agonzx · iOS Engineer (dark)',
     items: [
-      { name: 'LinkedIn personal banner', file: '/marketing/linkedin-banner-agonzx.svg', size: '1584 × 396' },
-      { name: 'Avatar (LinkedIn / GitHub / X)', file: '/marketing/avatar-agonzx.svg', size: '400 × 400' },
-      { name: 'Open Graph (link unfurl)', file: '/marketing/og-agonzx.svg', size: '1200 × 630' },
+      { name: 'LinkedIn personal banner',         slug: 'linkedin-banner-agonzx', size: '1584 × 396' },
+      { name: 'Avatar (LinkedIn / GitHub / X)',   slug: 'avatar-agonzx',          size: '400 × 400'  },
+      { name: 'Open Graph (link unfurl)',         slug: 'og-agonzx',              size: '1200 × 630' },
     ],
   },
   {
     group: 'axlab · Studio (light)',
     items: [
-      { name: 'LinkedIn page banner', file: '/marketing/linkedin-banner-axlab.svg', size: '1584 × 396' },
-      { name: 'Avatar (LinkedIn / Instagram)', file: '/marketing/avatar-axlab.svg', size: '400 × 400' },
-      { name: 'Open Graph (link unfurl)', file: '/marketing/og-axlab.svg', size: '1200 × 630' },
+      { name: 'LinkedIn page banner',             slug: 'linkedin-banner-axlab',  size: '1584 × 396' },
+      { name: 'Avatar (LinkedIn / Instagram)',    slug: 'avatar-axlab',           size: '400 × 400'  },
+      { name: 'Open Graph (link unfurl)',         slug: 'og-axlab',               size: '1200 × 630' },
     ],
   },
 ];
@@ -62,9 +69,9 @@ export default function MarketingHub() {
           Brand assets
         </h1>
         <p style={{ color: '#A8B3D1', marginTop: '0.5rem', fontSize: '0.95rem', maxWidth: 640 }}>
-          Assets internos para subir a LinkedIn / Instagram / X. Click en cada
-          tarjeta para abrir el SVG en una pestaña nueva — desde ahí export a
-          PNG en cualquier navegador (Cmd-Opt-S en Safari, devtools en Chrome).
+          Assets internos para subir a LinkedIn / Instagram / X. Cada PNG se
+          rasteriza al vuelo desde el SVG fuente al doble de resolución
+          (retina), para subir directo sin pasar por convertidores.
         </p>
 
         {ASSETS.map((g) => (
@@ -91,12 +98,8 @@ export default function MarketingHub() {
               }}
             >
               {g.items.map((item) => (
-                <a
-                  key={item.file}
-                  href={item.file}
-                  target="_blank"
-                  rel="noreferrer"
-                  download
+                <div
+                  key={item.slug}
                   style={{
                     display:        'flex',
                     flexDirection:  'column',
@@ -105,33 +108,70 @@ export default function MarketingHub() {
                     background:     'rgba(255,255,255,0.03)',
                     border:         '1px solid rgba(255,255,255,0.08)',
                     borderRadius:    14,
-                    textDecoration: 'none',
-                    color:          'inherit',
-                    transition:     'transform 0.2s ease, border-color 0.2s ease',
                   }}
                 >
-                  <div
+                  <a
+                    href={`/marketing/${item.slug}.png`}
                     style={{
-                      width:          '100%',
-                      aspectRatio:    '1584 / 396',
-                      background:     '#11182A',
-                      borderRadius:    8,
-                      overflow:       'hidden',
-                      backgroundImage:`url(${item.file})`,
-                      backgroundSize: 'contain',
-                      backgroundRepeat: 'no-repeat',
+                      display:    'block',
+                      width:      '100%',
+                      aspectRatio:'1584 / 396',
+                      background: '#11182A',
+                      borderRadius: 8,
+                      overflow:   'hidden',
+                      backgroundImage:    `url(/marketing/${item.slug}.svg)`,
+                      backgroundSize:     'contain',
+                      backgroundRepeat:   'no-repeat',
                       backgroundPosition: 'center',
                     }}
+                    aria-label={`Download ${item.name} as PNG`}
                   />
                   <div>
                     <div style={{ fontFamily: 'Nohemi, sans-serif', fontWeight: 500, fontSize: '0.9rem' }}>
                       {item.name}
                     </div>
                     <div style={{ fontSize: '0.78rem', color: '#6B7599', marginTop: 2 }}>
-                      {item.size} · click to open
+                      {item.size}
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.6rem', marginTop: '0.55rem', fontFamily: 'Nohemi, sans-serif', fontSize: '0.78rem' }}>
+                      <a
+                        href={`/marketing/${item.slug}.png`}
+                        style={{
+                          display:        'inline-flex',
+                          alignItems:     'center',
+                          gap:            6,
+                          padding:        '0.4rem 0.8rem',
+                          background:     '#6B6BFF',
+                          color:          '#FFFFFF',
+                          borderRadius:    9999,
+                          textDecoration: 'none',
+                          fontWeight:      500,
+                        }}
+                      >
+                        Download PNG ↓
+                      </a>
+                      <a
+                        href={`/marketing/${item.slug}.svg`}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          display:        'inline-flex',
+                          alignItems:     'center',
+                          gap:            6,
+                          padding:        '0.4rem 0.8rem',
+                          background:     'rgba(255,255,255,0.05)',
+                          border:         '1px solid rgba(255,255,255,0.1)',
+                          color:          '#A8B3D1',
+                          borderRadius:    9999,
+                          textDecoration: 'none',
+                          fontWeight:      500,
+                        }}
+                      >
+                        SVG
+                      </a>
                     </div>
                   </div>
-                </a>
+                </div>
               ))}
             </div>
           </section>
