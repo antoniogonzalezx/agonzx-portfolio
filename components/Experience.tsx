@@ -125,27 +125,27 @@ function MobileStack() {
 
 /* ── Desktop · editorial timeline ────────────────────────────────── */
 
-const AUTO_ADVANCE_MS = 9000;
-
 function DesktopExperience() {
-  const containerRef = useRef<HTMLElement>(null);
-  const stepRefs    = useRef<(HTMLLIElement | null)[]>([]);
-  const markerRef   = useRef<HTMLSpanElement>(null);
-  const progressRef = useRef<HTMLSpanElement>(null);
-  const isAnimating = useRef(false);
+  const containerRef   = useRef<HTMLElement>(null);
+  const stepRefs       = useRef<(HTMLLIElement | null)[]>([]);
+  const markerRef      = useRef<HTMLSpanElement>(null);
+  const isAnimating    = useRef(false);
+  const transitionRef  = useRef<(next: number) => void>(() => {});
 
-  /* `activeIdx` updates immediately on click / auto-advance — drives
-   * the rail UI and progress bar.  `displayIdx` updates AFTER the
-   * stage's exit animation completes, which is what controls the
-   * stage content (so the entry animation runs against the new role). */
+  /* `activeIdx` updates immediately on a wheel/click — drives
+   * the rail UI.  `displayIdx` updates AFTER the stage's exit
+   * animation completes, so the entry animation runs against the
+   * new role's content.  Splitting them is what gives the role
+   * change its layered "morph in place" feel.                      */
   const [activeIdx,  setActiveIdx]  = useState(0);
   const [displayIdx, setDisplayIdx] = useState(0);
-  const [paused,     setPaused]     = useState(false);
 
   const exp = EXPERIENCE[displayIdx];
 
-  /* ── Stage transition · OUT → swap → IN ── */
-  const transitionTo = (next: number) => {
+  /* ── Stage transition · OUT → swap → IN ──
+   * Stored on a ref so the wheel-event listener (registered once)
+   * always reads the latest closure with the latest activeIdx.   */
+  transitionRef.current = (next: number) => {
     if (isAnimating.current || next === activeIdx) return;
     isAnimating.current = true;
     setActiveIdx(next);
@@ -168,6 +168,7 @@ function DesktopExperience() {
       },
     });
   };
+  const transitionTo = (next: number) => transitionRef.current(next);
 
   /* ── Marker glide on the timeline rail ── */
   useGSAP(() => {
@@ -222,34 +223,34 @@ function DesktopExperience() {
         { opacity: 1, y: 0, duration: 0.45, stagger: 0.06 }, 0.75);
   }, { scope: containerRef, dependencies: [displayIdx] });
 
-  /* ── Auto-advance ─────────────────────────────────────────────── */
+  /* ── Wheel/keyboard/touch driven role advance ──
+   *   ParallaxScroller dispatches `parallax-internal-step` whenever
+   *   the user scrolls within a section that has data-internal-steps.
+   *   We listen for events with id="experience" (matching our section
+   *   attr) and run the transition.                                   */
   useEffect(() => {
-    if (paused) {
-      if (progressRef.current) progressRef.current.style.animationPlayState = 'paused';
-      return;
-    }
-    /* Restart the progress bar animation by re-applying the keyframes.
-     * Toggling animation-name + offsetWidth read forces a reflow so
-     * the bar always grows from 0 on every cycle.                   */
-    const bar = progressRef.current;
-    if (bar) {
-      bar.style.animation = 'none';
-      void bar.offsetWidth;
-      bar.style.animation = `expProgressFill ${AUTO_ADVANCE_MS}ms linear forwards`;
-    }
-    const id = window.setTimeout(() => {
-      transitionTo((activeIdx + 1) % EXPERIENCE.length);
-    }, AUTO_ADVANCE_MS);
-    return () => window.clearTimeout(id);
-  }, [activeIdx, paused]);
+    const handler = (e: Event) => {
+      const ev = e as CustomEvent<{ id: string; step: number }>;
+      if (ev.detail.id !== 'experience') return;
+      transitionRef.current(ev.detail.step);
+    };
+    window.addEventListener('parallax-internal-step', handler);
+    return () => window.removeEventListener('parallax-internal-step', handler);
+  }, []);
 
   return (
     <section
       ref={containerRef}
       id="experience"
       className="snap-section exp-host"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      /* data-internal-steps: ParallaxScroller reads this and treats
+       *   the section as N internal beats, dispatching
+       *   parallax-internal-step events as the user scrolls.  The
+       *   track stays put — the BG is fixed, only the content
+       *   morphs between roles.
+       * data-internal-step-id: routes the events to this component. */
+      data-internal-steps={EXPERIENCE.length}
+      data-internal-step-id="experience"
     >
       <h2 className="exp-host-title">Experience</h2>
 
@@ -278,11 +279,9 @@ function DesktopExperience() {
           </ol>
         </div>
 
-        {/* Auto-advance progress hint — thin bar that grows over 9s,
-            paused while the user hovers anywhere on the section. */}
-        <div className="exp-host-progress" aria-hidden>
-          <span ref={progressRef} className="exp-host-progress-bar" />
-        </div>
+        <span className="exp-host-hint" aria-hidden>
+          Scroll to advance
+        </span>
       </aside>
 
       {/* ── Right stage ── */}

@@ -14,6 +14,15 @@ export default function ParallaxScroller({ children }: { children: ReactNode }) 
   const lastNav = useRef(0);
   const vh = useRef(0);
 
+  /* Internal-step state for sections that opt in via
+   * data-internal-steps="N".  When the user wheels/keys/touches
+   * inside such a section, we advance an internal step instead of
+   * translating the track — the section stays pinned in view, the
+   * section's own component listens for `parallax-internal-step`
+   * events and animates its content.  Only after the last internal
+   * step does the regular section navigation kick in.            */
+  const internalSteps = useRef<Map<number, number>>(new Map());
+
   // Detect mobile — false on SSR, set synchronously before first paint via useLayoutEffect
   const [isMobile, setIsMobile] = useState(false);
   useLayoutEffect(() => {
@@ -79,11 +88,71 @@ export default function ParallaxScroller({ children }: { children: ReactNode }) 
   useEffect(() => {
     if (isMobile) return;
 
+    /* Returns the data-internal-steps count for a section (≥1).
+     * `1` means "no internal beats — navigate to next section". */
+    const getInternalSteps = (idx: number) => {
+      const el = sectionsRef.current[idx];
+      const n  = parseInt(el?.getAttribute('data-internal-steps') ?? '1', 10);
+      return Number.isFinite(n) && n > 0 ? n : 1;
+    };
+
+    /* Returns the unique id of the multi-step section, used by the
+     * section's own component to filter `parallax-internal-step`
+     * events.  Falls back to a positional id if none set.           */
+    const getInternalStepId = (idx: number) => {
+      const el = sectionsRef.current[idx];
+      return el?.getAttribute('data-internal-step-id') ?? `section-${idx}`;
+    };
+
+    const dispatchStep = (idx: number, step: number, dir: number) => {
+      window.dispatchEvent(
+        new CustomEvent('parallax-internal-step', {
+          detail: { id: getInternalStepId(idx), sectionIdx: idx, step, dir },
+        }),
+      );
+    };
+
     const navigate = (dir: number) => {
       const now = Date.now();
       if (now - lastNav.current < 850) return;
+
+      /* If the current section has internal steps and we're not at
+       * the edge in the requested direction, advance an internal
+       * step rather than the section.  The track stays put, the
+       * section component handles its own animation.              */
+      const totalSteps = getInternalSteps(currentIdx.current);
+      if (totalSteps > 1) {
+        const cur = internalSteps.current.get(currentIdx.current) ?? 0;
+        if (dir > 0 && cur < totalSteps - 1) {
+          lastNav.current = now;
+          const next = cur + 1;
+          internalSteps.current.set(currentIdx.current, next);
+          dispatchStep(currentIdx.current, next, dir);
+          return;
+        }
+        if (dir < 0 && cur > 0) {
+          lastNav.current = now;
+          const next = cur - 1;
+          internalSteps.current.set(currentIdx.current, next);
+          dispatchStep(currentIdx.current, next, dir);
+          return;
+        }
+        /* Edge of internal steps — fall through to section advance. */
+      }
+
       lastNav.current = now;
-      goTo(currentIdx.current + dir);
+      const nextIdx = currentIdx.current + dir;
+      goTo(nextIdx);
+
+      /* Land on a multi-step section · enter at step 0 going forward,
+       * step N-1 going backward — so back-navigation feels like
+       * "stepping back into the last beat you saw".                  */
+      const newTotal = getInternalSteps(nextIdx);
+      if (newTotal > 1) {
+        const entry = dir > 0 ? 0 : newTotal - 1;
+        internalSteps.current.set(nextIdx, entry);
+        dispatchStep(nextIdx, entry, dir);
+      }
     };
 
     const getNestedScroller = () => {

@@ -229,24 +229,31 @@ a{color:inherit;text-decoration:none}
 .exp-host-step[data-state='active'] .exp-host-step-year { color: var(--accent); }
 .exp-host-step[data-state='past']   .exp-host-step-name { color: var(--t2);    }
 
-/* Auto-advance progress hint — thin bar that fills over 9 s */
-.exp-host-progress {
-  margin-top: 1.2rem;
-  width:      80px;
-  height:     1px;
-  background: rgba(255,255,255,0.08);
-  overflow:   hidden;
+/* Scroll hint · subtle eyebrow under the timeline that quietly tells
+ * the user "this section is alive" without shouting.  No animation,
+ * no chrome — just a tiny ↓ + label in the muted token.            */
+.exp-host-hint {
+  margin-top:    1.4rem;
+  font-family:   'Safiro', sans-serif;
+  font-size:      0.72rem;
+  font-weight:    500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color:          var(--t3);
+  display:        inline-flex;
+  align-items:    center;
+  gap:            0.4rem;
 }
-.exp-host-progress-bar {
-  display:    block;
-  width:      100%;
-  height:     100%;
-  background: linear-gradient(90deg, transparent, var(--accent));
-  transform:  translateX(-100%);
+.exp-host-hint::before {
+  content:        '↓';
+  display:        inline-block;
+  font-size:       0.85rem;
+  color:          var(--accent);
+  animation:      expHintBob 1.8s ease-in-out infinite;
 }
-@keyframes expProgressFill {
-  from { transform: translateX(-100%); }
-  to   { transform: translateX(0); }
+@keyframes expHintBob {
+  0%, 100% { transform: translateY(0);   opacity: 0.65; }
+  50%      { transform: translateY(2px); opacity: 1;    }
 }
 
 /* ── Right stage ── */
