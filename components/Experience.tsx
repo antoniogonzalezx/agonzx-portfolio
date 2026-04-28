@@ -1,29 +1,28 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 import { EXPERIENCE } from './data';
 
+gsap.registerPlugin(useGSAP);
+
 /* ─────────────────────────────────────────────────────────────────
- * Experience — split rendering by viewport
+ * Experience — Editorial timeline (desktop) + stacked cards (mobile)
  *
- *   Desktop (>700px) · pinned stage with cross-fade
- *     - 4 transparent trigger sections live inside ParallaxScroller
- *       so the wheel/snap UX still ticks once per role.
- *     - A fixed stage rendered OUTSIDE ParallaxScroller paints the
- *       title + rail + role content full-bleed.  As ParallaxScroller
- *       advances, an IntersectionObserver on the triggers picks the
- *       active idx; the stage cross-fades between roles in place.
- *     - When the user leaves the experience zone (scrolling into
- *       Projects or back to About), the stage fades out by setting
- *       idx = -1 — no fixed-overlay bleed into other sections.
+ * DESKTOP composition · "Option A — Editorial timeline"
+ *   - One snap-section (single ParallaxScroller step → one dot in
+ *     the right rail).  No internal scroll; roles cycle in place.
+ *   - Left rail: fixed vertical timeline with year + company per role.
+ *     The active marker is a vertical bar that translates between
+ *     rows on a 700 ms power3.out — never jumps, always glides.
+ *   - Right stage: large logo · role · date+badge · context · desc ·
+ *     clients.  Each transition runs a hand-tuned GSAP timeline
+ *     (out → swap → in) with char-staggered role title, scale-pop
+ *     logo, and a 60 ms stagger across the client logos.
+ *   - Roles cycle every 9 s by default; hover anywhere on the section
+ *     pauses the timer; clicking a rail entry jumps + resets it.
  *
- *   Mobile (≤700px) · stacked cards
- *     - One section, four glass cards.  Eyebrow with date + badge,
- *       big logo, role title, description, client logos at the foot.
- *     - No sticky title, no parallax dots.
- *
- * Both variants live in the DOM.  CSS hides the irrelevant one and
- * ParallaxScroller filters out display:none snap-sections so the
- * step count stays correct.
+ * MOBILE composition · stacked cards (unchanged from prior pass).
  * ───────────────────────────────────────────────────────────────── */
 
 /* ── Shared helpers ──────────────────────────────────────────────── */
@@ -60,11 +59,30 @@ function CompanyLogo({ exp, height }: { exp: typeof EXPERIENCE[number]; height: 
 
 function shortName(name: string) { return name.split(' (')[0]; }
 
-/* ── Mobile · improved card stack ────────────────────────────────── */
+/* "Oct 2022 — Feb 2026" → "2022 · 2026"; "Feb 2026 — Present" → "2026 · Now" */
+function yearRange(date: string): string {
+  const parts = date.split('—').map(s => s.trim());
+  const left  = parts[0]?.match(/\d{4}/)?.[0] ?? parts[0];
+  const right = parts[1]?.match(/\d{4}/)?.[0]
+             ?? (parts[1]?.toLowerCase().includes('present') ? 'Now' : parts[1])
+             ?? '';
+  return `${left} · ${right}`;
+}
+
+/* Split a string into per-character spans so GSAP can stagger them. */
+function splitChars(text: string) {
+  return text.split('').map((ch, i) => (
+    <span key={i} className="exp-char" style={{ display: 'inline-block', willChange: 'transform, opacity' }}>
+      {ch === ' ' ? ' ' : ch}
+    </span>
+  ));
+}
+
+/* ── Mobile · improved card stack (unchanged) ─────────────────────── */
 
 function MobileStack() {
   return (
-    <section id="experience" className="snap-section exp-mobile">
+    <section id="experience-mobile" className="snap-section exp-mobile">
       <h2 className="exp-mobile-title">Experience</h2>
 
       <div className="exp-mobile-stack">
@@ -105,149 +123,201 @@ function MobileStack() {
   );
 }
 
-/* ── Desktop · transparent triggers ──────────────────────────────── */
+/* ── Desktop · editorial timeline ────────────────────────────────── */
 
-function DesktopTriggers() {
-  const stepRefs = useRef<(HTMLElement | null)[]>([]);
+const AUTO_ADVANCE_MS = 9000;
 
-  /* Pick the trigger with the largest visible-area-ratio as active.
-   * IntersectionObserver fires on threshold crossings; on every fire,
-   * we recompute every trigger's visible ratio so the active idx is
-   * always whichever beat dominates the viewport.
-   *
-   * Going to idx=-1 only when NO trigger has even 5% visibility kills
-   * the flicker we used to get during ParallaxScroller's transition
-   * (where two triggers briefly straddle the threshold). */
-  useEffect(() => {
-    const compute = () => {
-      let bestIdx   = -1;
-      let bestRatio =  0;
-      const vh      = window.innerHeight || 1;
-      stepRefs.current.forEach((el, i) => {
-        if (!el) return;
-        const r       = el.getBoundingClientRect();
-        const visible = Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0));
-        const ratio   = visible / vh;
-        if (ratio > bestRatio) {
-          bestIdx   = i;
-          bestRatio = ratio;
-        }
-      });
-      const idx = bestRatio > 0.05 ? bestIdx : -1;
-      window.dispatchEvent(new CustomEvent('exp-change', { detail: { idx } }));
-    };
+function DesktopExperience() {
+  const containerRef = useRef<HTMLElement>(null);
+  const stepRefs    = useRef<(HTMLLIElement | null)[]>([]);
+  const markerRef   = useRef<HTMLSpanElement>(null);
+  const progressRef = useRef<HTMLSpanElement>(null);
+  const isAnimating = useRef(false);
 
-    const obs = new IntersectionObserver(compute, {
-      threshold: [0, 0.1, 0.3, 0.5, 0.7, 0.9, 1],
+  /* `activeIdx` updates immediately on click / auto-advance — drives
+   * the rail UI and progress bar.  `displayIdx` updates AFTER the
+   * stage's exit animation completes, which is what controls the
+   * stage content (so the entry animation runs against the new role). */
+  const [activeIdx,  setActiveIdx]  = useState(0);
+  const [displayIdx, setDisplayIdx] = useState(0);
+  const [paused,     setPaused]     = useState(false);
+
+  const exp = EXPERIENCE[displayIdx];
+
+  /* ── Stage transition · OUT → swap → IN ── */
+  const transitionTo = (next: number) => {
+    if (isAnimating.current || next === activeIdx) return;
+    isAnimating.current = true;
+    setActiveIdx(next);
+
+    const ctx = containerRef.current;
+    if (!ctx) { setDisplayIdx(next); isAnimating.current = false; return; }
+
+    /* OUT — quick, all elements at once with a tight stagger so the
+     * stage clears in ~280 ms total; the eye barely registers a "blank
+     * frame" before the IN animation lights it back up.              */
+    gsap.to(ctx.querySelectorAll('.exp-stage-content > *'), {
+      opacity: 0,
+      y:      -8,
+      duration: 0.28,
+      ease:    'power2.in',
+      stagger: 0.025,
+      onComplete: () => {
+        setDisplayIdx(next);
+        isAnimating.current = false;
+      },
     });
-    stepRefs.current.forEach((el) => { if (el) obs.observe(el); });
+  };
 
-    /* ParallaxScroller transforms the track via rAF instead of native
-     * scroll, so IO doesn't always fire at the right moment.  A short
-     * interval keeps the active idx accurate during the lerp.  The
-     * cost is trivial — one rect read per trigger every 100 ms. */
-    const tick = window.setInterval(compute, 100);
-    compute();
+  /* ── Marker glide on the timeline rail ── */
+  useGSAP(() => {
+    const target = stepRefs.current[activeIdx];
+    const marker = markerRef.current;
+    if (!target || !marker) return;
+    gsap.to(marker, {
+      y:       target.offsetTop,
+      height:  target.offsetHeight,
+      opacity: 1,
+      duration: 0.7,
+      ease:    'power3.out',
+    });
+  }, { scope: containerRef, dependencies: [activeIdx] });
 
-    return () => {
-      obs.disconnect();
-      clearInterval(tick);
-      window.dispatchEvent(new CustomEvent('exp-change', { detail: { idx: -1 } }));
-    };
-  }, []);
+  /* ── Stage IN animation (runs whenever the rendered role changes) ── */
+  useGSAP(() => {
+    const ctx = containerRef.current;
+    if (!ctx) return;
 
-  return (
-    <>
-      {EXPERIENCE.map((_, i) => (
-        <section
-          key={i}
-          id={i === 0 ? 'experience' : undefined}
-          ref={(el) => { stepRefs.current[i] = el; }}
-          className="snap-section exp-desktop-trigger"
-          aria-hidden="true"
-        />
-      ))}
-    </>
-  );
-}
+    /* Reset the elements that will animate in.  Using gsap.set rather
+     * than CSS so the visual state is consistent on initial mount and
+     * on every subsequent role swap — no FOUC, no flicker.
+     *
+     * The role-title PARENT must be reset to opacity 1 / y 0 because
+     * the OUT tween moves every direct child of .exp-stage-content
+     * (which includes the parent <h3>) to opacity 0 / y -8 — without
+     * this reset the chars animate in but their parent stays hidden.
+     */
+    gsap.set(ctx.querySelector('.exp-stage-logo'),         { opacity: 0, scale: 0.96, y: 0 });
+    gsap.set(ctx.querySelector('.exp-stage-role-title'),   { opacity: 1, y: 0 });
+    gsap.set(ctx.querySelectorAll('.exp-stage-role-title .exp-char'), { opacity: 0, y: 10 });
+    gsap.set(ctx.querySelector('.exp-stage-meta'),         { opacity: 0, y: 8  });
+    gsap.set(ctx.querySelector('.exp-stage-context'),      { opacity: 0, y: 12 });
+    gsap.set(ctx.querySelector('.exp-stage-desc'),         { opacity: 0, y: 12 });
+    gsap.set(ctx.querySelector('.exp-stage-clients'),      { opacity: 1, y: 0 });
+    gsap.set(ctx.querySelectorAll('.exp-stage-clients > *'), { opacity: 0, y: 8  });
 
-/* ── Desktop · fixed pinned stage (rendered OUTSIDE ParallaxScroller) ── */
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-export function ExperienceStage() {
-  const [idx, setIdx] = useState(-1);
+    tl.to(ctx.querySelector('.exp-stage-logo'),
+        { opacity: 1, scale: 1, duration: 0.7 }, 0.05)
+      .to(ctx.querySelectorAll('.exp-stage-role-title .exp-char'),
+        { opacity: 1, y: 0, duration: 0.55, stagger: 0.022 }, 0.20)
+      .to(ctx.querySelector('.exp-stage-meta'),
+        { opacity: 1, y: 0, duration: 0.5 }, 0.40)
+      .to(ctx.querySelector('.exp-stage-context'),
+        { opacity: 1, y: 0, duration: 0.55 }, 0.50)
+      .to(ctx.querySelector('.exp-stage-desc'),
+        { opacity: 1, y: 0, duration: 0.55 }, 0.60)
+      .to(ctx.querySelectorAll('.exp-stage-clients > *'),
+        { opacity: 1, y: 0, duration: 0.45, stagger: 0.06 }, 0.75);
+  }, { scope: containerRef, dependencies: [displayIdx] });
 
+  /* ── Auto-advance ─────────────────────────────────────────────── */
   useEffect(() => {
-    const handler = (e: Event) =>
-      setIdx((e as CustomEvent<{ idx: number }>).detail.idx);
-    window.addEventListener('exp-change', handler);
-    return () => window.removeEventListener('exp-change', handler);
-  }, []);
-
-  const visible = idx >= 0;
-  const safeIdx = visible ? idx : 0;
+    if (paused) {
+      if (progressRef.current) progressRef.current.style.animationPlayState = 'paused';
+      return;
+    }
+    /* Restart the progress bar animation by re-applying the keyframes.
+     * Toggling animation-name + offsetWidth read forces a reflow so
+     * the bar always grows from 0 on every cycle.                   */
+    const bar = progressRef.current;
+    if (bar) {
+      bar.style.animation = 'none';
+      void bar.offsetWidth;
+      bar.style.animation = `expProgressFill ${AUTO_ADVANCE_MS}ms linear forwards`;
+    }
+    const id = window.setTimeout(() => {
+      transitionTo((activeIdx + 1) % EXPERIENCE.length);
+    }, AUTO_ADVANCE_MS);
+    return () => window.clearTimeout(id);
+  }, [activeIdx, paused]);
 
   return (
-    <div
-      className={`exp-stage${visible ? ' is-visible' : ''}`}
-      aria-hidden={!visible}
+    <section
+      ref={containerRef}
+      id="experience"
+      className="snap-section exp-host"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
     >
-      <h2 className="exp-stage-title">Experience</h2>
+      <h2 className="exp-host-title">Experience</h2>
 
-      <aside className="exp-stage-rail">
-        <span className="exp-stage-rail-eyebrow">
-          0{safeIdx + 1} / 0{EXPERIENCE.length}
+      {/* ── Left rail · timeline ── */}
+      <aside className="exp-host-rail">
+        <span className="exp-host-eyebrow">
+          0{activeIdx + 1} <span className="exp-host-eyebrow-dim">/ 0{EXPERIENCE.length}</span>
         </span>
-        <ol className="exp-stage-rail-steps">
-          {EXPERIENCE.map((s, i) => (
-            <li
-              key={i}
-              data-state={i === safeIdx ? 'active' : i < safeIdx ? 'past' : 'todo'}
-            >
-              <span className="exp-stage-rail-dot" />
-              <span className="exp-stage-rail-label">{shortName(s.company)}</span>
-            </li>
-          ))}
-        </ol>
+
+        <div className="exp-host-timeline-wrap">
+          <span ref={markerRef} className="exp-host-marker" aria-hidden />
+
+          <ol className="exp-host-timeline">
+            {EXPERIENCE.map((s, i) => (
+              <li
+                key={i}
+                ref={(el) => { stepRefs.current[i] = el; }}
+                className="exp-host-step"
+                data-state={i === activeIdx ? 'active' : i < activeIdx ? 'past' : 'todo'}
+                onClick={() => transitionTo(i)}
+              >
+                <span className="exp-host-step-year">{yearRange(s.date)}</span>
+                <span className="exp-host-step-name">{shortName(s.company)}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        {/* Auto-advance progress hint — thin bar that grows over 9s,
+            paused while the user hovers anywhere on the section. */}
+        <div className="exp-host-progress" aria-hidden>
+          <span ref={progressRef} className="exp-host-progress-bar" />
+        </div>
       </aside>
 
-      <div className="exp-stage-content">
-        {EXPERIENCE.map((exp, i) => (
-          <div
-            key={i}
-            className="exp-stage-role"
-            data-active={i === safeIdx || undefined}
-          >
-            <div className="exp-stage-logo">
-              <CompanyLogo exp={exp} height="clamp(80px, 9vw, 140px)" />
-            </div>
-
-            <h3 className="exp-stage-role-title">{exp.role}</h3>
-
-            <div className="exp-stage-meta">
-              <span>{exp.date}</span>
-              {exp.badge && <span className="exp-stage-badge">{exp.badge}</span>}
-            </div>
-
-            <p className="exp-stage-context">{exp.context}</p>
-            <p className="exp-stage-desc">{exp.desc}</p>
-
-            {exp.clients && exp.clients.length > 0 && (
-              <div className="exp-stage-clients">
-                <span className="exp-stage-clients-label">Clients</span>
-                {exp.clients.map((c: any, k: number) => (
-                  <img
-                    key={k}
-                    src={c.src}
-                    alt={c.alt}
-                    style={{ height: c.height ?? 22, filter: clientFilter(c) }}
-                  />
-                ))}
-              </div>
-            )}
+      {/* ── Right stage ── */}
+      <div className="exp-host-stage">
+        <div className="exp-stage-content">
+          <div className="exp-stage-logo">
+            <CompanyLogo exp={exp} height="clamp(80px, 9vw, 140px)" />
           </div>
-        ))}
+
+          <h3 className="exp-stage-role-title">{splitChars(exp.role)}</h3>
+
+          <div className="exp-stage-meta">
+            <span>{exp.date}</span>
+            {exp.badge && <span className="exp-stage-badge">{exp.badge}</span>}
+          </div>
+
+          <p className="exp-stage-context">{exp.context}</p>
+          <p className="exp-stage-desc">{exp.desc}</p>
+
+          {exp.clients && exp.clients.length > 0 && (
+            <div className="exp-stage-clients">
+              <span className="exp-stage-clients-label">Clients</span>
+              {exp.clients.map((c: any, k: number) => (
+                <img
+                  key={k}
+                  src={c.src}
+                  alt={c.alt}
+                  style={{ height: c.height ?? 22, filter: clientFilter(c) }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -255,7 +325,7 @@ export default function Experience() {
   return (
     <>
       <MobileStack />
-      <DesktopTriggers />
+      <DesktopExperience />
     </>
   );
 }

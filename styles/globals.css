@@ -91,16 +91,17 @@ a{color:inherit;text-decoration:none}
 @media(max-width:900px){ .about-grid { grid-template-columns: 1fr !important; } }
 @media(max-width:700px){ .about-grid { gap: 2rem !important; } }
 
-/* ── Experience · pinned stage desktop + improved card stack mobile ──
- * Desktop: 4 transparent triggers feed an IntersectionObserver inside
- *   <Experience>, which dispatches `exp-change` events.  A fixed
- *   <ExperienceStage> overlay (rendered outside ParallaxScroller in
- *   page.tsx) listens and cross-fades the active role's content in
- *   place — same composition as axlab's Proceso pinned stage.
- * Mobile: a single section with four glass cards.  Eyebrow with date
- *   + badge, full-width logo block, role title, description, clients
- *   row at the foot with its own label.
- * ──────────────────────────────────────────────────────────────────── */
+/* ── Experience · editorial timeline (desktop) + cards (mobile) ───
+ * Desktop: ONE snap-section with a fixed left timeline rail + a
+ *   single right-side stage that morphs between roles.  Roles cycle
+ *   on a 9 s auto-advance; clicking a rail entry jumps + resets.
+ *   GSAP timeline runs an out → swap → in sequence per transition,
+ *   with char-staggered role title, scale-pop logo and a 60 ms
+ *   client-logo stagger.  See components/Experience.tsx.
+ * Mobile: a single section with four glass cards.  Eyebrow with
+ *   date + badge, full-width logo block, role title, description,
+ *   clients row at the foot with its own label.
+ * ──────────────────────────────────────────────────────────────── */
 
 /* Shared text-logo styling (used when an experience has no SVG, e.g. NexPlayer) */
 .exp-text-logo {
@@ -112,30 +113,23 @@ a{color:inherit;text-decoration:none}
   white-space:    nowrap;
 }
 
-/* ── Desktop · transparent triggers + fixed pinned stage ────────── */
-.exp-desktop-trigger { background: var(--bg2); }
-
-.exp-stage {
-  position:        fixed;
-  inset:           0;
-  z-index:         5;
-  display:         grid;
-  grid-template-columns: clamp(200px, 20vw, 280px) 1fr;
-  gap:             clamp(2rem, 5vw, 4rem);
-  padding:         clamp(5rem, 9vw, 7rem) clamp(3rem, 6vw, 5rem) clamp(3rem, 5vw, 4rem);
-  align-items:     center;
-  pointer-events:  none;
-  opacity:         0;
-  transition:      opacity 0.45s var(--ease);
+/* ── Desktop · editorial timeline ──────────────────────────────── */
+.exp-host {
+  position:              relative;
+  background:            var(--bg2);
+  display:               grid;
+  grid-template-columns: clamp(220px, 22vw, 320px) 1fr;
+  gap:                   clamp(2.5rem, 6vw, 5rem);
+  padding:               clamp(5rem, 9vw, 7rem) clamp(3rem, 6vw, 5rem) clamp(3rem, 5vw, 4rem);
+  align-items:           center;
+  overflow:              hidden;
 }
-.exp-stage.is-visible { opacity: 1; }
 
 @media (max-width: 700px) {
-  .exp-stage           { display: none !important; }
-  .exp-desktop-trigger { display: none !important; }
+  .exp-host { display: none !important; }
 }
 
-.exp-stage-title {
+.exp-host-title {
   position:       absolute;
   top:            clamp(2.5rem, 5vw, 3.5rem);
   left:           clamp(3rem, 6vw, 5rem);
@@ -145,86 +139,130 @@ a{color:inherit;text-decoration:none}
   letter-spacing: -0.025em;
   color:          var(--white);
   margin:          0;
+  z-index:         2;
 }
 
-.exp-stage-rail {
+/* ── Left rail ── */
+.exp-host-rail {
   align-self:    center;
   display:        flex;
   flex-direction: column;
-  gap:            0.4rem;
+  gap:            1.5rem;
+  position:       relative;
+  z-index:        2;
 }
-.exp-stage-rail-eyebrow {
+
+.exp-host-eyebrow {
   font-family:    'Nohemi', sans-serif;
-  font-size:       0.66rem;
-  font-weight:      500;
-  letter-spacing:   0.08em;
-  text-transform:   uppercase;
-  color:           var(--t3);
-  margin-bottom:   0.6rem;
+  font-size:      clamp(2.4rem, 3.5vw, 3.4rem);
+  font-weight:     600;
+  letter-spacing: -0.04em;
+  line-height:     1;
+  color:          var(--white);
+  margin-bottom:   0.5rem;
 }
-.exp-stage-rail-steps {
-  list-style:     none;
-  padding:        0;
-  margin:         0;
+.exp-host-eyebrow-dim { color: var(--t3); font-weight: 400; }
+
+/* Wrap holds the marker (absolute) + the ordered list of steps */
+.exp-host-timeline-wrap {
+  position: relative;
+  display:  flex;
+  align-items: stretch;
+}
+
+/* The active marker — an indigo bar that GSAP translates between
+ * step rows on a 700 ms power3.out, never jumps.  Initial opacity
+ * 0 so it doesn't render before GSAP places it on first paint. */
+.exp-host-marker {
+  position:      absolute;
+  left:          0;
+  top:           0;
+  width:         3px;
+  height:        24px;
+  background:    var(--accent);
+  border-radius: 2px;
+  box-shadow:    0 0 14px rgba(107,107,255,0.55), 0 0 28px rgba(107,107,255,0.22);
+  opacity:        0;
+  pointer-events: none;
+  will-change:    transform, height;
+}
+
+.exp-host-timeline {
+  list-style:    none;
+  padding:       0;
+  margin:        0;
+  display:       flex;
+  flex-direction:column;
+  gap:           clamp(0.9rem, 1.4vw, 1.2rem);
+  width:         100%;
+  padding-left:  18px; /* room for the marker bar */
+}
+
+.exp-host-step {
   display:        flex;
   flex-direction: column;
-  gap:            14px;
+  gap:            2px;
+  cursor:         pointer;
+  transition:     transform 0.4s var(--ease);
+  user-select:    none;
 }
-.exp-stage-rail-steps li {
-  display:     flex;
-  align-items: center;
-  gap:         14px;
-  font-family: 'Safiro', sans-serif;
-  font-size:   0.82rem;
-  color:       var(--t3);
-  transition:  color 0.5s var(--ease);
+.exp-host-step:hover { transform: translateX(2px); }
+
+.exp-host-step-year {
+  font-family:    'Safiro', sans-serif;
+  font-size:       0.7rem;
+  font-weight:      500;
+  letter-spacing:   0.06em;
+  text-transform:   uppercase;
+  color:           var(--t3);
+  transition:      color 0.5s var(--ease);
 }
-.exp-stage-rail-dot {
-  width:         6px;
-  height:        6px;
-  border-radius: 50%;
-  background:    rgba(255,255,255,0.18);
-  transition:    all 0.5s var(--ease);
-  flex-shrink:   0;
+.exp-host-step-name {
+  font-family:    'Nohemi', sans-serif;
+  font-size:       1.02rem;
+  font-weight:      600;
+  letter-spacing: -0.015em;
+  color:           var(--t3);
+  transition:      color 0.5s var(--ease);
 }
-.exp-stage-rail-steps li[data-state='active']                     { color: var(--white); }
-.exp-stage-rail-steps li[data-state='active'] .exp-stage-rail-dot {
-  width:      10px;
-  height:     10px;
-  background: var(--accent);
-  box-shadow: 0 0 12px rgba(107,107,255,0.7), 0 0 24px rgba(107,107,255,0.35);
+.exp-host-step[data-state='active'] .exp-host-step-name { color: var(--white); }
+.exp-host-step[data-state='active'] .exp-host-step-year { color: var(--accent); }
+.exp-host-step[data-state='past']   .exp-host-step-name { color: var(--t2);    }
+
+/* Auto-advance progress hint — thin bar that fills over 9 s */
+.exp-host-progress {
+  margin-top: 1.2rem;
+  width:      80px;
+  height:     1px;
+  background: rgba(255,255,255,0.08);
+  overflow:   hidden;
 }
-.exp-stage-rail-steps li[data-state='past']                       { color: var(--t2); }
-.exp-stage-rail-steps li[data-state='past'] .exp-stage-rail-dot   {
-  background: rgba(255,255,255,0.45);
+.exp-host-progress-bar {
+  display:    block;
+  width:      100%;
+  height:     100%;
+  background: linear-gradient(90deg, transparent, var(--accent));
+  transform:  translateX(-100%);
+}
+@keyframes expProgressFill {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+/* ── Right stage ── */
+.exp-host-stage {
+  position:    relative;
+  align-self:  center;
+  width:       100%;
+  min-height:  clamp(360px, 62vh, 540px);
 }
 
 .exp-stage-content {
-  position:    relative;
-  width:       100%;
-  height:      100%;
-  align-self:  center;
-  min-height:  clamp(320px, 60vh, 520px);
-}
-
-/* Each role lives at the same coordinates; cross-fade via opacity. */
-.exp-stage-role {
-  position:        absolute;
-  inset:           0;
-  display:         flex;
-  flex-direction:  column;
-  align-items:     flex-start;
-  justify-content: center;
-  gap:             clamp(0.9rem, 1.2vw, 1.3rem);
-  max-width:       760px;
-  opacity:         0;
-  transform:       translateY(14px);
-  transition:      opacity 0.45s var(--ease), transform 0.55s var(--ease);
-  pointer-events:  none;
-}
-.exp-stage-role[data-active] {
-  opacity:   1;
-  transform: translateY(0);
+  display:        flex;
+  flex-direction: column;
+  align-items:    flex-start;
+  gap:            clamp(0.9rem, 1.2vw, 1.3rem);
+  max-width:      760px;
 }
 
 .exp-stage-logo {
@@ -232,6 +270,7 @@ a{color:inherit;text-decoration:none}
   align-items:   center;
   height:        clamp(80px, 9vw, 140px);
   margin-bottom: 0.5rem;
+  will-change:    transform, opacity;
 }
 .exp-stage-role-title {
   font-family:    'Nohemi', sans-serif;
