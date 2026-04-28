@@ -2,6 +2,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import { List, Sparkle, Stop, Play, Plus } from '@phosphor-icons/react';
 import { EXPERIENCE } from './data';
 
 gsap.registerPlugin(useGSAP);
@@ -178,8 +179,12 @@ const HIGHLIGHTS: string[][] = [
   ['Senior · B2C iOS surface',  'AI agentic workflow',          'Swift 6 · SwiftUI · SPM'   ],
   ['+120% apply rate',          '60% → 95%+ test coverage',     '20M monthly active users'  ],
   ['20 Minutos · iOS from scratch', 'XING · Banca March rotations', 'Useful by week two'        ],
-  ['Sky · HBO · Vodafone · Bell Media', 'Multi-camera SDK',            'First iOS · Aug 2020'      ],
+  ['Sky · HBO · Vodafone · Bell Media', 'Multi-camera SDK',            'First iOS role'            ],
 ];
+
+/* The "current focus" shown as the last segment of the Xcode
+ * breadcrumb — pulled from each manifest's most interesting field. */
+const BREADCRUMB_FOCUS = ['workflow', 'metrics', 'clients', 'shippedIn'];
 
 const TAGLINE: string[] = [
   'Building the apps participants use to actually run a UserTesting test — embedded with product, design and platform.',
@@ -244,21 +249,54 @@ function XcodeWindow({
 }) {
   const { file, code } = MANIFEST[activeIdx];
   const lines = parseCode(code);
+  const className = file.replace(/\.swift$/, '');
+  const focus     = BREADCRUMB_FOCUS[activeIdx];
 
   return (
-    <div className="exp-xcode" aria-label={`Xcode window · ${file}`}>
-      {/* Title bar with traffic lights + filename */}
-      <div className="exp-xcode-bar">
+    <div className="exp-xcode" aria-label={`Xcode · ${file}`}>
+      {/* ── Toolbar · traffic lights · sidebar/assistant icons ·
+       *    stop/run · scheme pill · status                       */}
+      <div className="exp-xcode-toolbar">
         <div className="exp-xcode-traffic" aria-hidden>
           <span className="exp-xcode-light" data-c="r" />
           <span className="exp-xcode-light" data-c="y" />
           <span className="exp-xcode-light" data-c="g" />
         </div>
-        <span className="exp-xcode-filename">{file}</span>
-        <span className="exp-xcode-spacer" aria-hidden />
+
+        <button type="button" className="exp-xcode-tool-btn" aria-label="Toggle navigator" tabIndex={-1}>
+          <List size={14} weight="regular" />
+        </button>
+        <button type="button" className="exp-xcode-tool-btn" aria-label="Coding intelligence" tabIndex={-1}>
+          <Sparkle size={14} weight="fill" />
+        </button>
+
+        <span className="exp-xcode-toolbar-divider" />
+
+        <button type="button" className="exp-xcode-tool-btn" aria-label="Stop" tabIndex={-1}>
+          <Stop size={11} weight="fill" />
+        </button>
+        <button type="button" className="exp-xcode-tool-btn exp-xcode-run" aria-label="Run" tabIndex={-1}>
+          <Play size={11} weight="fill" />
+        </button>
+
+        <span className="exp-xcode-toolbar-spacer" />
+
+        <div className="exp-xcode-scheme" aria-hidden>
+          <span className="exp-xcode-scheme-mark">{'{x}'}</span>
+          <span className="exp-xcode-scheme-name">agonzx</span>
+          <span className="exp-xcode-scheme-sep">›</span>
+          <span className="exp-xcode-scheme-device">iPhone 17 Pro</span>
+        </div>
+
+        <span className="exp-xcode-toolbar-spacer" />
+
+        <span className="exp-xcode-status" aria-hidden>
+          <span className="exp-xcode-status-dot" />
+          Ready
+        </span>
       </div>
 
-      {/* Tabs · double up as the role-navigation indicator */}
+      {/* ── Tab strip · pill-shaped tabs, active fills with subtle bg ── */}
       <div className="exp-xcode-tabs" role="tablist">
         {MANIFEST.map((m, i) => (
           <button
@@ -270,14 +308,29 @@ function XcodeWindow({
             className="exp-xcode-tab"
             data-active={i === activeIdx || undefined}
           >
-            <span className="exp-xcode-tab-dot" aria-hidden />
-            {m.file}
+            <span className="exp-xcode-tab-icon" aria-hidden />
+            <span className="exp-xcode-tab-label">{m.file}</span>
           </button>
         ))}
+        <button type="button" className="exp-xcode-tab-add" aria-label="New tab" tabIndex={-1}>
+          <Plus size={11} weight="bold" />
+        </button>
       </div>
 
-      {/* Code body · gutter + colorised lines */}
-      <div className="exp-xcode-body" key={activeIdx /* re-mount per role to retrigger type-on */}>
+      {/* ── Breadcrumb · file path with chevron separators ── */}
+      <div className="exp-xcode-breadcrumb" aria-hidden>
+        <span className="exp-xcode-tab-icon exp-xcode-tab-icon--sm" />
+        <span>agonzx</span>
+        <span className="exp-xcode-breadcrumb-sep">›</span>
+        <span>Experience</span>
+        <span className="exp-xcode-breadcrumb-sep">›</span>
+        <span>{className}</span>
+        <span className="exp-xcode-breadcrumb-sep">›</span>
+        <span className="exp-xcode-breadcrumb-active">{focus}</span>
+      </div>
+
+      {/* ── Code body · gutter + colourised lines ── */}
+      <div className="exp-xcode-body">
         <div className="exp-xcode-gutter" aria-hidden>
           {lines.map((_, i) => (
             <div key={i} className="exp-xcode-lineno">{i + 1}</div>
@@ -313,9 +366,17 @@ function DesktopExperience() {
 
   const exp = EXPERIENCE[displayIdx];
 
-  /* Stage transition · OUT (left side fades out) → swap → IN (typewriter
-   * runs on the new code).  Stored on a ref so the wheel-event handler
-   * (registered once) always reads the latest closure.                */
+  /* Stage transition · OUT → swap → IN.
+   *
+   * The flash bug we used to have ("new content appears, disappears,
+   * then types in") came from React rendering the next role's content
+   * after OUT but BEFORE useGSAP's set() call ran.  Fix here: the OUT
+   * tween animates code lines back to clip-path inset(0 100% 0 0) AND
+   * left items to opacity 0 — both stay in that state through the
+   * React swap thanks to the matching CSS defaults on .exp-xcode-line
+   * and .exp-host-left > *.  When the new lines mount, they inherit
+   * the closed clip-path from CSS, so the IN typewriter starts from
+   * an empty stage every time.  No flash, no flicker.                */
   transitionRef.current = (next: number) => {
     if (isAnimating.current || next === activeIdx) return;
     isAnimating.current = true;
@@ -324,19 +385,23 @@ function DesktopExperience() {
     const ctx = containerRef.current;
     if (!ctx) { setDisplayIdx(next); isAnimating.current = false; return; }
 
-    /* OUT — fade the left column items + dim the existing code body so
-     * the swap doesn't feel jarring.                                  */
-    gsap.to(ctx.querySelectorAll('.exp-host-left > *, .exp-xcode-body > *'), {
-      opacity: 0,
-      y:      -8,
-      duration: 0.28,
-      ease:    'power2.in',
-      stagger: 0.025,
+    const tlOut = gsap.timeline({
       onComplete: () => {
         setDisplayIdx(next);
         isAnimating.current = false;
       },
     });
+
+    /* Left column · fade out logo/date/tagline/chips. */
+    tlOut.to(ctx.querySelectorAll('.exp-host-left > *'),
+      { opacity: 0, y: -8, duration: 0.26, ease: 'power2.in', stagger: 0.025 }, 0);
+
+    /* Code lines · collapse clip-path back to closed (right edge wipes
+     * left to clear the editor), so when the new lines mount they
+     * land in the same closed state and the IN typewriter starts
+     * from an empty editor — no fragment of the old code visible. */
+    tlOut.to(ctx.querySelectorAll('.exp-xcode-line'),
+      { clipPath: 'inset(0 100% 0 0)', duration: 0.2, ease: 'power2.in', stagger: 0.012 }, 0);
   };
   const transitionTo = (next: number) => transitionRef.current(next);
 
@@ -345,35 +410,38 @@ function DesktopExperience() {
     const ctx = containerRef.current;
     if (!ctx) return;
 
-    gsap.set(ctx.querySelectorAll('.exp-host-left > *'), { opacity: 0, y: 8 });
-    gsap.set(ctx.querySelectorAll('.exp-xcode-body > *'), { opacity: 0, y: 8 });
+    /* Reset to entry state.  CSS already handles this for new mounts
+     * via the defaults on .exp-host-left > * / .exp-xcode-line, but
+     * we set it again here for elements that survived React's
+     * reconciliation (so old inline styles don't linger).             */
+    gsap.set(ctx.querySelectorAll('.exp-host-left > *'),
+      { opacity: 0, y: 8 });
+    gsap.set(ctx.querySelectorAll('.exp-xcode-line'),
+      { clipPath: 'inset(0 100% 0 0)' });
 
-    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    /* Left column · stagger the date/logo/tagline/chips in. */
+    gsap.to(ctx.querySelectorAll('.exp-host-left > *'),
+      { opacity: 1, y: 0, duration: 0.55, ease: 'power3.out', stagger: 0.06, delay: 0.05 });
 
-    /* Left column · stagger the logo/tagline/chips in. */
-    tl.to(ctx.querySelectorAll('.exp-host-left > *'),
-        { opacity: 1, y: 0, duration: 0.55, stagger: 0.08 }, 0);
-
-    /* Right column · gutter + code area appear together, then per-line
-     * type-on does the heavy lifting.                                  */
-    tl.to(ctx.querySelectorAll('.exp-xcode-body > *'),
-        { opacity: 1, y: 0, duration: 0.4 }, 0.15);
-
-    /* Type-on per line · clip-path inset shrinks left-to-right with a
-     * `steps(N)` ease so each char "appears" one frame at a time, the
-     * classic typewriter look without over-engineering.               */
+    /* Type-on, line by line, sequential.  Using a single timeline
+     * with the default position param means each line waits for the
+     * previous to finish, so the eye reads "type → enter → type →
+     * enter" rather than parallel revealing.  Per-char duration
+     * tuned so the slowest line still finishes in ≈ 0.6 s.            */
     const lines = ctx.querySelectorAll<HTMLDivElement>('.exp-xcode-line');
-    lines.forEach((line, i) => {
+    const tlType = gsap.timeline({ delay: 0.4 });
+    lines.forEach((line) => {
       const charCount = (line.textContent || '').length;
-      gsap.set(line, { clipPath: 'inset(0 100% 0 0)' });
       if (charCount === 0) {
-        gsap.set(line, { clipPath: 'inset(0 0% 0 0)' });
+        /* Blank line · still let the rhythm continue.  Reveal it
+         * instantly and add a small gap so the cadence stays steady. */
+        tlType.set(line, { clipPath: 'inset(0 0% 0 0)' });
+        tlType.to({}, { duration: 0.05 });
         return;
       }
-      gsap.to(line, {
+      tlType.to(line, {
         clipPath: 'inset(0 0% 0 0)',
-        duration: Math.max(0.18, charCount * 0.018),
-        delay:    0.55 + i * 0.08,
+        duration: Math.max(0.08, charCount * 0.013),
         ease:     `steps(${charCount})`,
       });
     });
@@ -408,6 +476,10 @@ function DesktopExperience() {
       <div className="exp-host-grid">
         {/* LEFT · company info */}
         <aside className="exp-host-left">
+          <span className="exp-host-date">
+            <span className="exp-host-date-dot" aria-hidden />
+            {exp.date}
+          </span>
           <div className="exp-host-logo">
             <CompanyLogo exp={exp} height="clamp(72px, 8vw, 110px)" />
           </div>
