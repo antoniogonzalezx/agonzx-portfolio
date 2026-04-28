@@ -2,7 +2,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { List, Sparkle, Stop, Play, Plus } from '@phosphor-icons/react';
 import { EXPERIENCE } from './data';
 
 gsap.registerPlugin(useGSAP);
@@ -182,10 +181,6 @@ const HIGHLIGHTS: string[][] = [
   ['Sky · HBO · Vodafone · Bell Media', 'Multi-camera SDK',            'First iOS role'            ],
 ];
 
-/* The "current focus" shown as the last segment of the Xcode
- * breadcrumb — pulled from each manifest's most interesting field. */
-const BREADCRUMB_FOCUS = ['workflow', 'metrics', 'clients', 'shippedIn'];
-
 const TAGLINE: string[] = [
   'Building the apps participants use to actually run a UserTesting test — embedded with product, design and platform.',
   'Owned the apply flow on a 20M-MAU jobs marketplace; metrics speak for themselves.',
@@ -195,7 +190,7 @@ const TAGLINE: string[] = [
 
 /* ── Tokenizer · simple Swift-aware lexer ──────────────────────── */
 
-type TokenType = 'kw' | 'ty' | 'str' | 'num' | 'cm' | 'prop' | 'plain';
+type TokenType = 'kw' | 'ty' | 'str' | 'num' | 'cm' | 'cms' | 'prop' | 'plain';
 interface Token { text: string; type: TokenType }
 type CodeLine = Token[];
 
@@ -214,7 +209,11 @@ function tokenize(line: string): Token[] {
   const push = (t: Token) => { if (t.text.length > 0) out.push(t); };
   while (rest.length > 0) {
     let m: RegExpMatchArray | null;
-    if ((m = rest.match(/^\/\/.*/)))                       { push({ text: m[0], type: 'cm'    }); break; }
+    if ((m = rest.match(/^(\/\/)(.*)/))) {
+      push({ text: m[1], type: 'cms' });
+      if (m[2].length > 0) push({ text: m[2], type: 'cm' });
+      break;
+    }
     if ((m = rest.match(/^"[^"]*"/)))                      { push({ text: m[0], type: 'str'   }); rest = rest.slice(m[0].length); continue; }
     if ((m = rest.match(/^-?\d+(\.\d+)?%?/)))              { push({ text: m[0], type: 'num'   }); rest = rest.slice(m[0].length); continue; }
     if ((m = rest.match(/^\.[a-zA-Z_][a-zA-Z0-9_]*/)))     { push({ text: m[0], type: 'prop'  }); rest = rest.slice(m[0].length); continue; }
@@ -249,13 +248,10 @@ function XcodeWindow({
 }) {
   const { file, code } = MANIFEST[activeIdx];
   const lines = parseCode(code);
-  const className = file.replace(/\.swift$/, '');
-  const focus     = BREADCRUMB_FOCUS[activeIdx];
 
   return (
     <div className="exp-xcode" aria-label={`Xcode · ${file}`}>
-      {/* ── Toolbar · traffic lights · sidebar/assistant icons ·
-       *    stop/run · scheme pill · status                       */}
+      {/* ── Toolbar · flat traffic lights · centred scheme pill ── */}
       <div className="exp-xcode-toolbar">
         <div className="exp-xcode-traffic" aria-hidden>
           <span className="exp-xcode-light" data-c="r" />
@@ -263,41 +259,21 @@ function XcodeWindow({
           <span className="exp-xcode-light" data-c="g" />
         </div>
 
-        <button type="button" className="exp-xcode-tool-btn" aria-label="Toggle navigator" tabIndex={-1}>
-          <List size={14} weight="regular" />
-        </button>
-        <button type="button" className="exp-xcode-tool-btn" aria-label="Coding intelligence" tabIndex={-1}>
-          <Sparkle size={14} weight="fill" />
-        </button>
-
-        <span className="exp-xcode-toolbar-divider" />
-
-        <button type="button" className="exp-xcode-tool-btn" aria-label="Stop" tabIndex={-1}>
-          <Stop size={11} weight="fill" />
-        </button>
-        <button type="button" className="exp-xcode-tool-btn exp-xcode-run" aria-label="Run" tabIndex={-1}>
-          <Play size={11} weight="fill" />
-        </button>
-
-        <span className="exp-xcode-toolbar-spacer" />
-
         <div className="exp-xcode-scheme" aria-hidden>
           <span className="exp-xcode-scheme-mark">{'{x}'}</span>
           <span className="exp-xcode-scheme-name">agonzx</span>
           <span className="exp-xcode-scheme-sep">›</span>
           <span className="exp-xcode-scheme-device">iPhone 17 Pro</span>
         </div>
-
-        <span className="exp-xcode-toolbar-spacer" />
-
-        <span className="exp-xcode-status" aria-hidden>
-          <span className="exp-xcode-status-dot" />
-          Ready
-        </span>
       </div>
 
-      {/* ── Tab strip · pill-shaped tabs, active fills with subtle bg ── */}
+      {/* ── Liquid Glass tab bar · 4 equal segments + sliding pill ── */}
       <div className="exp-xcode-tabs" role="tablist">
+        <span
+          className="exp-xcode-tabs-indicator"
+          aria-hidden
+          style={{ transform: `translateX(${activeIdx * 100}%)` }}
+        />
         {MANIFEST.map((m, i) => (
           <button
             key={m.file}
@@ -308,25 +284,10 @@ function XcodeWindow({
             className="exp-xcode-tab"
             data-active={i === activeIdx || undefined}
           >
-            <span className="exp-xcode-tab-icon" aria-hidden />
+            <span className="exp-xcode-tab-swift" aria-hidden />
             <span className="exp-xcode-tab-label">{m.file}</span>
           </button>
         ))}
-        <button type="button" className="exp-xcode-tab-add" aria-label="New tab" tabIndex={-1}>
-          <Plus size={11} weight="bold" />
-        </button>
-      </div>
-
-      {/* ── Breadcrumb · file path with chevron separators ── */}
-      <div className="exp-xcode-breadcrumb" aria-hidden>
-        <span className="exp-xcode-tab-icon exp-xcode-tab-icon--sm" />
-        <span>agonzx</span>
-        <span className="exp-xcode-breadcrumb-sep">›</span>
-        <span>Experience</span>
-        <span className="exp-xcode-breadcrumb-sep">›</span>
-        <span>{className}</span>
-        <span className="exp-xcode-breadcrumb-sep">›</span>
-        <span className="exp-xcode-breadcrumb-active">{focus}</span>
       </div>
 
       {/* ── Code body · gutter + colourised lines ── */}
@@ -476,10 +437,7 @@ function DesktopExperience() {
       <div className="exp-host-grid">
         {/* LEFT · company info */}
         <aside className="exp-host-left">
-          <span className="exp-host-date">
-            <span className="exp-host-date-dot" aria-hidden />
-            {exp.date}
-          </span>
+          <span className="exp-host-date">{exp.date}</span>
           <div className="exp-host-logo">
             <CompanyLogo exp={exp} height="clamp(72px, 8vw, 110px)" />
           </div>

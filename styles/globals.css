@@ -181,26 +181,17 @@ a{color:inherit;text-decoration:none}
   transform: translateY(8px);
 }
 
-/* Date eyebrow · SF Mono, accent dot, sits above the logo as the
+/* Date eyebrow · Safiro, accent colour, sits above the logo as the
  * first thing the eye lands on for temporal context.              */
 .exp-host-date {
   display:        inline-flex;
   align-items:    center;
-  gap:            0.55rem;
-  font-family:   'SF Mono', SFMono-Regular, ui-monospace, 'Martian Mono', Menlo, monospace;
-  font-size:      0.78rem;
-  font-weight:    500;
-  letter-spacing: 0.02em;
+  font-family:   'Safiro', sans-serif;
+  font-size:      0.95rem;
+  font-weight:    600;
+  letter-spacing:-0.005em;
   color:          var(--accent);
   margin-bottom: -0.3rem; /* tighten gap to logo */
-}
-.exp-host-date-dot {
-  width:          6px;
-  height:         6px;
-  border-radius:  50%;
-  background:     var(--accent);
-  box-shadow:     0 0 8px rgba(107,107,255,0.7), 0 0 14px rgba(107,107,255,0.3);
-  flex-shrink:    0;
 }
 
 .exp-host-logo {
@@ -260,89 +251,66 @@ a{color:inherit;text-decoration:none}
   position:       relative;
   width:          100%;
   border-radius:  22px;
-  background:     #1A1F2E;
+  background:     #23292E;
   border:         1px solid rgba(255,255,255,0.06);
   overflow:       hidden;
   box-shadow:
     0 36px 90px -22px rgba(0,0,0,0.60),
-    0 14px 36px -10px rgba(0,0,0,0.40),
-    inset 0 1px 0 rgba(255,255,255,0.08);
-  font-family:   'SF Mono', SFMono-Regular, ui-monospace, 'Martian Mono', Menlo, monospace;
+    0 14px 36px -10px rgba(0,0,0,0.40);
 }
 
-/* ── Toolbar · traffic lights + tool buttons + scheme + status ── */
+/* ── Toolbar · flat traffic lights + centred liquid-glass scheme pill ── */
 .exp-xcode-toolbar {
+  position:      relative;
   display:       flex;
   align-items:   center;
-  gap:           8px;
+  justify-content:center;
   height:        38px;
   padding:       0 12px;
-  background:    linear-gradient(180deg, #232838, #1A1F2E);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  background:    #23292E;
 }
 .exp-xcode-traffic {
+  position:    absolute;
+  left:        12px;
+  top:         50%;
+  transform:   translateY(-50%);
   display:     flex;
   gap:         8px;
   align-items: center;
-  margin-right: 4px;
 }
+/* Flat solid colour — no shadows, no rim, no radial highlight. */
 .exp-xcode-light {
   width:         12px;
   height:        12px;
   border-radius: 50%;
   display:       block;
-  /* Liquid-glass lights · radial highlight + subtle rim for depth. */
-  box-shadow:
-    inset 0 0 0 0.5px rgba(0,0,0,0.30),
-    inset 0 1px 1px rgba(255,255,255,0.45),
-    0 1px 2px rgba(0,0,0,0.30);
+  box-shadow:    none;
+  border:        none;
 }
-.exp-xcode-light[data-c='r'] { background: radial-gradient(circle at 35% 30%, #FF7B72, #E0443E); }
-.exp-xcode-light[data-c='y'] { background: radial-gradient(circle at 35% 30%, #FFD56C, #DEA123); }
-.exp-xcode-light[data-c='g'] { background: radial-gradient(circle at 35% 30%, #6CE193, #3CBC4A); }
+.exp-xcode-light[data-c='r'] { background: #FF5F57; }
+.exp-xcode-light[data-c='y'] { background: #FEBC2E; }
+.exp-xcode-light[data-c='g'] { background: #28C840; }
 
-.exp-xcode-tool-btn {
-  width:          26px;
-  height:         24px;
-  display:        inline-flex;
-  align-items:    center;
-  justify-content:center;
-  background:     transparent;
-  border:         none;
-  border-radius:  6px;
-  color:          rgba(255,255,255,0.55);
-  cursor:         default;
-  transition:     all 0.2s var(--ease);
-}
-.exp-xcode-tool-btn:hover {
-  background: rgba(255,255,255,0.06);
-  color:      rgba(255,255,255,0.85);
-}
-.exp-xcode-run { color: rgba(91,202,124,0.9); }
-
-.exp-xcode-toolbar-divider {
-  width:        1px;
-  height:       18px;
-  background:   rgba(255,255,255,0.08);
-  margin:       0 2px;
-}
-.exp-xcode-toolbar-spacer { flex: 1; min-width: 4px; }
-
-/* Scheme pill · centred tab-like indicator showing the project /
- * device · uses the {x} brand glyph as the app icon.              */
+/* Scheme pill · centred · solid darker than toolbar, fully circular
+ * ends, no liquid glass — just shape and depth.                    */
 .exp-xcode-scheme {
   display:       inline-flex;
   align-items:   center;
-  gap:           7px;
-  padding:       4px 10px 4px 6px;
-  background:    rgba(255,255,255,0.04);
-  border:        1px solid rgba(255,255,255,0.05);
-  border-radius: 7px;
-  font-family:   'SF Mono', SFMono-Regular, ui-monospace, 'Martian Mono', Menlo, monospace;
-  font-size:     0.70rem;
-  font-weight:    500;
-  color:          rgba(255,255,255,0.70);
-  letter-spacing:-0.005em;
+  gap:           9px;
+  padding:       6px 28px 6px 10px;
+  min-width:     280px;
+  justify-content:center;
+  background:    #1C2023;
+  border:        1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    inset 0 -1px 0 rgba(0,0,0,0.25);
+  font-family:   -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  font-size:     0.78rem;
+  font-weight:    600;
+  color:          rgba(255,255,255,0.85);
+  letter-spacing:-0.01em;
   white-space:    nowrap;
 }
 .exp-xcode-scheme-mark {
@@ -351,134 +319,91 @@ a{color:inherit;text-decoration:none}
   justify-content:center;
   width:           18px;
   height:          18px;
-  border-radius:   4px;
-  background:     rgba(107,107,255,0.18);
+  border-radius:   999px;
+  background:     rgba(107,107,255,0.22);
   color:          var(--accent);
   font-family:   'Nohemi', sans-serif;
-  font-weight:     600;
+  font-weight:     700;
   font-size:       0.62rem;
   letter-spacing: -0.04em;
   flex-shrink:    0;
 }
-.exp-xcode-scheme-name   { color: rgba(255,255,255,0.92); font-weight: 600; }
-.exp-xcode-scheme-sep    { color: rgba(255,255,255,0.22); padding: 0 1px; }
-.exp-xcode-scheme-device { color: rgba(255,255,255,0.55); }
+.exp-xcode-scheme-name   { color: rgba(255,255,255,1);     font-weight: 700; }
+.exp-xcode-scheme-sep    { color: rgba(255,255,255,0.35); padding: 0 1px; font-weight: 500; }
+.exp-xcode-scheme-device { color: rgba(255,255,255,0.78); font-weight: 600; }
 
-.exp-xcode-status {
-  display:       inline-flex;
-  align-items:   center;
-  gap:           6px;
-  font-family:   'SF Mono', SFMono-Regular, ui-monospace, 'Martian Mono', Menlo, monospace;
-  font-size:     0.66rem;
-  color:         rgba(255,255,255,0.45);
-  padding-right: 4px;
-  white-space:   nowrap;
-}
-.exp-xcode-status-dot {
-  width:         6px;
-  height:        6px;
-  border-radius: 50%;
-  background:    #4FE383;
-  box-shadow:    0 0 6px rgba(79,227,131,0.6);
-}
-
-/* ── Tab bar · pill-shaped tabs (Xcode 26 modern style) ──
- * Tabs sit on a darker bg with subtle padding around them.  Active
- * tab fills with rgba(255,255,255,0.07) + 1px inner ring · feels
- * like a card popped out of the bg, not a browser-style border. */
+/* ── iOS 26 Liquid Glass tab bar · pill container, 4 equal segments,
+ * sliding glass indicator with prominent spring ease.  Container
+ * height matches the active pill height (no padding around).      */
 .exp-xcode-tabs {
+  position:      relative;
   display:       flex;
-  align-items:   center;
-  gap:           4px;
-  padding:       6px 8px;
-  background:    #14182A;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  overflow-x:    auto;
+  align-items:   stretch;
+  margin:        10px 14px;
+  padding:       0;
+  background:    #33383D;
+  border:        none;
+  border-radius: 999px;
+}
+.exp-xcode-tabs-indicator {
+  position:      absolute;
+  top:           0;
+  bottom:        0;
+  left:          0;
+  width:         25%;
+  background:    #4F5357;
+  border:        1px solid rgba(255,255,255,0.14);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.16),
+    inset 0 -1px 0 rgba(0,0,0,0.18),
+    0 4px 10px rgba(0,0,0,0.22);
+  transition:    transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events:none;
+  z-index:       1;
 }
 .exp-xcode-tab {
-  display:        inline-flex;
-  align-items:    center;
-  gap:            7px;
-  padding:        6px 10px;
-  background:     transparent;
-  border:         none;
-  border-radius:  8px;
-  font-family:   'SF Mono', SFMono-Regular, ui-monospace, 'Martian Mono', Menlo, monospace;
-  font-size:      0.7rem;
-  font-weight:     500;
-  color:          rgba(255,255,255,0.42);
-  cursor:         pointer;
-  white-space:    nowrap;
-  transition:     all 0.2s var(--ease);
-  letter-spacing:-0.005em;
-}
-.exp-xcode-tab:hover {
-  background: rgba(255,255,255,0.04);
-  color:      rgba(255,255,255,0.7);
-}
-.exp-xcode-tab[data-active] {
-  background: rgba(255,255,255,0.07);
-  color:      rgba(255,255,255,0.95);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
-}
-.exp-xcode-tab-icon {
-  width:         11px;
-  height:        11px;
-  border-radius: 3px;
-  background:    linear-gradient(135deg, #FF9F40, #F26422);
-  flex-shrink:   0;
-  box-shadow:    0 1px 2px rgba(0,0,0,0.3);
-}
-.exp-xcode-tab-icon--sm {
-  width:  10px;
-  height: 10px;
-}
-.exp-xcode-tab-add {
-  width:          26px;
-  height:         24px;
+  position:       relative;
+  z-index:        2;
+  flex:           1 1 0;
+  min-width:      0;
   display:        inline-flex;
   align-items:    center;
   justify-content:center;
+  gap:            7px;
+  padding:        6px 12px;
   background:     transparent;
   border:         none;
-  border-radius:  6px;
-  color:          rgba(255,255,255,0.40);
-  cursor:         default;
-  margin-left:    auto; /* push the + to the right edge */
-  transition:     all 0.2s var(--ease);
+  border-radius:  999px;
+  font-family:   -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  font-size:      0.74rem;
+  font-weight:     600;
+  color:          rgba(255,255,255,0.55);
+  cursor:         pointer;
+  white-space:    nowrap;
+  transition:     color 0.3s var(--ease);
+  letter-spacing:-0.01em;
 }
-.exp-xcode-tab-add:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.7); }
-
-/* ── Breadcrumb · "agonzx › Experience › <Class> › <focus>" ── */
-.exp-xcode-breadcrumb {
-  display:       flex;
-  align-items:   center;
-  gap:           7px;
-  padding:       7px 14px;
-  background:    #14182A;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  font-family:   'SF Mono', SFMono-Regular, ui-monospace, 'Martian Mono', Menlo, monospace;
-  font-size:     0.69rem;
-  color:         rgba(255,255,255,0.40);
-  letter-spacing:-0.005em;
+.exp-xcode-tab:hover { color: rgba(255,255,255,0.85); }
+.exp-xcode-tab[data-active] { color: rgba(255,255,255,1); font-weight: 700; }
+.exp-xcode-tab-label {
   overflow:      hidden;
-  white-space:   nowrap;
   text-overflow: ellipsis;
 }
-.exp-xcode-breadcrumb-sep {
-  color: rgba(255,255,255,0.18);
-  padding: 0 1px;
-}
-.exp-xcode-breadcrumb-active {
-  color:       rgba(255,255,255,0.78);
-  font-weight: 500;
+.exp-xcode-tab-swift {
+  width:         11px;
+  height:        11px;
+  flex-shrink:   0;
+  background:    #FF8C34;
+  -webkit-mask:  url(/logos/swift-bird.svg) center / contain no-repeat;
+          mask:  url(/logos/swift-bird.svg) center / contain no-repeat;
 }
 
 /* Code body · gutter + colourised lines */
 .exp-xcode-body {
   display:        grid;
   grid-template-columns: 48px 1fr;
-  background:     #1A1F2E;
+  background:     #23292E;
   padding:        clamp(1rem, 1.6vw, 1.4rem) 0;
   min-height:     clamp(280px, 40vh, 420px);
   overflow:       hidden;
@@ -490,14 +415,20 @@ a{color:inherit;text-decoration:none}
   user-select: none;
 }
 .exp-xcode-lineno {
+  font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Consolas, monospace;
   font-size:    0.74rem;
-  line-height:  1.65;
-  color:        rgba(255,255,255,0.20);
+  font-weight:  500;
+  /* Match the code's absolute line-height so each gutter number sits
+   * on the baseline of its corresponding code line.                  */
+  line-height: calc(clamp(0.78rem, 0.95vw, 0.9rem) * 1.65);
+  color:        rgba(255,255,255,0.28);
 }
 .exp-xcode-code {
   padding:    0 16px;
   min-width:  0;
+  font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Consolas, monospace;
   font-size:  clamp(0.78rem, 0.95vw, 0.9rem);
+  font-weight: 500;
   line-height: 1.65;
 }
 .exp-xcode-line {
@@ -529,13 +460,14 @@ a{color:inherit;text-decoration:none}
 
 /* Token colours · Apple Xcode dark theme palette · keep the runs
  * tight so the editor feels real instead of imitation.            */
-.exp-xcode-tok--kw    { color: #FC5FA3; font-weight: 600; }
-.exp-xcode-tok--ty    { color: #5DD8FF; }
-.exp-xcode-tok--str   { color: #FC6A5D; }
-.exp-xcode-tok--num   { color: #D0BF69; }
-.exp-xcode-tok--prop  { color: #67B7A4; }
-.exp-xcode-tok--cm    { color: #6C7686; font-style: italic; }
-.exp-xcode-tok--plain { color: #E8ECF7; }
+.exp-xcode-tok--kw    { color: #FC5FA3; font-weight: 700; }
+.exp-xcode-tok--ty    { color: #5DD8FF; font-weight: 500; }
+.exp-xcode-tok--str   { color: #FC6A5D; font-weight: 500; }
+.exp-xcode-tok--num   { color: #D0BF69; font-weight: 500; }
+.exp-xcode-tok--prop  { color: #67B7A4; font-weight: 500; }
+.exp-xcode-tok--cm    { color: #6C7686; font-style: italic; font-weight: 700; }
+.exp-xcode-tok--cms   { color: #6C7686; font-style: italic; font-weight: 500; }
+.exp-xcode-tok--plain { color: #E8ECF7; font-weight: 500; }
 
 /* ── Mobile · improved card stack ──────────────────────────────── */
 .exp-mobile {
