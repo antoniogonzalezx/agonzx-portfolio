@@ -113,242 +113,282 @@ a{color:inherit;text-decoration:none}
   white-space:    nowrap;
 }
 
-/* ── Desktop · editorial timeline ──────────────────────────────── */
+/* ── Desktop · stack manifest (Xcode-style) ──────────────────────
+ * Title pinned top, 2-col split: company info (left) · simulated
+ * Xcode 26 window (right) with rounded macOS 26 corners, glass
+ * traffic lights, file tabs as the role-navigation indicator and a
+ * Swift code area with per-line type-on animation driven by GSAP.
+ * Mirrors axlab's Proceso section beat layout — title on top, big
+ * editorial card on the left, animated content on the right.
+ * ──────────────────────────────────────────────────────────────── */
+
 .exp-host {
-  position:              relative;
-  background:            var(--bg2);
-  display:               grid;
-  grid-template-columns: clamp(220px, 22vw, 320px) 1fr;
-  gap:                   clamp(2.5rem, 6vw, 5rem);
-  padding:               clamp(5rem, 9vw, 7rem) clamp(3rem, 6vw, 5rem) clamp(3rem, 5vw, 4rem);
-  align-items:           center;
-  overflow:              hidden;
+  position:    relative;
+  background:  var(--bg2);
+  display:     flex;
+  flex-direction: column;
+  padding:     clamp(2.5rem, 5vw, 4rem) clamp(2.5rem, 5vw, 4rem) clamp(2rem, 4vw, 3rem);
+  gap:         clamp(2rem, 4vw, 3rem);
+  overflow:    hidden;
 }
 
 @media (max-width: 700px) {
   .exp-host { display: none !important; }
 }
 
+/* ── Title · 2-line s-h2 lockup, mirrors axlab Proceso ── */
+.exp-host-header {
+  max-width: 1280px;
+  margin:    0 auto;
+  width:      100%;
+}
 .exp-host-title {
-  position:       absolute;
-  top:            clamp(2.5rem, 5vw, 3.5rem);
-  left:           clamp(3rem, 6vw, 5rem);
   font-family:    'Nohemi', sans-serif;
-  font-size:      clamp(1.4rem, 2.4vw, 1.8rem);
-  font-weight:     600;
-  letter-spacing: -0.025em;
-  color:          var(--white);
+  font-size:      clamp(1.85rem, 4vw, 3rem);
+  letter-spacing: -0.03em;
+  line-height:     0.96;
   margin:          0;
-  z-index:         2;
+}
+.exp-host-title-lead  { display: block; color: var(--white); font-weight: 600; }
+.exp-host-title-muted { display: block; color: var(--t3);    font-weight: 400; }
+
+/* ── 2-col grid · left info · right Xcode window ── */
+.exp-host-grid {
+  display:               grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.55fr);
+  gap:                   clamp(2rem, 5vw, 4.5rem);
+  align-items:           center;
+  max-width:             1280px;
+  width:                  100%;
+  margin:                  0 auto;
+  flex:                    1;
+  min-height:              0;
 }
 
-/* ── Left rail ── */
-.exp-host-rail {
-  align-self:    center;
+/* ── Left · company info ── */
+.exp-host-left {
   display:        flex;
   flex-direction: column;
-  gap:            1.5rem;
-  position:       relative;
-  z-index:        2;
+  gap:            clamp(1.3rem, 2.4vw, 2rem);
+  align-self:     center;
 }
-
-.exp-host-eyebrow {
-  font-family:    'Nohemi', sans-serif;
-  font-size:      clamp(2.4rem, 3.5vw, 3.4rem);
-  font-weight:     600;
-  letter-spacing: -0.04em;
-  line-height:     1;
+.exp-host-logo {
+  display:     flex;
+  align-items: center;
+  height:      clamp(72px, 8vw, 110px);
+  will-change: opacity, transform;
+}
+.exp-host-tagline {
+  font-family:    'Safiro', sans-serif;
+  font-size:      clamp(0.95rem, 1.2vw, 1.1rem);
+  line-height:     1.55;
+  color:          var(--t2);
+  margin:          0;
+  max-width:       460px;
+  font-weight:     500;
+  letter-spacing: -0.005em;
+}
+.exp-host-highlights {
+  list-style:     none;
+  padding:        0;
+  margin:         0;
+  display:        flex;
+  flex-direction: column;
+  gap:            0.6rem;
+}
+.exp-host-chip {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           0.7rem;
+  font-family:   'Nohemi', sans-serif;
+  font-size:      0.88rem;
+  font-weight:    500;
+  letter-spacing:-0.005em;
   color:          var(--white);
-  margin-bottom:   0.5rem;
 }
-.exp-host-eyebrow-dim { color: var(--t3); font-weight: 400; }
-
-/* Wrap holds the marker (absolute) + the ordered list of steps */
-.exp-host-timeline-wrap {
-  position: relative;
-  display:  flex;
-  align-items: stretch;
-}
-
-/* The active marker — an indigo bar that GSAP translates between
- * step rows on a 700 ms power3.out, never jumps.  Initial opacity
- * 0 so it doesn't render before GSAP places it on first paint. */
-.exp-host-marker {
-  position:      absolute;
-  left:          0;
-  top:           0;
-  width:         3px;
-  height:        24px;
+.exp-host-chip-dot {
+  width:         5px;
+  height:        5px;
+  border-radius: 50%;
   background:    var(--accent);
-  border-radius: 2px;
-  box-shadow:    0 0 14px rgba(107,107,255,0.55), 0 0 28px rgba(107,107,255,0.22);
-  opacity:        0;
-  pointer-events: none;
-  will-change:    transform, height;
+  box-shadow:    0 0 10px rgba(107,107,255,0.5);
+  flex-shrink:   0;
 }
 
-.exp-host-timeline {
-  list-style:    none;
-  padding:       0;
-  margin:        0;
-  display:       flex;
-  flex-direction:column;
-  gap:           clamp(0.9rem, 1.4vw, 1.2rem);
-  width:         100%;
-  padding-left:  18px; /* room for the marker bar */
+/* ── Right · simulated Xcode 26 window ──
+ * macOS 26 introduced a new "Liquid Glass" language: very rounded
+ * corners (≈ 18-22 px on app windows), translucent traffic lights
+ * and a softer, more tactile chrome.  We emulate that here without
+ * ripping in a real screenshot — every pixel is hand-styled.       */
+.exp-host-right {
+  position: relative;
+  align-self: center;
+  width:    100%;
+}
+.exp-xcode {
+  position:       relative;
+  width:          100%;
+  border-radius:  20px;
+  background:     #1A1F2E;
+  border:         1px solid rgba(255,255,255,0.06);
+  overflow:       hidden;
+  box-shadow:
+    0 30px 80px -20px rgba(0,0,0,0.55),
+    0 12px 32px -10px rgba(0,0,0,0.40),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  font-family:   'SF Mono', SFMono-Regular, ui-monospace, 'Martian Mono', Menlo, monospace;
 }
 
-.exp-host-step {
-  display:        flex;
-  flex-direction: column;
-  gap:            2px;
-  cursor:         pointer;
-  transition:     transform 0.4s var(--ease);
+/* Title bar · 28px tall · traffic lights + filename ── */
+.exp-xcode-bar {
+  display:     grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height:      36px;
+  padding:     0 14px;
+  background:  linear-gradient(180deg, #21283A, #1A1F2E);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.exp-xcode-traffic {
+  display: flex;
+  gap:     8px;
+  align-items: center;
+}
+.exp-xcode-light {
+  width:         12px;
+  height:        12px;
+  border-radius: 50%;
+  display:       block;
+  /* Liquid-glass lights · radial highlight + subtle border for depth */
+  box-shadow:
+    inset 0 0 0 0.5px rgba(0,0,0,0.30),
+    inset 0 1px 1px rgba(255,255,255,0.45),
+    0 1px 2px rgba(0,0,0,0.30);
+}
+.exp-xcode-light[data-c='r'] { background: radial-gradient(circle at 35% 30%, #FF7B72, #E0443E); }
+.exp-xcode-light[data-c='y'] { background: radial-gradient(circle at 35% 30%, #FFD56C, #DEA123); }
+.exp-xcode-light[data-c='g'] { background: radial-gradient(circle at 35% 30%, #6CE193, #3CBC4A); }
+.exp-xcode-filename {
+  font-family:    'SF Mono', SFMono-Regular, ui-monospace, 'Martian Mono', Menlo, monospace;
+  font-size:       0.74rem;
+  font-weight:      500;
+  color:           rgba(255,255,255,0.55);
+  letter-spacing: -0.005em;
   user-select:    none;
 }
-.exp-host-step:hover { transform: translateX(2px); }
+.exp-xcode-spacer { /* matches traffic light area on right for centring */ }
 
-.exp-host-step-year {
-  font-family:    'Safiro', sans-serif;
-  font-size:       0.7rem;
-  font-weight:      500;
-  letter-spacing:   0.06em;
-  text-transform:   uppercase;
-  color:           var(--t3);
-  transition:      color 0.5s var(--ease);
+/* Tab bar · file tabs replace the previous timeline rail */
+.exp-xcode-tabs {
+  display:     flex;
+  gap:         0;
+  padding:     0;
+  background:  #14182A;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  overflow-x:  auto;
 }
-.exp-host-step-name {
-  font-family:    'Nohemi', sans-serif;
-  font-size:       1.02rem;
-  font-weight:      600;
-  letter-spacing: -0.015em;
-  color:           var(--t3);
-  transition:      color 0.5s var(--ease);
-}
-.exp-host-step[data-state='active'] .exp-host-step-name { color: var(--white); }
-.exp-host-step[data-state='active'] .exp-host-step-year { color: var(--accent); }
-.exp-host-step[data-state='past']   .exp-host-step-name { color: var(--t2);    }
-
-/* Scroll hint · subtle eyebrow under the timeline that quietly tells
- * the user "this section is alive" without shouting.  No animation,
- * no chrome — just a tiny ↓ + label in the muted token.            */
-.exp-host-hint {
-  margin-top:    1.4rem;
-  font-family:   'Safiro', sans-serif;
-  font-size:      0.72rem;
-  font-weight:    500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color:          var(--t3);
-  display:        inline-flex;
-  align-items:    center;
-  gap:            0.4rem;
-}
-.exp-host-hint::before {
-  content:        '↓';
-  display:        inline-block;
-  font-size:       0.85rem;
-  color:          var(--accent);
-  animation:      expHintBob 1.8s ease-in-out infinite;
-}
-@keyframes expHintBob {
-  0%, 100% { transform: translateY(0);   opacity: 0.65; }
-  50%      { transform: translateY(2px); opacity: 1;    }
-}
-
-/* ── Right stage ── */
-.exp-host-stage {
-  position:    relative;
-  align-self:  center;
-  width:       100%;
-  min-height:  clamp(360px, 62vh, 540px);
-}
-
-.exp-stage-content {
+.exp-xcode-tab {
+  flex:           1;
+  min-width:      0;
+  padding:        9px 14px;
+  background:     transparent;
+  border:         none;
+  border-right:   1px solid rgba(255,255,255,0.04);
+  font-family:   'SF Mono', SFMono-Regular, ui-monospace, 'Martian Mono', Menlo, monospace;
+  font-size:      0.7rem;
+  font-weight:     500;
+  color:          rgba(255,255,255,0.40);
+  cursor:         pointer;
   display:        flex;
-  flex-direction: column;
-  align-items:    flex-start;
-  gap:            clamp(0.9rem, 1.2vw, 1.3rem);
-  max-width:      760px;
+  align-items:    center;
+  gap:            0.5rem;
+  white-space:    nowrap;
+  text-overflow:  ellipsis;
+  overflow:       hidden;
+  transition:     color 0.3s ease, background 0.3s ease;
+  position:       relative;
+}
+.exp-xcode-tab:last-child  { border-right: none; }
+.exp-xcode-tab:hover       { color: rgba(255,255,255,0.65); }
+.exp-xcode-tab[data-active] {
+  color:      rgba(255,255,255,0.95);
+  background: #1A1F2E;
+}
+.exp-xcode-tab[data-active]::after {
+  content:        '';
+  position:       absolute;
+  inset:          auto 0 0 0;
+  height:         2px;
+  background:     var(--accent);
+  box-shadow:     0 0 8px rgba(107,107,255,0.6);
+}
+.exp-xcode-tab-dot {
+  width:          6px;
+  height:         6px;
+  border-radius:  50%;
+  background:     rgba(255,255,255,0.25);
+  flex-shrink:    0;
+  transition:     background 0.3s ease;
+}
+.exp-xcode-tab[data-active] .exp-xcode-tab-dot { background: var(--accent); }
+
+/* Code body · gutter + colourised lines */
+.exp-xcode-body {
+  display:        grid;
+  grid-template-columns: 48px 1fr;
+  background:     #1A1F2E;
+  padding:        clamp(1rem, 1.6vw, 1.4rem) 0;
+  min-height:     clamp(280px, 40vh, 420px);
+  overflow:       hidden;
+}
+.exp-xcode-gutter {
+  text-align:  right;
+  padding:     0 12px 0 0;
+  border-right: 1px solid rgba(255,255,255,0.04);
+  user-select: none;
+}
+.exp-xcode-lineno {
+  font-size:    0.74rem;
+  line-height:  1.65;
+  color:        rgba(255,255,255,0.20);
+}
+.exp-xcode-code {
+  padding:    0 16px;
+  min-width:  0;
+  font-size:  clamp(0.78rem, 0.95vw, 0.9rem);
+  line-height: 1.65;
+}
+.exp-xcode-line {
+  white-space: pre;
+  min-height:  1em;
+  will-change: clip-path;
+}
+/* Cursor · accent bar at end of last line, gentle blink */
+.exp-xcode-line:last-child::after {
+  content:       '';
+  display:       inline-block;
+  width:         7px;
+  height:        1em;
+  background:    var(--accent);
+  margin-left:   2px;
+  vertical-align:-0.12em;
+  border-radius: 1px;
+  box-shadow:    0 0 6px rgba(107,107,255,0.55);
+  animation:     xcodeCursorBlink 1.06s step-end infinite;
+}
+@keyframes xcodeCursorBlink {
+  50% { opacity: 0; }
 }
 
-.exp-stage-logo {
-  display:       flex;
-  align-items:   center;
-  height:        clamp(80px, 9vw, 140px);
-  margin-bottom: 0.5rem;
-  will-change:    transform, opacity;
-}
-.exp-stage-role-title {
-  font-family:    'Nohemi', sans-serif;
-  font-size:      clamp(2rem, 4vw, 3.4rem);
-  font-weight:     600;
-  color:          var(--accent);
-  letter-spacing:-0.03em;
-  line-height:     1.05;
-  margin:          0;
-}
-.exp-stage-meta {
-  display:     flex;
-  gap:         0.8rem;
-  align-items: center;
-  font-family: 'Safiro', sans-serif;
-  font-size:   0.88rem;
-  font-weight: 500;
-  color:       var(--t3);
-}
-.exp-stage-badge {
-  padding:        0.22rem 0.7rem;
-  background:     var(--accent-s);
-  color:          var(--accent);
-  border:         1px solid rgba(107,107,255,0.22);
-  border-radius:  20px;
-  font-family:   'Nohemi', sans-serif;
-  font-size:      0.62rem;
-  font-weight:     500;
-  letter-spacing:-0.005em;
-}
-.exp-stage-context {
-  font-family:    'Safiro', sans-serif;
-  font-size:      clamp(0.92rem, 1.1vw, 1rem);
-  font-weight:     500;
-  color:          var(--t2);
-  line-height:     1.6;
-  letter-spacing: -0.005em;
-  margin:          0;
-  max-width:       540px;
-}
-.exp-stage-desc {
-  font-family: 'Safiro', sans-serif;
-  font-size:   clamp(0.95rem, 1.15vw, 1.05rem);
-  color:       var(--t2);
-  line-height:  1.75;
-  margin:       0;
-  max-width:    640px;
-}
-.exp-stage-clients {
-  display:     flex;
-  flex-wrap:   wrap;
-  align-items: center;
-  gap:         1.4rem;
-  margin-top:  0.4rem;
-  padding-top: 1.2rem;
-  border-top:  1px solid rgba(255,255,255,0.06);
-}
-.exp-stage-clients-label {
-  font-family:    'Nohemi', sans-serif;
-  font-size:       0.6rem;
-  font-weight:      500;
-  letter-spacing:   0.08em;
-  text-transform:   uppercase;
-  color:           var(--t3);
-  margin-right:    0.3rem;
-}
-.exp-stage-clients img {
-  width:      auto;
-  opacity:    0.7;
-  transition: opacity 0.25s var(--ease);
-}
+/* Token colours · Apple Xcode dark theme palette · keep the runs
+ * tight so the editor feels real instead of imitation.            */
+.exp-xcode-tok--kw    { color: #FC5FA3; font-weight: 600; }
+.exp-xcode-tok--ty    { color: #5DD8FF; }
+.exp-xcode-tok--str   { color: #FC6A5D; }
+.exp-xcode-tok--num   { color: #D0BF69; }
+.exp-xcode-tok--prop  { color: #67B7A4; }
+.exp-xcode-tok--cm    { color: #6C7686; font-style: italic; }
+.exp-xcode-tok--plain { color: #E8ECF7; }
 
 /* ── Mobile · improved card stack ──────────────────────────────── */
 .exp-mobile {

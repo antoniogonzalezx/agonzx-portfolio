@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { EXPERIENCE } from './data';
@@ -7,22 +7,26 @@ import { EXPERIENCE } from './data';
 gsap.registerPlugin(useGSAP);
 
 /* ─────────────────────────────────────────────────────────────────
- * Experience — Editorial timeline (desktop) + stacked cards (mobile)
+ * Experience — "Stack manifest" pattern
  *
- * DESKTOP composition · "Option A — Editorial timeline"
- *   - One snap-section (single ParallaxScroller step → one dot in
- *     the right rail).  No internal scroll; roles cycle in place.
- *   - Left rail: fixed vertical timeline with year + company per role.
- *     The active marker is a vertical bar that translates between
- *     rows on a 700 ms power3.out — never jumps, always glides.
- *   - Right stage: large logo · role · date+badge · context · desc ·
- *     clients.  Each transition runs a hand-tuned GSAP timeline
- *     (out → swap → in) with char-staggered role title, scale-pop
- *     logo, and a 60 ms stagger across the client logos.
- *   - Roles cycle every 9 s by default; hover anywhere on the section
- *     pauses the timer; clicking a rail entry jumps + resets it.
+ * DESKTOP composition (mirrors axlab's Proceso section beat layout):
+ *   - Title pinned top: "Experience. / From keyboard to App Store."
+ *   - 2-col split:
+ *       left  · big company logo + tagline + highlight chips
+ *       right · simulated Xcode 26 window (rounded corners, glass
+ *                traffic lights, file tabs as navigation indicator,
+ *                code area with Swift syntax highlighting and a
+ *                per-line type-on animation)
+ *   - One snap-section with internal steps — ParallaxScroller's
+ *     scroll-driven beats advance the role.  Background stays put,
+ *     only the manifest content morphs.
  *
- * MOBILE composition · stacked cards (unchanged from prior pass).
+ * The code is the message: every role renders as a Swift `struct
+ * Role: Experience { ... }` declaration, prefixed with `import
+ * agonzx`.  Showing not telling — recruiters reading this for the
+ * first time get the brand fit in a single glance.
+ *
+ * MOBILE composition · stacked cards (unchanged).
  * ───────────────────────────────────────────────────────────────── */
 
 /* ── Shared helpers ──────────────────────────────────────────────── */
@@ -57,27 +61,6 @@ function CompanyLogo({ exp, height }: { exp: typeof EXPERIENCE[number]; height: 
   );
 }
 
-function shortName(name: string) { return name.split(' (')[0]; }
-
-/* "Oct 2022 — Feb 2026" → "2022 · 2026"; "Feb 2026 — Present" → "2026 · Now" */
-function yearRange(date: string): string {
-  const parts = date.split('—').map(s => s.trim());
-  const left  = parts[0]?.match(/\d{4}/)?.[0] ?? parts[0];
-  const right = parts[1]?.match(/\d{4}/)?.[0]
-             ?? (parts[1]?.toLowerCase().includes('present') ? 'Now' : parts[1])
-             ?? '';
-  return `${left} · ${right}`;
-}
-
-/* Split a string into per-character spans so GSAP can stagger them. */
-function splitChars(text: string) {
-  return text.split('').map((ch, i) => (
-    <span key={i} className="exp-char" style={{ display: 'inline-block', willChange: 'transform, opacity' }}>
-      {ch === ' ' ? ' ' : ch}
-    </span>
-  ));
-}
-
 /* ── Mobile · improved card stack (unchanged) ─────────────────────── */
 
 function MobileStack() {
@@ -92,26 +75,18 @@ function MobileStack() {
               <span className="exp-mobile-card-date">{exp.date}</span>
               {exp.badge && <span className="exp-mobile-card-badge">{exp.badge}</span>}
             </div>
-
             <div className="exp-mobile-card-logo">
               <CompanyLogo exp={exp} height="64px" />
             </div>
-
             <h3 className="exp-mobile-card-role">{exp.role}</h3>
-
             <p className="exp-mobile-card-desc">{exp.desc}</p>
-
             {exp.clients && exp.clients.length > 0 && (
               <footer className="exp-mobile-card-clients">
                 <span className="exp-mobile-card-clients-label">Clientes</span>
                 <div className="exp-mobile-card-clients-row">
                   {exp.clients.map((c: any, k: number) => (
-                    <img
-                      key={k}
-                      src={c.src}
-                      alt={c.alt}
-                      style={{ height: 16, filter: clientFilter(c) }}
-                    />
+                    <img key={k} src={c.src} alt={c.alt}
+                      style={{ height: 16, filter: clientFilter(c) }} />
                   ))}
                 </div>
               </footer>
@@ -123,28 +98,224 @@ function MobileStack() {
   );
 }
 
-/* ── Desktop · editorial timeline ────────────────────────────────── */
+/* ── Manifest data · per-role Swift snippets ───────────────────────
+ * Each block is plain text; tokenize() at render time produces the
+ * coloured spans.  Adding a new attribute to a manifest is a one-line
+ * change here, no React refactor.
+ * ──────────────────────────────────────────────────────────────── */
+
+const MANIFEST: { file: string; code: string }[] = [
+  {
+    file: 'UserTesting.swift',
+    code: `import agonzx
+
+struct UserTesting: Experience {
+  let role     = "Senior iOS Engineer"
+  let team     = "Participant Experience · B2C"
+  let surface  = "iOS apps people open to take a test"
+  let stack    = ["Swift 6", "SwiftUI", "Modular SPM"]
+  let workflow = AI.agentic(["Claude Code", "Codex", "Cursor"])
+  let owns     = ["Component infra", "Shared libraries"]
+  let dates    = "Feb 2026 — Present"
+  // Embedded with PM, design and platform.
+}`,
+  },
+  {
+    file: 'XING.swift',
+    code: `import agonzx
+
+struct XING: Experience {
+  let role     = "iOS Engineer"
+  let surface  = "Jobs marketplace · 20M monthly users"
+  let stack    = ["SwiftUI", "TCA", "Clean Arch", "Apollo GraphQL"]
+  let owned    = "End-to-end job-application flow"
+  let metrics  = Metrics(
+    applyRate: "+120%",
+    coverage:  "60% → 95%+",
+    buildTime: "-40%"
+  )
+  let practices = ["A/B testing", "Swift 6", "Accessibility-first"]
+  let dates    = "Oct 2022 — Feb 2026"
+}`,
+  },
+  {
+    file: 'Hiberus.swift',
+    code: `import agonzx
+
+struct Hiberus: Experience {
+  let role    = "iOS Developer · Consulting"
+  let stack   = ["Swift", "UIKit", "MVVM", "Combine"]
+  let clients: [Client] = [
+    .twentyMinutos,  // News app · iOS from scratch
+    .xing,           // Pre-XING · rotation
+    .bancaMarch      // Banking · short rotation
+  ]
+  let highlight = "Useful by week two on any codebase"
+  let dates    = "May 2021 — Oct 2022"
+}`,
+  },
+  {
+    file: 'NexPlayer.swift',
+    code: `import agonzx
+
+struct NexPlayer: Experience {
+  let role    = "Mobile Developer · Video streaming SDK"
+  let stack   = ["Swift", "Kotlin", "AVFoundation", "ExoPlayer"]
+  let shippedIn: [Broadcaster] = [
+    .sky, .hbo, .vodafone, .bellMedia
+  ]
+  let features = [
+    "Multi-camera synchronised playback",
+    "Interactive video"
+  ]
+  let firstIOS = true
+  let dates   = "Aug 2020 — May 2021"
+}`,
+  },
+];
+
+const HIGHLIGHTS: string[][] = [
+  ['Senior · B2C iOS surface',  'AI agentic workflow',          'Swift 6 · SwiftUI · SPM'   ],
+  ['+120% apply rate',          '60% → 95%+ test coverage',     '20M monthly active users'  ],
+  ['20 Minutos · iOS from scratch', 'XING · Banca March rotations', 'Useful by week two'        ],
+  ['Sky · HBO · Vodafone · Bell Media', 'Multi-camera SDK',            'First iOS · Aug 2020'      ],
+];
+
+const TAGLINE: string[] = [
+  'Building the apps participants use to actually run a UserTesting test — embedded with product, design and platform.',
+  'Owned the apply flow on a 20M-MAU jobs marketplace; metrics speak for themselves.',
+  'iOS consulting rotations across XING, 20 Minutos and Banca March — built the 20 Minutos app from scratch.',
+  'First iOS role, on a video streaming SDK that ended up inside Sky, HBO, Vodafone and Bell Media.',
+];
+
+/* ── Tokenizer · simple Swift-aware lexer ──────────────────────── */
+
+type TokenType = 'kw' | 'ty' | 'str' | 'num' | 'cm' | 'prop' | 'plain';
+interface Token { text: string; type: TokenType }
+type CodeLine = Token[];
+
+const KEYWORDS = new Set([
+  'import','struct','class','let','var','func','enum','return','if','else',
+  'for','in','guard','true','false','nil','as','is',
+]);
+const TYPES = new Set([
+  'Experience','String','Int','Double','Bool','Date','AI','Client','Broadcaster',
+  'Stack','Metrics',
+]);
+
+function tokenize(line: string): Token[] {
+  const out: Token[] = [];
+  let rest = line;
+  const push = (t: Token) => { if (t.text.length > 0) out.push(t); };
+  while (rest.length > 0) {
+    let m: RegExpMatchArray | null;
+    if ((m = rest.match(/^\/\/.*/)))                       { push({ text: m[0], type: 'cm'    }); break; }
+    if ((m = rest.match(/^"[^"]*"/)))                      { push({ text: m[0], type: 'str'   }); rest = rest.slice(m[0].length); continue; }
+    if ((m = rest.match(/^-?\d+(\.\d+)?%?/)))              { push({ text: m[0], type: 'num'   }); rest = rest.slice(m[0].length); continue; }
+    if ((m = rest.match(/^\.[a-zA-Z_][a-zA-Z0-9_]*/)))     { push({ text: m[0], type: 'prop'  }); rest = rest.slice(m[0].length); continue; }
+    if ((m = rest.match(/^[a-zA-Z_][a-zA-Z0-9_]*/))) {
+      const w = m[0];
+      let type: TokenType = 'plain';
+      if (KEYWORDS.has(w))                                    type = 'kw';
+      else if (TYPES.has(w) || /^[A-Z]/.test(w))              type = 'ty';
+      push({ text: w, type });
+      rest = rest.slice(w.length);
+      continue;
+    }
+    if ((m = rest.match(/^\s+/))) { push({ text: m[0], type: 'plain' }); rest = rest.slice(m[0].length); continue; }
+    push({ text: rest[0], type: 'plain' });
+    rest = rest.slice(1);
+  }
+  return out;
+}
+
+function parseCode(text: string): CodeLine[] {
+  return text.split('\n').map(tokenize);
+}
+
+/* ── Xcode window ──────────────────────────────────────────────── */
+
+function XcodeWindow({
+  activeIdx,
+  onSelect,
+}: {
+  activeIdx: number;
+  onSelect: (idx: number) => void;
+}) {
+  const { file, code } = MANIFEST[activeIdx];
+  const lines = parseCode(code);
+
+  return (
+    <div className="exp-xcode" aria-label={`Xcode window · ${file}`}>
+      {/* Title bar with traffic lights + filename */}
+      <div className="exp-xcode-bar">
+        <div className="exp-xcode-traffic" aria-hidden>
+          <span className="exp-xcode-light" data-c="r" />
+          <span className="exp-xcode-light" data-c="y" />
+          <span className="exp-xcode-light" data-c="g" />
+        </div>
+        <span className="exp-xcode-filename">{file}</span>
+        <span className="exp-xcode-spacer" aria-hidden />
+      </div>
+
+      {/* Tabs · double up as the role-navigation indicator */}
+      <div className="exp-xcode-tabs" role="tablist">
+        {MANIFEST.map((m, i) => (
+          <button
+            key={m.file}
+            type="button"
+            role="tab"
+            aria-selected={i === activeIdx}
+            onClick={() => onSelect(i)}
+            className="exp-xcode-tab"
+            data-active={i === activeIdx || undefined}
+          >
+            <span className="exp-xcode-tab-dot" aria-hidden />
+            {m.file}
+          </button>
+        ))}
+      </div>
+
+      {/* Code body · gutter + colorised lines */}
+      <div className="exp-xcode-body" key={activeIdx /* re-mount per role to retrigger type-on */}>
+        <div className="exp-xcode-gutter" aria-hidden>
+          {lines.map((_, i) => (
+            <div key={i} className="exp-xcode-lineno">{i + 1}</div>
+          ))}
+        </div>
+        <div className="exp-xcode-code">
+          {lines.map((line, i) => (
+            <div key={i} className="exp-xcode-line">
+              {line.length === 0
+                ? <span>&nbsp;</span>
+                : line.map((tok, j) => (
+                    <span key={j} className={`exp-xcode-tok exp-xcode-tok--${tok.type}`}>
+                      {tok.text}
+                    </span>
+                  ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Desktop · stack manifest ──────────────────────────────────── */
 
 function DesktopExperience() {
-  const containerRef   = useRef<HTMLElement>(null);
-  const stepRefs       = useRef<(HTMLLIElement | null)[]>([]);
-  const markerRef      = useRef<HTMLSpanElement>(null);
-  const isAnimating    = useRef(false);
-  const transitionRef  = useRef<(next: number) => void>(() => {});
+  const containerRef = useRef<HTMLElement>(null);
+  const isAnimating  = useRef(false);
+  const transitionRef = useRef<(next: number) => void>(() => {});
 
-  /* `activeIdx` updates immediately on a wheel/click — drives
-   * the rail UI.  `displayIdx` updates AFTER the stage's exit
-   * animation completes, so the entry animation runs against the
-   * new role's content.  Splitting them is what gives the role
-   * change its layered "morph in place" feel.                      */
   const [activeIdx,  setActiveIdx]  = useState(0);
   const [displayIdx, setDisplayIdx] = useState(0);
 
   const exp = EXPERIENCE[displayIdx];
 
-  /* ── Stage transition · OUT → swap → IN ──
-   * Stored on a ref so the wheel-event listener (registered once)
-   * always reads the latest closure with the latest activeIdx.   */
+  /* Stage transition · OUT (left side fades out) → swap → IN (typewriter
+   * runs on the new code).  Stored on a ref so the wheel-event handler
+   * (registered once) always reads the latest closure.                */
   transitionRef.current = (next: number) => {
     if (isAnimating.current || next === activeIdx) return;
     isAnimating.current = true;
@@ -153,10 +324,9 @@ function DesktopExperience() {
     const ctx = containerRef.current;
     if (!ctx) { setDisplayIdx(next); isAnimating.current = false; return; }
 
-    /* OUT — quick, all elements at once with a tight stagger so the
-     * stage clears in ~280 ms total; the eye barely registers a "blank
-     * frame" before the IN animation lights it back up.              */
-    gsap.to(ctx.querySelectorAll('.exp-stage-content > *'), {
+    /* OUT — fade the left column items + dim the existing code body so
+     * the swap doesn't feel jarring.                                  */
+    gsap.to(ctx.querySelectorAll('.exp-host-left > *, .exp-xcode-body > *'), {
       opacity: 0,
       y:      -8,
       duration: 0.28,
@@ -170,64 +340,46 @@ function DesktopExperience() {
   };
   const transitionTo = (next: number) => transitionRef.current(next);
 
-  /* ── Marker glide on the timeline rail ── */
-  useGSAP(() => {
-    const target = stepRefs.current[activeIdx];
-    const marker = markerRef.current;
-    if (!target || !marker) return;
-    gsap.to(marker, {
-      y:       target.offsetTop,
-      height:  target.offsetHeight,
-      opacity: 1,
-      duration: 0.7,
-      ease:    'power3.out',
-    });
-  }, { scope: containerRef, dependencies: [activeIdx] });
-
-  /* ── Stage IN animation (runs whenever the rendered role changes) ── */
+  /* ── Stage IN animation runs whenever displayIdx changes ── */
   useGSAP(() => {
     const ctx = containerRef.current;
     if (!ctx) return;
 
-    /* Reset the elements that will animate in.  Using gsap.set rather
-     * than CSS so the visual state is consistent on initial mount and
-     * on every subsequent role swap — no FOUC, no flicker.
-     *
-     * The role-title PARENT must be reset to opacity 1 / y 0 because
-     * the OUT tween moves every direct child of .exp-stage-content
-     * (which includes the parent <h3>) to opacity 0 / y -8 — without
-     * this reset the chars animate in but their parent stays hidden.
-     */
-    gsap.set(ctx.querySelector('.exp-stage-logo'),         { opacity: 0, scale: 0.96, y: 0 });
-    gsap.set(ctx.querySelector('.exp-stage-role-title'),   { opacity: 1, y: 0 });
-    gsap.set(ctx.querySelectorAll('.exp-stage-role-title .exp-char'), { opacity: 0, y: 10 });
-    gsap.set(ctx.querySelector('.exp-stage-meta'),         { opacity: 0, y: 8  });
-    gsap.set(ctx.querySelector('.exp-stage-context'),      { opacity: 0, y: 12 });
-    gsap.set(ctx.querySelector('.exp-stage-desc'),         { opacity: 0, y: 12 });
-    gsap.set(ctx.querySelector('.exp-stage-clients'),      { opacity: 1, y: 0 });
-    gsap.set(ctx.querySelectorAll('.exp-stage-clients > *'), { opacity: 0, y: 8  });
+    gsap.set(ctx.querySelectorAll('.exp-host-left > *'), { opacity: 0, y: 8 });
+    gsap.set(ctx.querySelectorAll('.exp-xcode-body > *'), { opacity: 0, y: 8 });
 
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-    tl.to(ctx.querySelector('.exp-stage-logo'),
-        { opacity: 1, scale: 1, duration: 0.7 }, 0.05)
-      .to(ctx.querySelectorAll('.exp-stage-role-title .exp-char'),
-        { opacity: 1, y: 0, duration: 0.55, stagger: 0.022 }, 0.20)
-      .to(ctx.querySelector('.exp-stage-meta'),
-        { opacity: 1, y: 0, duration: 0.5 }, 0.40)
-      .to(ctx.querySelector('.exp-stage-context'),
-        { opacity: 1, y: 0, duration: 0.55 }, 0.50)
-      .to(ctx.querySelector('.exp-stage-desc'),
-        { opacity: 1, y: 0, duration: 0.55 }, 0.60)
-      .to(ctx.querySelectorAll('.exp-stage-clients > *'),
-        { opacity: 1, y: 0, duration: 0.45, stagger: 0.06 }, 0.75);
+    /* Left column · stagger the logo/tagline/chips in. */
+    tl.to(ctx.querySelectorAll('.exp-host-left > *'),
+        { opacity: 1, y: 0, duration: 0.55, stagger: 0.08 }, 0);
+
+    /* Right column · gutter + code area appear together, then per-line
+     * type-on does the heavy lifting.                                  */
+    tl.to(ctx.querySelectorAll('.exp-xcode-body > *'),
+        { opacity: 1, y: 0, duration: 0.4 }, 0.15);
+
+    /* Type-on per line · clip-path inset shrinks left-to-right with a
+     * `steps(N)` ease so each char "appears" one frame at a time, the
+     * classic typewriter look without over-engineering.               */
+    const lines = ctx.querySelectorAll<HTMLDivElement>('.exp-xcode-line');
+    lines.forEach((line, i) => {
+      const charCount = (line.textContent || '').length;
+      gsap.set(line, { clipPath: 'inset(0 100% 0 0)' });
+      if (charCount === 0) {
+        gsap.set(line, { clipPath: 'inset(0 0% 0 0)' });
+        return;
+      }
+      gsap.to(line, {
+        clipPath: 'inset(0 0% 0 0)',
+        duration: Math.max(0.18, charCount * 0.018),
+        delay:    0.55 + i * 0.08,
+        ease:     `steps(${charCount})`,
+      });
+    });
   }, { scope: containerRef, dependencies: [displayIdx] });
 
-  /* ── Wheel/keyboard/touch driven role advance ──
-   *   ParallaxScroller dispatches `parallax-internal-step` whenever
-   *   the user scrolls within a section that has data-internal-steps.
-   *   We listen for events with id="experience" (matching our section
-   *   attr) and run the transition.                                   */
+  /* ── Listen for ParallaxScroller's scroll-driven beats ── */
   useEffect(() => {
     const handler = (e: Event) => {
       const ev = e as CustomEvent<{ id: string; step: number }>;
@@ -243,77 +395,36 @@ function DesktopExperience() {
       ref={containerRef}
       id="experience"
       className="snap-section exp-host"
-      /* data-internal-steps: ParallaxScroller reads this and treats
-       *   the section as N internal beats, dispatching
-       *   parallax-internal-step events as the user scrolls.  The
-       *   track stays put — the BG is fixed, only the content
-       *   morphs between roles.
-       * data-internal-step-id: routes the events to this component. */
       data-internal-steps={EXPERIENCE.length}
       data-internal-step-id="experience"
     >
-      <h2 className="exp-host-title">Experience</h2>
+      <header className="exp-host-header">
+        <h2 className="exp-host-title">
+          <span className="exp-host-title-lead">Experience.</span>
+          <span className="exp-host-title-muted">From keyboard to App Store.</span>
+        </h2>
+      </header>
 
-      {/* ── Left rail · timeline ── */}
-      <aside className="exp-host-rail">
-        <span className="exp-host-eyebrow">
-          0{activeIdx + 1} <span className="exp-host-eyebrow-dim">/ 0{EXPERIENCE.length}</span>
-        </span>
-
-        <div className="exp-host-timeline-wrap">
-          <span ref={markerRef} className="exp-host-marker" aria-hidden />
-
-          <ol className="exp-host-timeline">
-            {EXPERIENCE.map((s, i) => (
-              <li
-                key={i}
-                ref={(el) => { stepRefs.current[i] = el; }}
-                className="exp-host-step"
-                data-state={i === activeIdx ? 'active' : i < activeIdx ? 'past' : 'todo'}
-                onClick={() => transitionTo(i)}
-              >
-                <span className="exp-host-step-year">{yearRange(s.date)}</span>
-                <span className="exp-host-step-name">{shortName(s.company)}</span>
+      <div className="exp-host-grid">
+        {/* LEFT · company info */}
+        <aside className="exp-host-left">
+          <div className="exp-host-logo">
+            <CompanyLogo exp={exp} height="clamp(72px, 8vw, 110px)" />
+          </div>
+          <p className="exp-host-tagline">{TAGLINE[displayIdx]}</p>
+          <ul className="exp-host-highlights" aria-label="Highlights">
+            {HIGHLIGHTS[displayIdx].map((h, i) => (
+              <li key={i} className="exp-host-chip">
+                <span className="exp-host-chip-dot" aria-hidden />
+                {h}
               </li>
             ))}
-          </ol>
-        </div>
+          </ul>
+        </aside>
 
-        <span className="exp-host-hint" aria-hidden>
-          Scroll to advance
-        </span>
-      </aside>
-
-      {/* ── Right stage ── */}
-      <div className="exp-host-stage">
-        <div className="exp-stage-content">
-          <div className="exp-stage-logo">
-            <CompanyLogo exp={exp} height="clamp(80px, 9vw, 140px)" />
-          </div>
-
-          <h3 className="exp-stage-role-title">{splitChars(exp.role)}</h3>
-
-          <div className="exp-stage-meta">
-            <span>{exp.date}</span>
-            {exp.badge && <span className="exp-stage-badge">{exp.badge}</span>}
-          </div>
-
-          <p className="exp-stage-context">{exp.context}</p>
-          <p className="exp-stage-desc">{exp.desc}</p>
-
-          {exp.clients && exp.clients.length > 0 && (
-            <div className="exp-stage-clients">
-              <span className="exp-stage-clients-label">Clients</span>
-              {exp.clients.map((c: any, k: number) => (
-                <img
-                  key={k}
-                  src={c.src}
-                  alt={c.alt}
-                  style={{ height: c.height ?? 22, filter: clientFilter(c) }}
-                />
-              ))}
-            </div>
-          )}
+        {/* RIGHT · Xcode window */}
+        <div className="exp-host-right">
+          <XcodeWindow activeIdx={activeIdx} onSelect={transitionTo} />
         </div>
       </div>
     </section>
